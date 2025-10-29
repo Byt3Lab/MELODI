@@ -1,0 +1,14 @@
+# MELODI
+ERP de gestion d'entreprise multisectorielle
+
+# MISSION
+
+# INSTALLATION ET DEMARRAGE
+
+# FONCTIONALITES
+
+# STRUCTURE
+
+# TECHNOLOGIES
+
+# FEATURES
