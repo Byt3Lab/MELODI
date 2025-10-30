@@ -1,0 +1,42 @@
+{% extends "base/components/layout_admin.html" %}
+
+{% block title %}Gestion de la page d'accueil{% endblock %}
+
+{% block admin_content %}   
+    <h1>Gestion de la page d'accueil</h1>
+
+    <div>
+        total déclarée(s) : {{home_pages_len}}
+        |
+        <a href="/admin/settings/home_page_clear" class="btn">rénitialiser</a>
+
+    </div>
+    <div>
+        acitive : {{home_page_on}}
+    </div>
+    <div>
+        {% for home_page in home_pages %}
+            <div>
+                <p>{{home_page}}</p>
+                <div>
+                    <a href="/admin/settings/home_page/{{ home_page }}/on" class="btn">definir comme page d'accueil</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="app">
+        <h1> [[name]] ok</h1>
+    </div>
+
+    <script>
+        const m = new mljs.Melodi({el:"#app", data:{name:"gg"} })
+
+        setTimeout(function(){
+            m.data.name = "ss"
+            m.update()
+        }, 3000)
+
+       
+    </script>
+{% endblock %}

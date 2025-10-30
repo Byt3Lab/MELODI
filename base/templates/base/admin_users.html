@@ -1,0 +1,25 @@
+{% extends "base/components/layout_admin.html" %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block admin_content %}
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">Utilisateurs</h5>
+      <a href="#" class="btn btn-primary btn-sm">Créer un utilisateur</a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr><th>ID</th><th>Nom</th><th>Email</th><th>Rôle</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Admin</td><td>admin@example.com</td><td>Administrateur</td><td><a class="btn btn-sm btn-outline-primary">Edit</a></td></tr>
+          <tr><td>2</td><td>Jean Dupont</td><td>j.dupont@example.com</td><td>Commercial</td><td><a class="btn btn-sm btn-outline-primary">Edit</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

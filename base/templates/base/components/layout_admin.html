@@ -1,0 +1,85 @@
+{% extends "base/components/layout.html" %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-wrapper{display:flex;min-height:100vh}
+        #admin-sidebar,.offcanvas{min-width:250px;background: linear-gradient(90deg,#003366 0%, #00509e 100%);color:#fff}
+        #admin-sidebar a,.offcanvas a{color:#fff}
+        #admin-content{flex:1;background:#f8f9fa}
+        .nav-card{transition:transform .15s}
+        .nav-card:hover{transform:translateY(-4px)}
+    </style>
+{% endblock %}
+
+{% block content %}
+        <div class="admin-wrapper">
+            <!-- Offcanvas sidebar for mobile -->
+            <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasSidebarLabel">MELODI</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body p-0">
+                    <nav class="py-3">
+                        <div class="sidebar-header text-center mb-3">
+                            <img src="/static/base/melodi.png" alt="MELODI" class="img-fluid" style="max-width:140px">
+                        </div>
+                        <ul class="nav flex-column px-2">
+                            <li class="nav-item mb-1"><a href="/admin" class="nav-link"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                            <li class="nav-item mb-1"><a href="/admin/modules" class="nav-link"><i class="fas fa-puzzle-piece me-2"></i>Modules</a></li>
+                            <li class="nav-item mb-1"><a href="/admin/users" class="nav-link"><i class="fas fa-users-cog me-2"></i>Utilisateurs</a></li>
+                            <li class="nav-item mb-1"><a href="/admin/settings" class="nav-link"><i class="fas fa-cogs me-2"></i>Paramètres</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Desktop sidebar -->
+            <nav id="admin-sidebar" class="py-3 d-none d-lg-block">
+                <div class="sidebar-header text-center mb-3">
+                    <img src="/static/base/melodi.png" alt="MELODI" class="img-fluid" style="max-width:140px">
+                </div>
+                <ul class="nav flex-column px-2">
+                    <li class="nav-item mb-1"><a href="/admin" class="nav-link"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                    <li class="nav-item mb-1"><a href="/admin/modules" class="nav-link"><i class="fas fa-puzzle-piece me-2"></i>Modules</a></li>
+                    <li class="nav-item mb-1"><a href="/admin/users" class="nav-link"><i class="fas fa-users-cog me-2"></i>Utilisateurs</a></li>
+                    <li class="nav-item mb-1"><a href="/admin/settings" class="nav-link"><i class="fas fa-cogs me-2"></i>Paramètres</a></li>
+                </ul>
+            </nav>
+
+            <div id="admin-content">
+                <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+                    <div class="container-fluid">
+                        <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"><i class="fas fa-bars"></i></button>
+                        <div class="ms-auto d-flex align-items-center">
+                            <div class="me-3">
+                                <button class="btn btn-sm btn-light position-relative">
+                                    <i class="fas fa-bell"></i>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
+                                </button>
+                            </div>
+                            <div>
+                                <div class="dropdown">
+                                    <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-user-circle"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="/admin/profile">Profil</a></li>
+                                        <li><a class="dropdown-item" href="/">Aller à la page d'accueil</a></li>
+                                        <li><a class="dropdown-item" href="/logout">Se déconnecter</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+
+                <main class="container-fluid p-4">
+                    {% block admin_content %}{% endblock %}
+                </main>
+            </div>
+        </div>
+
+        <!-- Bootstrap bundle (includes Offcanvas JS) -->
+        <script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.bundle.min.js') }}"></script>
+{% endblock %}

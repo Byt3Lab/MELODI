@@ -12,6 +12,7 @@ db.db
 database.db
 help.txt
 idea.txt
+storage/
 
 # Distribution / packaging
 .Python

@@ -1,0 +1,74 @@
+{% extends "base/components/layout_admin.html" %}
+
+{% block title %}Page non trouvée (404){% endblock %}
+
+{% block head %}
+    <style>
+        .error-404 {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7rem 1rem;
+        }
+        .error-card {
+            max-width: 900px;
+            background: linear-gradient(180deg, #fff 0%, #f7fbff 100%);
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(2,6,23,0.12);
+            overflow: hidden;
+        }
+        .error-art {
+            background: linear-gradient(135deg,#003366 0%, #00509e 100%);
+            color: #fff;
+            padding: 2.5rem;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            min-height:220px;
+        }
+        .error-body {
+            padding: 2.5rem;
+        }
+        .error-code {
+            font-size: 5.5rem;
+            font-weight:700;
+            line-height:1;
+        }
+        @media (max-width: 767px) {
+            .error-art { padding: 1.5rem; }
+            .error-code { font-size: 3.5rem; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section class="error-404">
+        <div class="container">
+            <div class="error-card row g-0">
+                <div class="col-md-5 error-art d-flex flex-column align-items-center justify-content-center">
+                    <div style="text-align:center;">
+                        <div class="error-code">404</div>
+                        <div style="font-size:1.1rem;font-weight:600;margin-top:0.5rem;">Page non trouvée</div>
+                    </div>
+                </div>
+                <div class="col-md-7 error-body">
+                    <h3 class="text-danger">La page que vous recherchez est introuvable.</h3>
+                    <p class="text-muted">Il se peut que l'URL soit incorrecte ou que la ressource ait été déplacée ou supprimée.</p>
+
+                    {% if path %}
+                        <div class="mb-3">
+                            <strong>Chemin demandé :</strong>
+                            <div class="mt-1 p-2 bg-light border rounded text-danger">{{ path }}</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+                        <a href="/" class="btn btn-outline-secondary">Contacter l'administrateur</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

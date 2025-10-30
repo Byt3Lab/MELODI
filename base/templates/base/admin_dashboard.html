@@ -1,0 +1,13 @@
+{% extends "base/components/layout_admin.html" %}
+
+{% block title %} Dashboard Admin{% endblock %}
+
+{% block admin_content %}
+
+    {% for widget in widgets %}
+
+        {{ widget|safe }}
+
+    {% endfor %}
+
+{% endblock %}

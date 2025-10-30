@@ -1,0 +1,46 @@
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(90deg,#003366 0%, #00509e 100%);">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/static/base/melodi.png" alt="Melodi" style="width:42px;height:auto;" class="me-2">
+                    <!-- <span class="fw-bold">MELODI</span>
+                    <small class="ms-2 text-muted" style="opacity:0.9;"></small> -->
+                 <div style="font-size: 10px;">
+                  <strong>MELODI</strong>
+                  <div style="font-size:0.85rem;opacity:0.9;">Business Management</div>
+                </div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#melodiNavbar" aria-controls="melodiNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="melodiNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/modules">Modules</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/plugins">Plugins</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/support">Support</a></li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    {% if user %}
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ user.username if user.username else user }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><a class="dropdown-item" href="/profile">Profil</a></li>
+                                <li><a class="dropdown-item" href="/settings">Paramètres</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout">Se déconnecter</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="/login" class="btn btn-sm btn-light">Administration >></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>

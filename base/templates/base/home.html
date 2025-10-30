@@ -1,0 +1,188 @@
+{% extends "base/components/layout.html" %}
+
+{% block title %}MELODI — ERP modulaire{% endblock %}
+
+{% block head %}
+    <style>
+        /* full viewport sections */
+        .full-vh { min-height: 100vh; display:flex; align-items:center; }
+        @media (max-width:991px){ .full-vh { min-height:85vh } }
+        @media (max-width:767px){ .full-vh { min-height:70vh } }
+
+        /* Hero style - softer gradient that blends with header */
+        .hero {
+            padding: 0;
+            background: linear-gradient(135deg, rgba(6,30,63,0.95) 0%, rgba(11,78,155,0.9) 100%);
+            color: #fff;
+        }
+
+        .brand-pill { background: rgba(255,255,255,0.08); color:#fff; padding:.35rem .65rem; border-radius:.5rem; font-weight:600 }
+
+        /* Cards with glass effect */
+        .feature-card { border-radius:.8rem; transition:transform .18s, box-shadow .18s; background: var(--glass-bg); backdrop-filter: blur(6px); }
+        .feature-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(3,37,76,0.12); }
+
+                .step-badge { width:52px;height:52px;border-radius:12px;background:var(--primary-700);color:#fff;display:inline-grid;place-items:center;font-weight:700 }
+
+                /* CTA responsive: stack on small screens */
+                .d-grid.d-md-flex { grid-template-columns: 1fr auto; align-items:center }
+                @media (max-width:767px){
+                    .d-grid.d-md-flex { display: grid !important; grid-template-columns: 1fr; gap:.75rem }
+                    .d-grid.d-md-flex .btn { width:100% }
+                }
+
+                /* Preformatted code block */
+                .pre-code{ overflow:auto; white-space:pre-wrap; word-break:break-word }
+
+                /* Responsive typography */
+                .hero h1 { font-size: clamp(1.5rem, 3.2vw, 2.25rem) }
+                /* Desktop hero tweaks */
+                .hero .content-col { padding: 2.5rem 1rem }
+                .hero .image-col { padding: 2.5rem 1rem }
+                .hero-image { max-width:520px }
+                @media (min-width:1200px){
+                    .hero h1 { font-size: 3.25rem }
+                    .hero .content-col { padding-left:4rem }
+                    .hero .image-col { padding-right:4rem }
+                }
+
+                /* Section spacing */
+                section.py-5 { padding-top:3.5rem; padding-bottom:3.5rem }
+
+                /* Buttons and responsive utilities */
+                .cta-grid { display: grid; gap: .75rem; grid-template-columns: 1fr auto; }
+                @media (max-width:767px){
+                    .cta-grid { grid-template-columns: 1fr; }
+                    .brand-pill { font-size: .9rem }
+                }
+
+                /* Preformatted code block: allow horizontal scroll on small screens */
+                .pre-code{ overflow:auto; white-space:pre; max-width:100%; border-radius:.5rem }
+
+                /* Feature cards responsive spacing */
+                .feature-card { margin: 0 auto }
+
+        /* Muted text color for readability */
+        .text-muted { color: var(--muted) !important }
+        .text-muted2 { color: var(--muted2) !important }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section class="hero full-vh" style="background: linear-gradient(0deg,#ffffff 0%, #053c72 100%);">
+        <div class="container-fluid px-0">
+            <div class="container">
+            <div class="row align-items-center h-100">
+                <div class="col-lg-6 order-2 order-lg-1 content-col">
+                    <div class="mb-3"><span class="brand-pill">MELODI ERP</span></div>
+                    <h1 class="display-6 fw-bold">Gérez vos ventes, stocks et clients. Simplement.</h1>
+                    <p class="lead text-muted2 mt-3">Une plateforme modulaire, légère et extensible pensée pour les PME — évolutive avec vos besoins métiers.</p>
+
+                    <div class="d-grid gap-2 d-md-flex mt-4">
+                        <a href="/admin" class="btn btn-primary btn-lg" role="button">Essayer l'administration</a>
+                        <a href="/install/step1" class="btn btn-outline-primary btn-lg" role="button">Installer MELODI</a>
+                    </div>
+
+                    <ul class="list-unstyled d-flex gap-3 mt-4 flex-wrap">
+                        <li class="text-muted2"><strong>• Rapide</strong> à déployer</li>
+                        <li class="text-muted2"><strong>• Modulaire</strong> & extensible</li>
+                        <li class="text-muted2"><strong>• Open</strong> et personnalisable</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6 text-center mt-4 mt-lg-0 order-1 order-lg-2 image-col d-flex align-items-center justify-content-center">
+                    <img src="/static/base/melodi2.png" alt="MELODI interface" class="img-fluid rounded shadow-sm hero-image" style="max-height:420px;width:100%;height:auto;object-fit:contain;background-color:#fbfcfeab">
+                </div>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 full-vh" style="background: linear-gradient(0deg,#ffffff 5%, #ffffff 100%);">
+        <div class="container">
+            <div class="row text-center mb-4">
+                <div class="col-12">
+                    <h2 class="h3">Ce que MELODI vous apporte</h2>
+                    <p class="text-muted">Des modules clairs, une interface centrée sur l'opérationnel, et des APIs pour automatiser vos flux.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="p-4 bg-white feature-card h-100">
+                        <div class="mb-3"><i class="fas fa-cubes fa-2x text-primary"></i></div>
+                        <h5>Architecture modulaire</h5>
+                        <p class="text-muted">Activez uniquement les modules dont vous avez besoin (Ventes, Stock, CRM, RH).</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 bg-white feature-card h-100">
+                        <div class="mb-3"><i class="fas fa-sync-alt fa-2x text-success"></i></div>
+                        <h5>Intégrations & API</h5>
+                        <p class="text-muted">Automatisez vos commandes, synchronisez votre stock et vos factures via API.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 bg-white feature-card h-100">
+                        <div class="mb-3"><i class="fas fa-shield-alt fa-2x text-warning"></i></div>
+                        <h5>Sécurité & permissions</h5>
+                        <p class="text-muted">Contrôlez l'accès par rôle, gardez l'historique et auditez les actions critiques.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 full-vh" style="background-color: #ffffff">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h4>Comment ça marche — en 3 étapes</h4>
+                    <ol class="list-unstyled mt-3">
+                        <li class="d-flex gap-3 mb-3 align-items-start">
+                            <div class="step-badge">1</div>
+                            <div>
+                                <strong>Installez</strong>
+                                <div class="text-muted">Installez MELODI et activez les modules nécessaires.</div>
+                            </div>
+                        </li>
+                        <li class="d-flex gap-3 mb-3 align-items-start">
+                            <div class="step-badge">2</div>
+                            <div>
+                                <strong>Configurez</strong>
+                                <div class="text-muted">Connectez vos flux (ventes, inventaire, compta) et paramétrez les utilisateurs.</div>
+                            </div>
+                        </li>
+                        <li class="d-flex gap-3 mb-3 align-items-start">
+                            <div class="step-badge">3</div>
+                            <div>
+                                <strong>Automatisez</strong>
+                                <div class="text-muted">Utilisez les APIs et plugins pour automatiser les tâches répétitives.</div>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="/static/base/boot.png" alt="architecture" class="img-fluid" style="max-height:260px;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 full-vh" style="background-color: #ffffff;">
+        <div class="container text-center">
+            <h4>Prêt à tester ?</h4>
+            <p class="text-muted">Lancez MELODI localement en quelques minutes et prenez le contrôle de vos opérations.</p>
+            <div class="d-flex justify-content-center">
+                 <pre class="bg-dark text-white p-3 rounded text-start pre-code" style="max-width:720px">python3 -m venv venv
+                    source venv/bin/activate
+                    pip install -r requirements.txt
+                    python3 main.py
+                 </pre>
+            </div>
+            <div class="mt-3">
+                <a href="/install/step1" class="btn btn-primary btn-lg me-2">Installer maintenant</a>
+                <a href="/admin" class="btn btn-secondary btn-lg m-1">Aller à l'administration</a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

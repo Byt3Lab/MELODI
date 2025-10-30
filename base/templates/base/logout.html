@@ -1,0 +1,70 @@
+{% extends "base/components/layout.html" %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block head %}
+  <style>
+    .auth-page {
+      min-height: 75vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 0;
+      min-height: max-content;
+    }
+    .auth-card {
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      overflow: hidden;
+    }
+    .auth-left {
+      background: linear-gradient(135deg, #003366 0%, #00509e 100%);
+      color: #fff;
+      padding: 2.5rem;
+    }
+    .auth-left .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .auth-left h3 {
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    .auth-right {
+      padding: 2.5rem;
+      background: #fff;
+    }
+    @media (max-width: 767px) {
+      .auth-left { display: none; }
+      .auth-card { border-radius: 8px; }
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <section class="auth-page">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+          <div class="row g-0 auth-card">
+            <div class="col-md-5 auth-left d-flex flex-column">
+              <div class="brand">
+                <img src="/static/base/melodi.png" alt="Melodi" style="width:56px;height:auto;">
+                <div>
+                  <a href="/" style="text-decoration: none;color: #fff;">
+                    <strong>MELODI</strong>
+                    <div style="font-size:0.85rem;opacity:0.9;">Business Management</div>
+                  </a>
+                </div>
+              </div>
+              <h3>Vous êtes déconnecté</h3>
+              <p>Vous avez été déconnecté avec succès. À bientôt !</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

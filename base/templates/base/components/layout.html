@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+{% if (theme=="light") %}
+  <html lang="{{ lang }}">
+{% else %}
+  <html lang="en">
+{% endif %}
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MELODI ERP - Business Management Software">
+    <meta name="keywords" content="ERP, Business Management, Software, MELODI">
+    <meta name="author" content="MELODI BUSINESS MANAGEMENT">
+    <meta name="robots" content="index, follow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#003366">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MELODI ERP">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#003366">
+    <meta name="msapplication-TileImage" content="/static/melodi.png">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
+    
+    <title>{% block title %}MELODI{% endblock %}</title>
+  
+    <link rel="shortcut icon" href="/static/base/melodi.png" type="image/x-icon">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='base/bootstrap-5/css/bootstrap.min.css') }}">
+    
+    <script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.min.js') }}"></script>
+    
+    <script src="{{ url_for('static', filename='base/htmx/htmx.min.js') }}"></script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='base/base.css') }}">
+    <script src="{{ url_for('static', filename='base/base.js') }}"></script>
+    <script src="{{ url_for('static', filename='base/melodi.js') }}"></script>
+
+    {% if (theme=="light") %}
+      <link rel="stylesheet" href="{{ url_for('static', filename='base/themes/default.css') }}">
+    {% elif (theme=="nigth") %}
+      <link rel="stylesheet" href="{{ url_for('static', filename='base/themes/nigth.css') }}">
+    {% else %}
+      <link rel="stylesheet" href="{{ url_for('static', filename='base/themes/default.css') }}">
+    {% endif %}
+
+    {% block head %}{% endblock %}
+
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        background-color: #cfcfcf;
+      }
+    </style>
+</head>
+<body>
+  {% if not hide_before_header %}
+      {% block before_header %}{% endblock %}
+  {% endif %}
+
+  {% if not hide_header %}
+    {% set hd="base/components/header.html" %}
+    {% include hd %}
+  {% endif %}
+
+  {% if not hide_after_header %}
+      {% block after_header %}{% endblock %}
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+  {% if not hide_before_footer %}
+      {% block before_footer %}{% endblock %}
+  {% endif %}
+
+  {% if not hide_footer %}
+    {% include "base/components/footer.html" %}
+  {% endif %}
+
+  {% if not hide_before_footer %}
+    {% block after_footer %}{% endblock %}
+  {% endif %}
+</body>
+</html>
