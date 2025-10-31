@@ -13,10 +13,7 @@ database.db
 help.txt
 idea.txt
 storage/
-config/home_page_on.txt
-config/modules_on.json
-config/widgets_on.json
-config/infos_entreprise.txt
+config/
 
 # Distribution / packaging
 .Python
