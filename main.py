@@ -1,11 +1,6 @@
-from core import app
+from core import Melodi
 
-from threading import Timer
-
-def delApp():
-    app.restart()
-
-time = Timer(3, delApp)
+app = Melodi()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

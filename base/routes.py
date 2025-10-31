@@ -43,6 +43,10 @@ class AdminRoutes(Router):
         def login():
             return self.render_template("login.html",hide_header=True,hide_footer=True, theme=get_theme(request))
         
+        @self.add_route("/register", methods=["GET"])
+        def register():
+            return self.render_template("register.html",hide_header=True,hide_footer=True, theme=get_theme(request))
+        
         @self.add_route("/logout", methods=["GET"])
         def logout():
             return self.render_template("logout.html",hide_header=True,hide_footer=True, theme=get_theme(request))

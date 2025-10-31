@@ -63,10 +63,13 @@ def is_prime(n:int)->bool:
             return False
     return True
 
-def read_file(path_file: str) -> str:
+def read_file(path_file: str, mode="r") -> str:
     if not path_exist(path_file):
         raise FileNotFoundError(f"The file at {path_file} does not exist.")
     
+    if not (mode == "r" or mode == "ra") :
+        mode = "r"
+        
     with open(path_file, 'r') as file:
         return file.read()
     
@@ -77,11 +80,11 @@ def get_file(path_file: str) -> str:
     
     return open(path_file, 'r')
     
-def write_file(path_file: str, content: str) -> None:
-    if not path_exist(path_file):
-        raise FileNotFoundError(f"The file at {path_file} does not exist.")
-    
-    with open(path_file, 'w') as file:
+def write_file(path_file: str, content: str, mode="w") -> None:
+    if not (mode == "w" or mode == "a" or mode == "wb" or mode == "ab") :
+        mode = "w"
+
+    with open(path_file, mode=mode) as file:
         file.write(content)
 
 import os

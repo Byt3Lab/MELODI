@@ -130,7 +130,7 @@ class ModuleManager:
         return dirname in self.modules_on
 
     def on_module(self, name_module):
-        if name_module in self.modules_on:
+        if self.isOn(name_module):
             return
 
         if self.module_exists(name_module):
