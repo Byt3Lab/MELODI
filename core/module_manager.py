@@ -150,12 +150,9 @@ class ModuleManager:
     def set_file_modules_on(self):
         PATH_FILE_MODULES_ON = self.app.config.PATH_DIR_CONFIG + "/modules_on.json"
 
-        try:
-            with open(PATH_FILE_MODULES_ON, "w", encoding="utf-8") as fh:
-                    content = json.dumps(self.modules_on, indent=4, ensure_ascii=False)
-                    fh.write(f"{content}")
-        except Exception as exc:
-            print(f"Erreur lors de l'écriture de {PATH_FILE_MODULES_ON}: {exc}")
+        with open(PATH_FILE_MODULES_ON, "w", encoding="utf-8") as fh:
+                content = json.dumps(self.modules_on, indent=4, ensure_ascii=False)
+                fh.write(f"{content}")
 
     def module_exists(self, name_module)->bool:
         PATH_DIR_MODULES = self.app.config.PATH_DIR_MODULES

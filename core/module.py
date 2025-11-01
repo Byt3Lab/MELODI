@@ -81,4 +81,22 @@ class Module:
     
     def serve_static_directory(self,prefix_path:str, path_dir:str):
         self.app.server.serve_static_directory(prefix_path=prefix_path, path_directory=path_dir)
+
+    def add_service(self, name_service:str|None=None):
+        def decorator (func):
+            name_module = self.dirname
+            ns = name_service
+
+            if callable(func):
+                if not ns:
+                    ns = func.__name__
+                    self.app.service_manager.register(name_module, ns, func)
+                    return
+                self.app.service_manager.register(name_module, ns, func)
+                return
+            
+            if ns:
+                self.app.service_manager.register(name_module, ns, func)
+
+        return  decorator
     

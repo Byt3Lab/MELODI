@@ -30,40 +30,29 @@ class Config:
 
     def load_infos_entreprise(self):
         path = join_paths(self.PATH_DIR_CONFIG, "infos_entreprise.json")
-        try:
-            if not path_exist(path):
-                self.infos_entreprise = {}
-                return
-            self.infos_entreprise = json.loads(read_file(path_file=path))
-        except:
-            print("erreur")
+        if not path_exist(path):
+            self.infos_entreprise = {}
+            return
+        self.infos_entreprise = json.loads(read_file(path_file=path))
 
     def load_modules_on(self):
         path = join_paths(self.PATH_DIR_CONFIG, "modules_on.json")
-        try:
-            if not path_exist(path):
-                self.modules_on = [] 
-                return
-            self.modules_on = json.loads(read_file(path_file=path))
-        except:
-            print("erreur")
+        if not path_exist(path):
+            self.modules_on = [] 
+            return
+        self.modules_on = json.loads(read_file(path_file=path))
 
     def load_widgets_on(self):
         path = join_paths(self.PATH_DIR_CONFIG, "widgets_on.json")
-        try:
-            if not path_exist(path):
-                self.widgets_on = []
-                return
-            self.widgets_on = json.loads(read_file(path_file=path))
-        except:
-            print("erreur")
+        if not path_exist(path):
+            self.widgets_on = []
+            return
+        self.widgets_on = json.loads(read_file(path_file=path))
 
     def load_home_page_on(self):
         path = join_paths(self.PATH_DIR_CONFIG, "home_page_on.txt")
-        try:
-            if not path_exist(path):
-                return
-            self.home_page_on = read_file(path_file=path).strip()
-        except:
-            print("erreur")
+        
+        if not path_exist(path):
+            return
+        self.home_page_on = read_file(path_file=path).strip()
                     

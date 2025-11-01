@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from .module import Module
 
 class BaseRouter:
-    def __init__(self, app:Application, name:str, module:Module|None = None,):
+    def __init__(self, app:Application, name:str, module:Module|None = None):
         self.app = app
         self.module = module
 

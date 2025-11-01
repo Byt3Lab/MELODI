@@ -5,6 +5,7 @@ from core.menu_item_manager import MenuItemManager
 from core.module_manager import ModuleManager
 from core.plugin_manager import PluginManager
 from core.adapters.flask_adapter import FlaskAdapter
+from core.service_manager import ServiceManager
 from core.utils import TimerManager, EventListener, create_dir, create_dir_if_not_exist, join_paths, read_file
 from core.database import DataBase
 from core.config import Config
@@ -26,6 +27,7 @@ class Application:
         self.api_router = APIRouter(app=self, name="main_api")
         self.module_manager = ModuleManager(app=self)
         self.plugin_manager = PluginManager(app=self)
+        self.service_manager = ServiceManager(app=self)
         self.widget_manager = WidgetManager(app=self)
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
