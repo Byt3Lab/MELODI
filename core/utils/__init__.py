@@ -95,5 +95,15 @@ def join_paths(*paths: str) -> str:
 def path_exist(*paths: str):
     return os.path.exists(*paths)
 
-def list_dir():
-    pass
+def list_dir(path_dir:str):
+    return os.listdir(path=path_dir) 
+
+def create_dir(path_dir, parents=True, exist_ok=True):
+    from pathlib import Path
+    Path(path_dir).mkdir(parents, exist_ok)
+
+def create_dir_if_not_exist(path_dir, parents=True, exist_ok=True):
+    if path_exist(path_dir):
+        return
+    
+    create_dir(path_dir, parents, exist_ok)

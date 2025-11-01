@@ -5,7 +5,7 @@ from core.menu_item_manager import MenuItemManager
 from core.module_manager import ModuleManager
 from core.plugin_manager import PluginManager
 from core.adapters.flask_adapter import FlaskAdapter
-from core.utils import TimerManager, EventListener, read_file
+from core.utils import TimerManager, EventListener, create_dir, create_dir_if_not_exist, join_paths, read_file
 from core.database import DataBase
 from core.config import Config
 from core.router import Router
@@ -30,6 +30,8 @@ class Application:
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
         
+        create_dir_if_not_exist(join_paths(self.config.PATH_DIR_CONFIG))
+        create_dir_if_not_exist(join_paths(self.config.PATH_DIR_STORAGE))
 
     def restart(self):
         self.stop()
