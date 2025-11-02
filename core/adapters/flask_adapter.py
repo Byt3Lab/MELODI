@@ -13,6 +13,11 @@ class FlaskAdapter(WebServerInterface):
     def run(self, host="127.0.0.1", port=5000):
         self.app.run(host=host, port=port)
 
+    def clear(self):
+        self.app.view_functions.clear()
+        from werkzeug.routing import Map
+        self.app.url_map = Map()
+
     def serve_static_directory(self, path_directory: str, prefix_path: str):
         def handler(filename):
             return send_from_directory(path_directory, filename)

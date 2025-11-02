@@ -1,1 +1,0 @@
-alert("stock module loaded");

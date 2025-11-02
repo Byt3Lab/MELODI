@@ -15,10 +15,10 @@ from core.widget_manager import WidgetManager
 
 class Application:
     def __init__(self):
-       self.init()
+        self.server = FlaskAdapter()
+        self.init()
 
     def init(self):
-        self.server = FlaskAdapter()
         self.config = Config()
         self.event_listener = EventListener(app=self)
         self.timer_manager = TimerManager(app=self)
@@ -36,11 +36,13 @@ class Application:
         create_dir_if_not_exist(join_paths(self.config.PATH_DIR_STORAGE))
 
     def restart(self):
-        self.stop()
-        self.init()
+        # self.stop()
+        # self.init()
+        # self.run()
+        pass
 
     def stop(self):
-        pass
+        self.server.clear()
 
     def run(self, host="0.0.0.0", port=5001, debug=True):
         self.db.init_database()

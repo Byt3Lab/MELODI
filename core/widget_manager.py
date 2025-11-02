@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
+
+from core.utils import join_paths, path_exist, read_file
 
 if TYPE_CHECKING:
     from .application import Application
@@ -8,42 +11,61 @@ if TYPE_CHECKING:
 class WidgetManager:
     def __init__(self, app:Application | None = None):
         self.app = app
-        self.widgets_on = self.app.config.widgets_on if self.app else []
-        self.widgets = {}
-
-    def register_widget(self, name: str, widget):
-        self.widgets[name] = widget
-
-    def remove_widget(self, name: str):
-        if name in self.widgets:
-            del self.widgets[name]  
-
-    def list_widgets(self):
-        return list(self.widgets.keys())
-    
-    def clear_widgets(self):
-        self.widgets.clear()
-
-    def get_widget(self, name:str):
-        if name in self.widgets:
-            return self.widgets[name] 
-        return ""
-    
-    def render_widget(self, name: str):
-        widget = self.get_widget(name)
-
-        if callable(widget):
-            widget = widget()
-
-        if isinstance(widget, str):
-            return widget
-        else:
-            return str(widget)
+        self.path_file = join_paths(self.app.config.PATH_DIR_CONFIG, "widgets_on.json")
+        self.widgets_on = []
+        self.widgets:dict[str,object] = {}
+        self.load_widgets_on()
     
     def load_widgets_on(self):
-        widgets = []
+        if not path_exist(self.path_file):
+            self.widgets_on = []
+            return
+        self.widgets_on = json.loads(read_file(path_file=self.path_file))
 
-        for widget_name in self.widgets_on:
-            widgets.append(self.render_widget(widget_name))
+    def register(self, name_module:str, name_widget: str, widget, infos):
+        if not name_module in self.widgets:
+            self.widgets[name_module] = {}
 
-        return widgets
+        self.widgets[name_module][name_widget] = {widget, infos}
+
+    def remove(self, name_module:str, name_widget: str):
+        try:
+            if isinstance(name_module, str):
+                if isinstance(name_module, str):
+                    del self.widgets[name_module][name_widget]
+                    return True
+                del self.widgets[name_module]
+                return True
+            return False
+        except:
+            return False
+        
+    def list(self):
+        return self.widgets
+    
+    def clear(self):
+        self.widgets.clear()
+
+    def get(self, name_module:str, name_widget: str):
+        try:
+            return self.widgets[name_module][name_widget]["widget"]
+        except:
+            return None
+    
+    def render(self, name_module:str, name_widget: str):
+        try:
+            widget = self.get(name_module, name_widget)
+
+            if callable(widget):
+                return widget()
+
+            if isinstance(widget, str):
+                return widget
+            
+            return None
+        except:
+            return None
+        
+
+    def on(self):
+        pass

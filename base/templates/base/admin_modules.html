@@ -7,7 +7,7 @@
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h5 class="mb-0">Modules : {{ modules_len }} </h5>
-      <a href="/admin/add_module" class="btn btn-success btn-sm">+ Ajouter</a>
+      <a href="/admin/add_module" class="btn btn-dark btn-sm">+ Ajouter</a>
     </div>
 
     <ul class="list-group">
@@ -19,13 +19,32 @@
             </div>
           
             <div>{{ module.infos.title }} </div>
+            <!-- Button trigger modal -->
+            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#module_{{module.name}}">
+              Launch demo modal
+            </button>
 
-            <div class="btn_see_more" target="{{'see_'+module.name}}"> <span>détails</span> </div>
-            <div class="see_more" id="{{'see_'+module.name}}">
-              <div>version: {{ module.infos.version }}</div>
-              <p>{{ module.infos.description }}</p>
-              <!-- <div>{{ module.infos.depends }}</div> -->
-              <div class="btn_hide" target="{{'see_'+module.name}}"> <span>moins</span> </div>
+            <!-- Modal -->
+            <div class="modal fade" id="module_{{module.name}}" tabindex="-1" aria-labelledby="module_{{module.name}}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div>nom: {{ module.infos.name }}</div>
+                    <div>titre: {{ module.infos.title }}</div>
+                    <div>version: {{ module.infos.version }}</div>
+                    <p>{{ module.infos.description }}</p>
+                    <div>{{ module.infos.depends }}</div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div>
@@ -41,46 +60,11 @@
           </div>
         </li>
       {% endfor %}
+
+      <li>
+        <a href="/admin/add_module" class="btn btn-dark w-100">+ Installer un module</a>
+      </li>
     </ul>
   </div>
 </div>
-
-<script>
-  const seeMoreElements = document.querySelectorAll(".see_more");
-  const BTNseeMoreElements = document.querySelectorAll(".btn_see_more");
-  const BTNhideElements = document.querySelectorAll(".btn_hide");
-
-  function toggleVisibility(element) {
-    if (element.style.visibility === "hidden") {
-      element.style.visibility = "visible";
-      element.style.height = "auto";
-      element.style.overflow = "visible";
-    } else {
-      element.style.visibility = "hidden";
-      element.style.height = "0";
-      element.style.overflow = "hidden";
-    }
-  }
-
-  function toggleVisibilityById(id) {
-    const element = document.getElementById(id);
-    toggleVisibility(element);
-  }
-
-  seeMoreElements.forEach(function(element) {
-    toggleVisibility(element);
-  });
-  BTNseeMoreElements.forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      const targetId = btn.getAttribute("target");
-      toggleVisibilityById(targetId);
-    });
-  });
-  BTNhideElements.forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      const targetId = btn.getAttribute("target");
-      toggleVisibilityById(targetId);
-    });
-  });
-</script>
 {% endblock %}

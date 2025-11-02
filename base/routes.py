@@ -71,7 +71,8 @@ class AdminRoutes(Router):
 
         @self.add_route('/admin/settings/widgets', methods=['GET'])
         def settings_widgets():
-            return self.render_template("admin_widgets.html", theme=get_theme(request),hide_header=True,hide_footer=True)
+            widgets = self.app.widget_manager.list_widgets()
+            return self.render_template("admin_widgets.html", widgets=widgets, theme=get_theme(request),hide_header=True,hide_footer=True)
 
         @self.add_route('/admin/settings/home_page', methods=['GET'])
         def settings_home_page():

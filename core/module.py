@@ -82,7 +82,7 @@ class Module:
     def serve_static_directory(self,prefix_path:str, path_dir:str):
         self.app.server.serve_static_directory(prefix_path=prefix_path, path_directory=path_dir)
 
-    def add_service(self, name_service:str|None=None):
+    def register_service(self, name_service:str|None=None):
         def decorator (func):
             name_module = self.dirname
             ns = name_service
@@ -100,3 +100,14 @@ class Module:
 
         return  decorator
     
+    def register_widget(self, name_widget:str|None=None, infos={}):
+        def decorator (func):
+            if callable(func):
+                if not name_widget:
+                    self.app.widget_manager.register(name_module=self.dirname, name_widget= func.__name__, widget=func, infos=infos)
+                self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
+                return
+            
+            if name_widget:
+                self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
+        return decorator

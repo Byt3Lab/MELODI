@@ -15,7 +15,7 @@ class Base(Module):
         def xample_widget():
             return "<div><h3>Base Widget</h3><p>This is a sample widget from the Base module.</p></div>"
         
-        self.app.widget_manager.register_widget("base", xample_widget)
+        self.register_widget("base")(xample_widget)
 
         routes = AdminRoutes(name="base", app=self.app, dirname_module=self.dirname)
         api_routes = AdminApiRoutes(name="base", app=self.app)

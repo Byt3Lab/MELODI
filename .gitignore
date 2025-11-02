@@ -13,7 +13,10 @@ database.db
 help.txt
 idea.txt
 storage
-config
+config/*
+!config/__init__.py
+modules/*
+!modules/__init__.py
 
 # Distribution / packaging
 .Python

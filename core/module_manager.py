@@ -4,7 +4,7 @@ import importlib.util
 import json
 import os
 import sys
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from .module import Module
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ class ModuleManager:
 
     def __init__(self, app: Application | None = None):
         self.app = app
-        self.modules: Dict[str, Module] = {}
+        self.modules: dict[str, Module] = {}
         self.modules_on: list[str] = self.app.config.modules_on
 
     def add_module(self, module: Module, name_module:str):
