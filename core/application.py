@@ -32,7 +32,6 @@ class Application:
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
         
-        create_dir_if_not_exist(join_paths(self.config.PATH_DIR_CONFIG))
         create_dir_if_not_exist(join_paths(self.config.PATH_DIR_STORAGE))
 
     def restart(self):

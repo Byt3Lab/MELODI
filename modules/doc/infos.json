@@ -1,0 +1,10 @@
+{
+    "version":"1.0",
+    "name":"melodi doc",
+    "title":"documentation",
+    "description":"documentation",
+    "depends":{
+        "core":"",
+        "modules":[]
+    }
+}

@@ -16,6 +16,7 @@ storage
 config/*
 !config/__init__.py
 modules/*
+!modules/doc
 !modules/__init__.py
 
 # Distribution / packaging
