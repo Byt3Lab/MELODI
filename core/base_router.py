@@ -55,10 +55,6 @@ class BaseRouter:
     def add_router(self, router:BaseRouter, url_prefix=''):
         self.router.register_blueprint(router.get_router(), url_prefix=url_prefix)
 
-    def add_many_routers(self, routers:list[BaseRouter]):
-        for router in routers:
-            self.add_router(router=router)
-
     def redirect(self, location: str, code: int = 302):
         from flask import redirect
         return redirect(location, code=code)

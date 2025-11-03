@@ -53,13 +53,8 @@ class AdminRoutes(Router):
 
         @self.add_route("/admin", methods=["GET"])
         def ds():
-            widgets=self.app.widget_manager.load_widgets_on()
-            print(widgets)
+            widgets=self.app.widget_manager.list()
             return self.render_template("admin_dashboard.html",widgets=widgets, theme=get_theme(request),hide_header=True,hide_footer=True)
-
-        @self.add_route('/admin/dashboard', methods=['GET'])
-        def admin_dashboard():
-            return self.render_template('dashboard.html', theme=get_theme(request),hide_header=True,hide_footer=True)
 
         @self.add_route('/admin/users', methods=['GET'])
         def admin_users():

@@ -18,6 +18,10 @@ config/*
 modules/*
 !modules/doc
 !modules/__init__.py
+plugins/*
+!plugins/__init__.py
+lea
+learn.py
 
 # Distribution / packaging
 .Python
