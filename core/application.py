@@ -43,7 +43,7 @@ class Application:
     def stop(self):
         self.server.clear()
 
-    def run(self, host="0.0.0.0", port=5001, debug=True):
+    def build(self):
         self.db.init_database()
 
         self.register_request_maintenance()
@@ -63,8 +63,11 @@ class Application:
 
         self.register_route_not_found()
 
+    def run(self, host="0.0.0.0", port=5001, debug=True):
         self.server.app.run(host=host, port=port, debug=debug)
-    
+
+    def get_server(self):
+        return self.server.app
 
     def register_routers(self):
         self.server.add_router(self.api_router.get_router(), url_prefix="/api")
