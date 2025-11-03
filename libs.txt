@@ -1,6 +1,6 @@
 pip install flask[async]
 pip install gunicorn
-pip install hypercorn
+#pip install hypercorn
 pip install pytest
 pip install SQLAlchemy
 pip install PyPDF2
