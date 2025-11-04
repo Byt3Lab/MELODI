@@ -5,6 +5,8 @@ import json
 import os
 import sys
 from typing import TYPE_CHECKING
+
+from core.utils import join_paths, path_exist, read_file
 from .module import Module
 
 if TYPE_CHECKING:
@@ -22,12 +24,36 @@ class ModuleManager:
 
     def __init__(self, app: Application | None = None):
         self.app = app
+        self.PATH_DIR_MODULES = self.app.config.PATH_DIR_MODULES
         self.modules: dict[str, Module] = {}
-        self.modules_on: list[str] = self.app.config.modules_on
+        self.modules_infos: dict[str, object] = {}
+        self.modules_on: list[str] = []
+        self.list_modules_installs = []
+        self.load_list_modules_installs()
+        self.load_modules_on()
+        self.check_modules_on()
+        
+    def load_modules_on(self):
+        path = join_paths(self.app.config.PATH_DIR_CONFIG, "modules_on.json")
+        if not path_exist(path):
+            self.modules_on = [] 
+            return
+        self.modules_on = json.loads(read_file(path_file=path))
 
-    def add_module(self, module: Module, name_module:str):
-        """Enregistre une instance de module dans le registre."""
-        self.modules[name_module] = module
+    def load_list_modules_installs(self):
+        if not os.path.isdir(self.PATH_DIR_MODULES):
+            return
+        list = os.listdir(self.PATH_DIR_MODULES)
+
+        for current_module_dirname in list:
+            if (current_module_dirname.startswith("_")):
+                continue
+
+            if not os.path.isdir(join_paths(self.PATH_DIR_MODULES, current_module_dirname)):
+                continue
+            
+            self.list_modules_installs.append(current_module_dirname)
+            
 
     def get_module(self, name: str):
         return self.modules.get(name)
@@ -56,67 +82,79 @@ class ModuleManager:
         appelle `module.load()` puis `self.add_module(module)`.
         """
 
-        PATH_DIR_MODULES = self.app.config.PATH_DIR_MODULES
-
-        if not os.path.isdir(PATH_DIR_MODULES):
-            return
-
-        list_modules = os.listdir(PATH_DIR_MODULES)
-
         # parcourir les éléments du dossier modules
 
-        for current_module_dirname in list_modules:
-            if (current_module_dirname.startswith("_")):
-                continue
+        for current_module_dirname in self.list_modules_installs:
+            self._load_module(current_module_dirname)
 
-            path_dir_to_current_module = os.path.join(PATH_DIR_MODULES, current_module_dirname)
+    def _load_module(self, name_module):
+        # self._load_module(name_module)
+        if self.isLoad(name_module):
+            return
+        
+        path_dir_to_current_module = join_paths(self.PATH_DIR_MODULES, name_module)
 
-            if not os.path.isdir(path_dir_to_current_module):
-                continue
+        if not self.isInstall(name_module):
+            return
 
-            path_file_to_current_module_py = os.path.join(path_dir_to_current_module, "module.py")
+        path_file_to_current_module_py = join_paths(path_dir_to_current_module, "module.py")
 
-            if not os.path.exists(path_file_to_current_module_py):
-                # skip directories without python module.py in dir of current_module_dirname
-                continue
+        if not os.path.exists(path_file_to_current_module_py):
+            # skip directories without python module.py in dir of current_module_dirname
+            return
 
-            module_name_space = f"modules.{current_module_dirname}.module"
+        module_name_space = f"modules.{name_module}.module"
 
+        try:
+            mod = self._load_module_from_path(module_name_space, path_file_to_current_module_py)
+        except Exception as e:
+            # erreur d'import, ignorer ou logger
+            print(f"Erreur lors de l'import du module {name_module}: {e}")
+            return
+
+        # chercher l'objet `module` à l'intérieur
+        module_instance = getattr(mod, "module", None)
+
+        if module_instance is None:
+            print(f"Aucun objet `module` de type Module trouvé dans {name_module}, skipped.")
+            return
+
+        # assurer que c'est bien une instance de Module
+        if not isinstance(module_instance, Module):
+            print(f"Objet `module` dans {name_module} n'est pas une instance de Module, skipped.")
+            return
+
+        if not self.isOn(name_module):
+            return
+
+        if not hasattr(module_instance, "load"):
+            return
+        
+        module_infos = self.get_module_infos(name_module)
+    
+        try:
+            depends = module_infos["depends"]["modules"]
+        except:
+            depends = []
+
+        for depend in depends:
             try:
-                mod = self._load_module_from_path(module_name_space, path_file_to_current_module_py)
-            except Exception as e:
-                # erreur d'import, ignorer ou logger
-                print(f"Erreur lors de l'import du module {current_module_dirname}: {e}")
-                continue
+                self._load_module(depend)
+            except:
+                return
+            
+        # appeler la méthode load() si disponible
+        try:
+            module_instance.init(app=self.app, dirname=name_module)
+            module_instance.load()
+        except Exception as e:
+            print(f"Erreur pendant module.load() pour {name_module}: {e}")
 
-            # chercher l'objet `module` à l'intérieur
-            module_instance = getattr(mod, "module", None)
-
-            if module_instance is None:
-                print(f"Aucun objet `module` de type Module trouvé dans {current_module_dirname}, skipped.")
-                continue
-
-            # assurer que c'est bien une instance de Module
-            if not isinstance(module_instance, Module):
-                print(f"Objet `module` dans {current_module_dirname} n'est pas une instance de Module, skipped.")
-                continue
-
-            if not self.isOn(current_module_dirname):
-                continue
-
-            # appeler la méthode load() si disponible
-            try:
-                if hasattr(module_instance, "load"):
-                    module_instance.init(app=self.app, dirname=current_module_dirname)
-                    module_instance.load()
-            except Exception as e:
-                print(f"Erreur pendant module.load() pour {current_module_dirname}: {e}")
-
-            # ajouter au registre d'application
-            try:
-                self.add_module(module_instance, current_module_dirname)
-            except Exception as e:
-                print(f"Erreur lors de l'enregistrement du module {current_module_dirname}: {e}")
+        # ajouter au registre d'application
+        try:
+            self.add_module(module_instance, name_module)
+        except Exception as e:
+            print(f"Erreur lors de l'enregistrement du module {name_module}: {e}")
 
     def run_modules(self):
         """Appelle la méthode `_run()` de chaque module chargé."""
@@ -126,128 +164,93 @@ class ModuleManager:
             except Exception as e:
                 print(f"Erreur lors de l'exécution du module {module_name}: {e}")
 
-    def isOn(self, dirname:str)->bool:
-        return dirname in self.modules_on
+    def isOn(self, name_module:str)->bool:
+        return name_module in self.modules_on
+
+    def isLoad(self, name_module:str)->bool:
+        return name_module in self.modules
+
+    def isInstall(self, name_module):
+        return name_module in self.list_modules_installs
 
     def on_module(self, name_module):
         if self.isOn(name_module):
             return
+        
+        if not self.isInstall(name_module):
+            return
+        
+        module_infos = self.get_module_infos(name_module)
+        
+        try:
+            depends = module_infos["depends"]["modules"]
+        except:
+            depends = []
+        
+        for depend in depends:
+            if not self.isInstall(depend):
+                return
+            
+            if self.isOn(depend):
+                continue
 
-        if self.module_exists(name_module):
-            self.modules_on.append(name_module)
-            self.set_file_modules_on()
+            self.modules_on.append(depend)
+
+        self.modules_on.append(name_module)
+        self.set_file_modules_on()
 
 
     def off_module(self, name_module):
-        print(f"Désactivation du module {name_module}")
+        if not self.isOn(name_module):
+            return
 
-        if name_module not in self.modules_on:
+        module_infos = self.get_module_infos(name_module)
+
+        depends_by = self.get_depends_by(name_module)
+
+        if len(depends_by) == 0 :
             return
         
+        try:
+            depends = module_infos["depends"]["modules"]
+        except:
+            depends = []
+
         self.modules_on.remove(name_module)
         self.set_file_modules_on()
 
+    def get_module_infos(self,name_module):
+        infos = {}
+        path = join_paths(self.PATH_DIR_MODULES, name_module, "infos.json")
+
+        if not os.path.exists(path):
+            return None
+
+        infos = json.loads(read_file(path_file=path))
+
+        return infos
+    
+    def get_depends_by(name_module):
+        depends_by = []
+
+        return depends_by
     def set_file_modules_on(self):
         PATH_FILE_MODULES_ON = self.app.config.PATH_DIR_CONFIG + "/modules_on.json"
 
         with open(PATH_FILE_MODULES_ON, "w", encoding="utf-8") as fh:
-                content = json.dumps(self.modules_on, indent=4, ensure_ascii=False)
-                fh.write(f"{content}")
+            content = json.dumps(self.modules_on, indent=4, ensure_ascii=False)
+            fh.write(f"{content}")
+
+    def add_module(self, module: Module, name_module:str):
+        """Enregistre une instance de module dans le registre."""
+        self.modules_infos[name_module] = self.get_module_infos(name_module)
+        self.modules[name_module] = module
 
     def module_exists(self, name_module)->bool:
-        PATH_DIR_MODULES = self.app.config.PATH_DIR_MODULES
-        path_module = os.path.join(PATH_DIR_MODULES, name_module)
-        return os.path.isdir(path_module)
+        return os.path.isdir(join_paths(self.PATH_DIR_MODULES, name_module))
     
     def del_module(self, name_module):
         pass
-
-    def resolve_load_order(self) -> list[str]:
-        """
-        Lit le fichier de manifeste de chaque module activé (manifest.json ou infos.json),
-        extrait les dépendances et retourne la liste des modules à charger dans l'ordre
-        (tri topologique). Lève RuntimeError en cas de dépendances manquantes ou de cycle.
-        """
-
-        from collections import deque
-        import json
-
-        PATH_DIR_MODULES = self.app.config.PATH_DIR_MODULES
-        if not os.path.isdir(PATH_DIR_MODULES):
-            return []
-
-        # Collecter les modules activés et leurs dépendances
-        deps_map: dict[str, list[str]] = {}
-        for entry in os.listdir(PATH_DIR_MODULES):
-            if entry.startswith("_"):
-                continue
-            entry_path = os.path.join(PATH_DIR_MODULES, entry)
-            if not os.path.isdir(entry_path):
-                continue
-            if not self.isOn(entry):
-                continue
-
-            manifest_path = os.path.join(entry_path, "infos.json"),
-
-            manifest = None
-            
-            if os.path.exists(manifest_path):
-                try:
-                    with open(manifest_path, "r", encoding="utf-8") as fh:
-                        manifest = json.load(fh)
-                except Exception as exc:
-                    raise RuntimeError(f"Impossible de lire {manifest_path} pour le module '{entry}': {exc}")
-
-            deps = []
-            if manifest:
-                raw = manifest.get("depends") if isinstance(manifest, dict) else None
-
-                if raw is not None:
-                    if isinstance(raw, str):
-                        deps = [raw.strip()] if raw.strip() else []
-                    elif isinstance(raw, (list, tuple)):
-                        deps = [str(d).strip() for d in raw if str(d).strip()]
-                    else:
-                        raise RuntimeError(f"Dépendances du module '{entry}' mal formées dans le manifeste.")
-            deps_map[entry] = deps
-
-        nodes = set(deps_map.keys())
-
-        # Vérifier que toutes les dépendances existent parmi les modules activés
-        missing = {}
-        for mod, deps in deps_map.items():
-            for d in deps:
-                if d not in nodes:
-                    missing.setdefault(mod, []).append(d)
-        if missing:
-            msgs = [f"{m} -> {', '.join(ds)}" for m, ds in missing.items()]
-            raise RuntimeError(f"Dépendances manquantes pour des modules activés: {'; '.join(msgs)}")
-
-        # Construire graphe inverse pour Kahn (arcs: dep -> module)
-        graph: dict[str, set[str]] = {n: set() for n in nodes}
-        indeg: dict[str, int] = {n: 0 for n in nodes}
-        for mod, deps in deps_map.items():
-            for d in deps:
-                graph[d].add(mod)
-                indeg[mod] += 1
-
-        # Kahn
-        q = deque([n for n, deg in indeg.items() if deg == 0])
-        order: list[str] = []
-        while q:
-            n = q.popleft()
-            order.append(n)
-            for nb in graph[n]:
-                indeg[nb] -= 1
-                if indeg[nb] == 0:
-                    q.append(nb)
-
-        if len(order) != len(nodes):
-            # il y a un cycle
-            remaining = [n for n, deg in indeg.items() if deg > 0]
-            raise RuntimeError(f"Cycle détecté dans les dépendances des modules: {', '.join(remaining)}")
-
-        return order
 
     def list_modules(self):
         """
@@ -269,12 +272,12 @@ class ModuleManager:
             if entry.startswith("_"):
                 continue
 
-            entry_path = os.path.join(PATH_DIR_MODULES, entry)
+            entry_path = join_paths(PATH_DIR_MODULES, entry)
             if not os.path.isdir(entry_path):
                 continue
 
             infos = None
-            infos_file = os.path.join(entry_path, "infos.json")
+            infos_file = join_paths(entry_path, "infos.json")
             if os.path.exists(infos_file):
                 try:
                     with open(infos_file, "r", encoding="utf-8") as fh:
@@ -290,3 +293,14 @@ class ModuleManager:
                 "enabled": entry in getattr(self, "modules_on", [])
             })
         return modules
+    
+    def check_modules_on(self):
+        modules_on = [] 
+        
+        for module in self.modules_on:
+            if self.isInstall(module):
+                modules_on.append(module)
+                continue
+        
+        self.modules_on = modules_on
+        self.set_file_modules_on()

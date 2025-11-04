@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from core.utils import join_paths, write_file
+from core.utils import join_paths, path_exist, read_file, write_file
 
 if TYPE_CHECKING:
     from .application import Application
@@ -10,9 +10,17 @@ if TYPE_CHECKING:
 class HomePageManager:
     def __init__(self, app:Application):
         self.app = app
-        self.home_page_on = self.app.config.home_page_on
+        self.home_page_on = ""
         self.home_pages:dict = {}
+        self.load_home_page_on()
 
+    def load_home_page_on(self):
+        path = join_paths(self.app.config.PATH_DIR_CONFIG, "home_page_on.txt")
+        
+        if not path_exist(path):
+            return
+        self.home_page_on = read_file(path_file=path).strip()
+        
     def render_home_page(self):
         try:
             res = self.home_pages[self.home_page_on]["home_page"]
