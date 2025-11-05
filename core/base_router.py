@@ -86,3 +86,6 @@ class BaseRouter:
     def get_current_request_json(self) -> dict:
         from flask import request
         return request.get_json()   
+    
+    def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
+        return self.module.translate(filename, keys, lang)

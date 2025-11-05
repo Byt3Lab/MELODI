@@ -8,6 +8,8 @@ class Base(Module):
     def load(self):
         from .routes import AdminRoutes, AdminApiRoutes
 
+        self.init_translation("fr")
+
         PATH_DIR_BASE_MODULE = self.app.config.PATH_DIR_BASE_MODULE
         
         self.app.config.path_template_404_not_found = join_paths(PATH_DIR_BASE_MODULE, 'templates', 'base', '404.html')
@@ -31,5 +33,4 @@ class Base(Module):
 module = Base(
     name="base", 
     router_name="base", 
-    version="0.1", 
 )

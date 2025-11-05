@@ -117,9 +117,7 @@ class AdminRoutes(Router):
 
             response = self.redirect("/")
             
-            response.set_cookie("theme", theme)
-
-            return response
+            return self.set_cookie(response, "theme", value=theme)
 
 class AdminApiRoutes(APIRouter):
     def load(self):

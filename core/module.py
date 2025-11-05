@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from core.router import Router
 from core.api_router import APIRouter
 from core.utils import join_paths, path_exist
+from core.utils.translation import Translation
 
 if TYPE_CHECKING:
     from core.application import Application
@@ -12,12 +13,12 @@ if TYPE_CHECKING:
 class Module:
     name: str
     router_name: str
-    version: str = "0.1"
     app:Application | None = None
     router:Router | None = None
     admin_router:Router | None = None
     api_router:APIRouter | None = None
     dirname: str=""
+    translation = None
 
     def add_router(self, router:Router, url_prefix=''):
         self.router.add_router(router, url_prefix=url_prefix)
@@ -48,6 +49,16 @@ class Module:
         self.router = Router(name=self.name, app=self.app, template_folder=path_template_folder, dirname_module=self.dirname)
         self.admin_router = Router(app=self.app, name=self.router_name+"_admin", dirname_module=self.dirname)
         self.api_router = APIRouter(app=self.app, name=self.router_name+"_api")
+
+    def init_translation(self, default_lang:str):
+        path_dir = []
+
+        if self.dirname == "base":
+            path_dir = [self.app.config.PATH_DIR_RACINE, self.dirname, "langs"]
+        else:
+            path_dir = [self.app.config.PATH_DIR_MODULES, self.dirname, "langs"]
+
+        self.translation = Translation(path_dir, default_lang)
 
     def load(self):
         pass
@@ -111,3 +122,9 @@ class Module:
             if name_widget:
                 self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
         return decorator
+
+    def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
+        if self.translation == None:
+            return {}
+        
+        return self.translation.translate(filename, keys, lang)

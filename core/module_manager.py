@@ -46,7 +46,7 @@ class ModuleManager:
         list = os.listdir(self.PATH_DIR_MODULES)
 
         for current_module_dirname in list:
-            if (current_module_dirname.startswith("_")):
+            if current_module_dirname.startswith("_") or current_module_dirname == "base":
                 continue
 
             if not os.path.isdir(join_paths(self.PATH_DIR_MODULES, current_module_dirname)):
@@ -208,9 +208,10 @@ class ModuleManager:
 
         depends_by = self.get_depends_by(name_module)
 
-        if len(depends_by) == 0 :
-            return
-        
+        if len(depends_by) > 0 :
+            for d in depends_by:
+                if not d == name_module and self.isOn(d):
+                    return
         try:
             depends = module_infos["depends"]["modules"]
         except:
@@ -219,19 +220,37 @@ class ModuleManager:
         self.modules_on.remove(name_module)
         self.set_file_modules_on()
 
+        for name_module in depends:
+            self.off_module(name_module)
+
+        return True
+
     def get_module_infos(self,name_module):
         infos = {}
-        path = join_paths(self.PATH_DIR_MODULES, name_module, "infos.json")
 
-        if not os.path.exists(path):
+        if (name_module == "base"):
+            path = join_paths(self.app.config.PATH_DIR_RACINE, name_module, "infos.json")
+        else:
+            path = join_paths(self.PATH_DIR_MODULES, name_module, "infos.json")
+
+        if not path_exist(path):
             return None
 
         infos = json.loads(read_file(path_file=path))
 
         return infos
     
-    def get_depends_by(name_module):
+    def get_depends_by(self, name_module):
         depends_by = []
+
+        for m in self.modules_infos:
+            try:
+                depends = self.modules_infos[m]["depends"]["modules"]
+            
+                if name_module in depends:
+                    depends_by.append(m)
+            except:
+                continue
 
         return depends_by
     def set_file_modules_on(self):
