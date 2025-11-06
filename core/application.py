@@ -69,6 +69,27 @@ class Application:
         return self.server.app
 
     def register_routers(self):
+        from flask import send_from_directory, Blueprint
+        
+        def handler_icon(module):
+            path_directory = join_paths(self.config.PATH_DIR_MODULES, module)
+            filename = "icon.png"
+
+            return send_from_directory(path_directory, filename)
+        
+        def handler_banner(module):
+            path_directory = join_paths(self.config.PATH_DIR_MODULES, module)
+            filename = "banner.png"
+
+            return send_from_directory(path_directory, filename)
+        
+        bp = Blueprint(f'static_module_icon_banner', __name__)
+
+        bp.route(f'/static/module_icon/<path:module>/icon.png')(handler_icon)
+        bp.route(f'/static/module_banner/<path:module>/banner.png')(handler_banner)
+        
+        self.router.router.register_blueprint(bp)
+
         self.server.add_router(self.api_router.get_router(), url_prefix="/api")
         self.server.add_router(self.router.get_router())
 
