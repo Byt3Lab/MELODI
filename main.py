@@ -1,4 +1,4 @@
-from core import Melodi
+from core import Application as Melodi
 
 app = Melodi()
 app.build()

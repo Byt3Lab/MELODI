@@ -1,17 +1,14 @@
 from __future__ import annotations
-
 import importlib.util
 import json
 import os
 import sys
 from typing import TYPE_CHECKING
-
 from core.utils import join_paths, path_exist, read_file
 from .module import Module
 
 if TYPE_CHECKING:
-    from .application import Application
-    from .module import Module
+    from core import Application
     
 class ModuleManager:
     """Gère l'ensemble des modules de l'application.
@@ -127,9 +124,6 @@ class ModuleManager:
         if not self.isOn(name_module):
             return
 
-        if not hasattr(module_instance, "load"):
-            return
-        
         module_infos = self.get_module_infos(name_module)
     
         try:
@@ -160,7 +154,7 @@ class ModuleManager:
         """Appelle la méthode `_run()` de chaque module chargé."""
         for module_name, module in self.modules.items():
             try:
-                module.run()
+                module._run()
             except Exception as e:
                 print(f"Erreur lors de l'exécution du module {module_name}: {e}")
 
@@ -243,9 +237,9 @@ class ModuleManager:
     def get_depends_by(self, name_module):
         depends_by = []
 
-        for m in self.modules_infos:
+        for m, infos in self.modules_infos.items():
             try:
-                depends = self.modules_infos[m]["depends"]["modules"]
+                depends = infos["depends"]["modules"]
             
                 if name_module in depends:
                     depends_by.append(m)

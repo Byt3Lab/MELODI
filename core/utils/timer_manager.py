@@ -5,7 +5,7 @@ import threading
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..application import Application
+    from core.application import Application
 
 class TimerManager:
     def __init__(self, app:Application | None = None):

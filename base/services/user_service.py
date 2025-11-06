@@ -1,7 +1,7 @@
 from base.repository.user_repository import UserRepository
-from core.base_service import BaseService
+from core import Service
 
-class UserService(BaseService):
+class UserService(Service):
     def list_users(self):
         data = UserRepository.get_all_users()
         return self.response(data=data)

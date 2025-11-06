@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, String, Float, Boolean
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 
-class BaseModel(DeclarativeBase):
+class Model(DeclarativeBase):
     mapped_collum = mapped_column
     Mapped = Mapped
     Integer = Integer

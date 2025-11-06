@@ -25,6 +25,5 @@ class Config:
     def load_infos_entreprise(self):
         path = join_paths(self.PATH_DIR_CONFIG, "infos_entreprise.json")
         if not path_exist(path):
-            self.infos_entreprise = {}
             return
         self.infos_entreprise = json.loads(read_file(path_file=path))

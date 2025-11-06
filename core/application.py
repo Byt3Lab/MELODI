@@ -1,17 +1,17 @@
 import os
 
-from core.home_page_manager import HomePageManager
-from core.menu_item_manager import MenuItemManager
-from core.module_manager import ModuleManager
-from core.plugin_manager import PluginManager
+from core.utils import TimerManager, EventListener, create_dir_if_not_exist, join_paths, read_file
+
+from core.component import HomePageManager
+from core.component import MenuItemManager
+from core.module import ModuleManager
 from core.adapters.flask_adapter import FlaskAdapter
-from core.service_manager import ServiceManager
-from core.utils import TimerManager, EventListener, create_dir, create_dir_if_not_exist, join_paths, read_file
-from core.database import DataBase
+from core.service import ServiceManager
+from core.db import DataBase
 from core.config import Config
 from core.router import Router
-from core.api_router import APIRouter
-from core.widget_manager import WidgetManager
+from core.router.api_router import APIRouter
+from core.component.widget_manager import WidgetManager
 
 class Application:
     def __init__(self):
@@ -26,7 +26,6 @@ class Application:
         self.router = Router(name="main", app=self)
         self.api_router = APIRouter(app=self, name="main_api")
         self.module_manager = ModuleManager(app=self)
-        self.plugin_manager = PluginManager(app=self)
         self.service_manager = ServiceManager(app=self)
         self.widget_manager = WidgetManager(app=self)
         self.menu_item_manager = MenuItemManager(app=self)
@@ -55,7 +54,7 @@ class Application:
 
         self.module_manager.load_modules()
 
-        base_module.run()
+        base_module._run()
 
         self.module_manager.run_modules()
 

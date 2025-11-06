@@ -1,5 +1,5 @@
-from core.router import Router
+from core.router import WebRouter
 
-class UserRoutes(Router):
+class UserRoutes(WebRouter):
     def load(self):
         pass

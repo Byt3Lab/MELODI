@@ -1,12 +1,9 @@
-from core import Module
+from core.module import ApplicationModule
 from core.utils import join_paths
 
-title="module d'administration de l'applicaion"
-description = "Module d'administration de l'application"
-
-class Base(Module):
+class Base(ApplicationModule):
     def load(self):
-        from .routes import AdminRoutes, AdminApiRoutes
+        from base.routes import AdminRoutes, AdminApiRoutes
 
         self.init_translation("fr")
 

@@ -1,25 +1,21 @@
 from __future__ import annotations
 
-from typing import Dict, TYPE_CHECKING
-
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..application import Application
-
+    from core.application import Application
 
 class EventListener:
     def __init__(self, app:Application | None = None):
         self.app = app
         # Dictionnaire {nom_evenement: [callbacks]}
-        self._events: Dict[str, list[function]] = {}
+        self._events:dict[str,list[object]] = {}
 
-    def add_event_listener(self, event_name: str):
+    def add_event_listener(self, event_name: str, callback):
         """Ajoute un callback pour un événement."""
-        def decorator(callback):
-            if event_name not in self._events:
-                self._events[event_name] = []
-            self._events[event_name].append(callback)
-        return decorator
-    
+        if event_name not in self._events:
+            self._events[event_name] = []
+        self._events[event_name].append(callback)
+
     def remove_event_listener(self, event_name: str, callback):
         """Supprime un callback d’un événement."""
         if event_name in self._events:

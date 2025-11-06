@@ -1,4 +1,3 @@
-from .application import Application as Melodi
-from .module import Module
-from .router import Router
-from .api_router import APIRouter
+from .config import Config
+from .global_data import GlobalData
+from .application import Application

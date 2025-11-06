@@ -1,7 +1,7 @@
 from __future__ import annotations
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from core.model import BaseModel
+from .model import Model
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ class DataBase():
         self.engine = create_engine(self.app.config.DB_URL, echo=False)
 
     def create_all(self):
-        BaseModel.metadata.create_all(self.engine) 
+        Model.metadata.create_all(self.engine) 
     
     def get_session (self):
         return Session(self.engine)

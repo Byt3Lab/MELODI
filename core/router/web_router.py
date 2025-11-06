@@ -4,13 +4,13 @@ from typing import TYPE_CHECKING
 
 from flask import Response
 
-from core.base_router import BaseRouter
+from .router import Router
 from core.utils import path_exist, read_file
 
 if TYPE_CHECKING:
-    from core.application import Application
+    from core import Application
 
-class Router(BaseRouter):
+class WebRouter(Router):
     def __init__(self, name:str, app:Application,  template_folder=None, dirname_module="", module=None):
         self.template_folder = template_folder
         self.dirname_module = dirname_module

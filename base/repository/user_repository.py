@@ -1,7 +1,7 @@
-from core.base_repository import BaseRepository
-from base.models.user_model import UserModel
+from core.db import Repository
+from base.models import UserModel
 
-class UserRepository(BaseRepository):
+class UserRepository(Repository):
     def get_all_users (self):
         with self.db.get_session() as session:
             user = UserModel()

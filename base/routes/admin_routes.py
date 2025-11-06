@@ -1,13 +1,7 @@
-from __future__ import annotations
-
 from flask import request, Request, g
-from core import Router, APIRouter
+from core.router import WebRouter, RequestContext
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from core.request_context import RequestContext
-
-class AdminRoutes(Router):
+class AdminRoutes(WebRouter):
     def load (self):
         def get_theme(request:Request)->str:
             theme=request.cookies.get("theme")
@@ -118,9 +112,3 @@ class AdminRoutes(Router):
             response = self.redirect("/")
             
             return self.set_cookie(response, "theme", value=theme)
-
-class AdminApiRoutes(APIRouter):
-    def load(self):
-        @self.add_route("/", methods=["GET"])
-        def status():
-            return self.render_json(data={"status": "Admin API is working!", "code": 200}, status_code=200)

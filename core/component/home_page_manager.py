@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from core.utils import join_paths, path_exist, read_file, write_file
 
 if TYPE_CHECKING:
-    from .application import Application
+    from core import Application
 
 class HomePageManager:
     def __init__(self, app:Application):

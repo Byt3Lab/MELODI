@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .module import Module
+    from ..module.module import Module
 
-class BaseService:
-    def __init__(self, instance_module:Module):
-        self.module = instance_module
+class Service:
+    def __init__(self, module:Module):
+        self.module = module
         
     def response(self, data=None, status="success", code=200, message=""):
         return {

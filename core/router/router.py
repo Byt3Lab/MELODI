@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING
 from flask import Blueprint
 
 if TYPE_CHECKING:
+    from core import Application
+    from core.module import Module
     from .request_context import RequestContext
-    from .application import Application
-    from .module import Module
 
-class BaseRouter:
+class Router:
     def __init__(self, app:Application, name:str, module:Module|None = None):
         self.app = app
         self.module = module
@@ -52,7 +52,7 @@ class BaseRouter:
     def get_router(self):
         return self.router
 
-    def add_router(self, router:BaseRouter, url_prefix=''):
+    def add_router(self, router:Router, url_prefix=''):
         self.router.register_blueprint(router.get_router(), url_prefix=url_prefix)
 
     def redirect(self, location: str, code: int = 302):

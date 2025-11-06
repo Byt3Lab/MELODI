@@ -1,7 +1,7 @@
 # adapters/flask_adapter.py
 from flask import Flask, Blueprint, send_from_directory, Request, g
 from .web_server_interface import WebServerInterface
-from ..request_context import RequestContext
+from core.router import RequestContext
 
 class FlaskAdapter(WebServerInterface):
     def __init__(self):
