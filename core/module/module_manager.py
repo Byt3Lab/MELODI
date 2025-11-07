@@ -102,7 +102,6 @@ class ModuleManager:
         if not path_exist(path_file_to_current_module_py):
             # skip directories without python module.py in dir of current_module_dirname
             return
-        print(path_file_to_current_module_py)
 
         module_name_space = f"modules.{name_module}.module"
 
@@ -179,7 +178,6 @@ class ModuleManager:
         path_file_module_infos = join_paths(self.PATH_DIR_MODULES, name_module, "infos.json")
                
         if not path_exist(path_file_module_py) or not path_exist(path_file_module_infos):
-            print(path_file_module_py)
             return
         
         module_infos = self.get_module_infos(name_module)
@@ -191,7 +189,6 @@ class ModuleManager:
         
         for depend in depends:
             res = self.on_module(depend)
-            print(res)
             if not res == True:
                 return
 

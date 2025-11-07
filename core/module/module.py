@@ -71,7 +71,6 @@ class Module:
             path_dir = join_paths(self.app.config.PATH_DIR_MODULES, self.dirname, "static")
             prefix_url = self.dirname
             
-        print(prefix_url)
         if path_exist(path_dir):    
             self.app.server.serve_static_directory(name=f'{self.type_module}_{self.dirname}', prefix_path=prefix_url, path_directory=path_dir)
 
