@@ -12,6 +12,7 @@ from core.config import Config
 from core.router import Router
 from core.router.api_router import APIRouter
 from core.component.widget_manager import WidgetManager
+from core.utils import Storage
 
 class Application:
     def __init__(self):
@@ -20,8 +21,8 @@ class Application:
 
     def init(self):
         self.config = Config()
-        self.event_listener = EventListener(app=self)
-        self.timer_manager = TimerManager(app=self)
+        self.event_listener = EventListener()
+        self.timer_manager = TimerManager()
         self.db = DataBase(self)
         self.router = Router(name="main", app=self)
         self.api_router = APIRouter(app=self, name="main_api")
@@ -30,6 +31,7 @@ class Application:
         self.widget_manager = WidgetManager(app=self)
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
+        self.storage = Storage(app=self)
         
         create_dir_if_not_exist(join_paths(self.config.PATH_DIR_STORAGE))
 
@@ -69,27 +71,6 @@ class Application:
         return self.server.app
 
     def register_routers(self):
-        from flask import send_from_directory, Blueprint
-        
-        def handler_icon(module):
-            path_directory = join_paths(self.config.PATH_DIR_MODULES, module)
-            filename = "icon.png"
-
-            return send_from_directory(path_directory, filename)
-        
-        def handler_banner(module):
-            path_directory = join_paths(self.config.PATH_DIR_MODULES, module)
-            filename = "banner.png"
-
-            return send_from_directory(path_directory, filename)
-        
-        bp = Blueprint(f'static_module_icon_banner', __name__)
-
-        bp.route(f'/static/module_icon/<path:module>/icon.png')(handler_icon)
-        bp.route(f'/static/module_banner/<path:module>/banner.png')(handler_banner)
-        
-        self.router.router.register_blueprint(bp)
-
         self.server.add_router(self.api_router.get_router(), url_prefix="/api")
         self.server.add_router(self.router.get_router())
 

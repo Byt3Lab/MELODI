@@ -18,11 +18,12 @@ class FlaskAdapter(WebServerInterface):
         from werkzeug.routing import Map
         self.app.url_map = Map()
 
-    def serve_static_directory(self, path_directory: str, prefix_path: str):
+    def serve_static_directory(self, name:str, path_directory: str, prefix_path: str):
         def handler(filename):
             return send_from_directory(path_directory, filename)
-        bp = Blueprint(f'static_{prefix_path}', __name__)
-        bp.route(f'/static{prefix_path}/<path:filename>')(handler)
+        
+        bp = Blueprint(f'static_{name}', __name__)
+        bp.route(f'/static/{prefix_path}/<path:filename>')(handler)
         self.app.register_blueprint(bp)
 
     def serve_template(self, template_name: str, **context):

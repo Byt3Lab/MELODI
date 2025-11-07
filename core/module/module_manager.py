@@ -89,16 +89,20 @@ class ModuleManager:
         if self.isLoad(name_module):
             return
         
-        path_dir_to_current_module = join_paths(self.PATH_DIR_MODULES, name_module)
+        if not self.isOn(name_module):
+            return
 
         if not self.isInstall(name_module):
             return
 
+        path_dir_to_current_module = join_paths(self.PATH_DIR_MODULES, name_module)
+
         path_file_to_current_module_py = join_paths(path_dir_to_current_module, "module.py")
 
-        if not os.path.exists(path_file_to_current_module_py):
+        if not path_exist(path_file_to_current_module_py):
             # skip directories without python module.py in dir of current_module_dirname
             return
+        print(path_file_to_current_module_py)
 
         module_name_space = f"modules.{name_module}.module"
 
@@ -119,9 +123,6 @@ class ModuleManager:
         # assurer que c'est bien une instance de Module
         if not isinstance(module_instance, Module):
             print(f"Objet `module` dans {name_module} n'est pas une instance de Module, skipped.")
-            return
-
-        if not self.isOn(name_module):
             return
 
         module_infos = self.get_module_infos(name_module)
@@ -174,6 +175,13 @@ class ModuleManager:
         if not self.isInstall(name_module):
             return
         
+        path_file_module_py = join_paths(self.PATH_DIR_MODULES, name_module, "module.py")
+        path_file_module_infos = join_paths(self.PATH_DIR_MODULES, name_module, "infos.json")
+               
+        if not path_exist(path_file_module_py) or not path_exist(path_file_module_infos):
+            print(path_file_module_py)
+            return
+        
         module_infos = self.get_module_infos(name_module)
         
         try:
@@ -182,16 +190,14 @@ class ModuleManager:
             depends = []
         
         for depend in depends:
-            if not self.isInstall(depend):
+            res = self.on_module(depend)
+            print(res)
+            if not res == True:
                 return
-            
-            if self.isOn(depend):
-                continue
-
-            self.modules_on.append(depend)
 
         self.modules_on.append(name_module)
         self.set_file_modules_on()
+        return True
 
 
     def off_module(self, name_module):
@@ -230,8 +236,11 @@ class ModuleManager:
         if not path_exist(path):
             return None
 
-        infos = json.loads(read_file(path_file=path))
-
+        try:
+            infos = json.loads(read_file(path_file=path))
+        except:
+            infos = {}
+                    
         return infos
     
     def get_depends_by(self, name_module):

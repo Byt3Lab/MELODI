@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from core.utils import Translation
+from core.router import WebRouter
+from core.router import APIRouter
+from core.utils import join_paths, path_exist, Translation
 
 if TYPE_CHECKING:
     from core.application import Application
 
 class Module:
-    def __init__(self, name:str, type_module:str):
+    def __init__(self, name:str, type_module:str, router_name:str):
         self.name: str = name
         self.dirname: str = ""
         self.type_module:str = type_module
         self.app:Application | None = None
         self.translation = None
+        self.router_name = router_name
+        self.router:WebRouter | None = None
+        self.api_router:APIRouter | None = None
 
     def init_translation(self, default_lang:str):
         path_dir = []
@@ -31,9 +36,51 @@ class Module:
         print(f"Stopping module {self.name}")
         pass
 
-    def _run():
-        pass
- 
+    def add_router(self, router:WebRouter, url_prefix=''):
+        self.router.add_router(router, url_prefix=url_prefix)
+    
+    def add_api_router(self, router:APIRouter, url_prefix=''):
+        self.api_router.add_router(router, url_prefix=url_prefix)
+
+    def init(self, app:Application, dirname:str):
+        self.app = app
+        self.dirname = dirname
+
+        if self.dirname == "base":
+            path_template_folder = self.app.config.PATH_DIR_BASE_MODULE + f"/templates"
+        else:
+            path_template_folder = self.app.config.PATH_DIR_MODULES + f"/{self.dirname}/templates"
+
+        if not path_exist(path_template_folder):
+            path_template_folder = None
+
+        router_name = f'{self.type_module}_{self.dirname}'
+        self.router = WebRouter(app=self.app, name=router_name, template_folder=path_template_folder, dirname_module=self.dirname)
+        self.api_router = APIRouter(app=self.app, name=f'{self.router_name}_api')
+
+    def _run(self):
+        if self.app is None:
+            raise ValueError("Application instance is not set for the module.")
+        self.app.router.add_router(self.router)
+        self.app.api_router.add_router(self.api_router)
+
+        if self.dirname == "base":
+            path_dir = join_paths(self.app.config.PATH_DIR_BASE_MODULE, "static")
+            prefix_url = "base"
+        else:
+            path_dir = join_paths(self.app.config.PATH_DIR_MODULES, self.dirname, "static")
+            prefix_url = self.dirname
+            
+        print(prefix_url)
+        if path_exist(path_dir):    
+            self.app.server.serve_static_directory(name=f'{self.type_module}_{self.dirname}', prefix_path=prefix_url, path_directory=path_dir)
+
+    def get_router(self)->WebRouter:
+        return self.router
+    
+    def get_api_router(self)->APIRouter:
+        return self.api_router
+    
     def register_service(self, name_service:str|None=None):
         def decorator (func):
             name_module = self.dirname

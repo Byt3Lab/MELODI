@@ -1,12 +1,5 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from core.application import Application
-
 class EventListener:
-    def __init__(self, app:Application | None = None):
-        self.app = app
+    def __init__(self):
         # Dictionnaire {nom_evenement: [callbacks]}
         self._events:dict[str,list[object]] = {}
 

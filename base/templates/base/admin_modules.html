@@ -15,13 +15,14 @@
         <li class="list-group-item d-flex justify-content-between align-items-center">
           <div>
             <div>
+              <img src="/static/{{module.name}}/icon.png" alt="" style="width: 60px;">
               <span style="font-weight: bold;">{{ module.infos.name }} </span>
             </div>
           
             <div>{{ module.infos.title }} </div>
             <!-- Button trigger modal -->
             <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#module_{{module.name}}">
-              Launch demo modal
+              détails
             </button>
 
             <!-- Modal -->
@@ -33,6 +34,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
                   <div class="modal-body">
+                    <div>
+                      <img src="/static/{{module.name}}/banner.png" alt="" style="width: 100px;">
+                    </div>
                     <div>nom: {{ module.infos.name }}</div>
                     <div>titre: {{ module.infos.title }}</div>
                     <div>version: {{ module.infos.version }}</div>

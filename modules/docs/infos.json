@@ -1,0 +1,11 @@
+{
+    "version":"1.0",
+    "name":"melodi docs",
+    "title":"gestion de la documentation",
+    "description":"gestion de la documentation",
+    "depends":{
+        "core":"",
+        "modules":[],
+        "python":[]
+    }
+}

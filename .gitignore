@@ -16,7 +16,7 @@ storage
 config/*
 !config/__init__.py
 modules/*
-!modules/doc
+!modules/docs
 !modules/__init__.py
 plugins/*
 !plugins/__init__.py

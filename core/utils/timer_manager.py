@@ -1,16 +1,6 @@
-from __future__ import annotations
-
 import threading
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from core.application import Application
-
 class TimerManager:
-    def __init__(self, app:Application | None = None):
-        self.app = app
-
     def set_timeout(self, func, delay, *args, **kwargs):
         """
         Exécute une fonction une seule fois après un délai (ms)
