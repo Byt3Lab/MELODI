@@ -141,8 +141,9 @@ class ModuleManager:
 
             if not self.check_compatibility(constraints, version):
                 return
+            
             try:
-                self._load_module(depend)
+                self._load_module(name)
             except:
                 # self.off_module(name_module)
                 return
@@ -198,8 +199,19 @@ class ModuleManager:
             depends = []
         
         for depend in depends:
-            res = self.on_module(depend)
-            if not res == True:
+            try:
+                parse = self.parse_module_name(depend)
+                name = parse.get("name", "")
+                constraints = parse.get("constraints", [])
+
+                version = self.get_module_infos(name).get("version")
+            except:
+                return False
+
+            if not self.check_compatibility(constraints, version):
+                return False
+            
+            if not self.on_module(name) == True:
                 return False
 
         self.modules_on.append(name_module)
@@ -223,11 +235,17 @@ class ModuleManager:
         except:
             depends = []
 
+
         self.modules_on.remove(name_module)
         self.set_file_modules_on()
 
-        for name_module in depends:
-            self.off_module(name_module)
+        for depend in depends:
+            try:
+                name = self.parse_module_name(depend).get("name", "")
+            except:
+                return False
+            
+            self.off_module(name)
 
         return True
 
@@ -256,8 +274,11 @@ class ModuleManager:
             try:
                 depends = infos["depends"]["modules"]
             
-                if name_module in depends:
-                    depends_by.append(m)
+                for depend in depends:
+                    name = self.parse_module_name(depend).get("name", "")
+                    
+                    if name_module == name:
+                        depends_by.append(m)
             except:
                 continue
 
