@@ -43,7 +43,7 @@ class ModuleManager:
         list = os.listdir(self.PATH_DIR_MODULES)
 
         for current_module_dirname in list:
-            if current_module_dirname.startswith("_") or current_module_dirname == "base":
+            if current_module_dirname == "base" or not self.is_valid_module_name(current_module_dirname):
                 continue
 
             if not os.path.isdir(join_paths(self.PATH_DIR_MODULES, current_module_dirname)):
@@ -51,7 +51,6 @@ class ModuleManager:
             
             self.list_modules_installs.append(current_module_dirname)
             
-
     def get_module(self, name: str):
         return self.modules.get(name)
 
@@ -85,7 +84,6 @@ class ModuleManager:
             self._load_module(current_module_dirname)
 
     def _load_module(self, name_module):
-        # self._load_module(name_module)
         if self.isLoad(name_module):
             return
         
@@ -133,8 +131,20 @@ class ModuleManager:
 
         for depend in depends:
             try:
+                parse = self.parse_module_name(depend)
+                name = parse.get("name", "")
+                constraints = parse.get("constraints", [])
+
+                version = self.get_module_infos(name).get("version")
+            except:
+                return
+
+            if not self.check_compatibility(constraints, version):
+                return
+            try:
                 self._load_module(depend)
             except:
+                # self.off_module(name_module)
                 return
             
         # appeler la méthode load() si disponible
@@ -169,16 +179,16 @@ class ModuleManager:
 
     def on_module(self, name_module):
         if self.isOn(name_module):
-            return
+            return True
         
         if not self.isInstall(name_module):
-            return
+            return False
         
         path_file_module_py = join_paths(self.PATH_DIR_MODULES, name_module, "module.py")
         path_file_module_infos = join_paths(self.PATH_DIR_MODULES, name_module, "infos.json")
                
         if not path_exist(path_file_module_py) or not path_exist(path_file_module_infos):
-            return
+            return False
         
         module_infos = self.get_module_infos(name_module)
         
@@ -190,12 +200,11 @@ class ModuleManager:
         for depend in depends:
             res = self.on_module(depend)
             if not res == True:
-                return
+                return False
 
         self.modules_on.append(name_module)
         self.set_file_modules_on()
         return True
-
 
     def off_module(self, name_module):
         if not self.isOn(name_module):
@@ -253,6 +262,7 @@ class ModuleManager:
                 continue
 
         return depends_by
+    
     def set_file_modules_on(self):
         PATH_FILE_MODULES_ON = self.app.config.PATH_DIR_CONFIG + "/modules_on.json"
 
@@ -268,9 +278,6 @@ class ModuleManager:
     def module_exists(self, name_module)->bool:
         return os.path.isdir(join_paths(self.PATH_DIR_MODULES, name_module))
     
-    def del_module(self, name_module):
-        pass
-
     def list_modules(self):
         """
         Parcourt le dossier des modules et retourne une liste d'objets décrivant chaque module.
@@ -283,15 +290,8 @@ class ModuleManager:
 
         modules = []
 
-        if not os.path.isdir(PATH_DIR_MODULES):
-            return modules
-
-        for entry in os.listdir(PATH_DIR_MODULES):
-            # ignorer les fichiers/dirs cachés ou de configuration
-            if entry.startswith("_"):
-                continue
-
-            entry_path = join_paths(PATH_DIR_MODULES, entry)
+        for module_name in self.list_modules_installs:
+            entry_path = join_paths(PATH_DIR_MODULES, module_name)
             if not os.path.isdir(entry_path):
                 continue
 
@@ -306,10 +306,10 @@ class ModuleManager:
                     infos = {"_error": f"Impossible de lire infos.json: {exc}"}
 
             modules.append({
-                "name": entry,
+                "name": module_name,
                 "path": entry_path,
                 "infos": infos,
-                "enabled": entry in getattr(self, "modules_on", [])
+                "enabled": module_name in self.modules_on
             })
         return modules
     
@@ -323,3 +323,116 @@ class ModuleManager:
         
         self.modules_on = modules_on
         self.set_file_modules_on()
+
+    def parse_module_name(self, requirement: str) -> dict:
+        """
+        Analyse une chaîne comme 'stock>=1.0.0,==2.2.2' ou 'users==1.2' ou 'compta'
+        et retourne :
+        {
+            "name": "stock",
+            "constraints": [
+                { "operator": ">=", "version": "1.0.0" },
+                { "operator": "==", "version": "2.2.2" }
+            ]
+        }
+        """
+
+        import re
+
+        # Regex pour capturer le nom et les contraintes
+        pattern = r"^([a-zA-Z0-9_\-]+)((?:[=<>!]+[\d\.]+(?:,)?)+)?$"
+        match = re.match(pattern, requirement.strip())
+
+        if not match:
+            raise ValueError(f"Format invalide : {requirement}")
+
+        name = match.group(1)
+        constraints_str = match.group(2)
+
+        constraints = []
+        if constraints_str:
+            # Trouver toutes les paires (opérateur, version)
+            sub_pattern = r"([=<>!]+)\s*([\d\.]+)"
+            for op, ver in re.findall(sub_pattern, constraints_str):
+                constraints.append({
+                    "operator": op,
+                    "version": ver
+                })
+
+        return {
+            "name": name,
+            "constraints": constraints
+        }
+    
+    def check_compatibility(self, constraints: list[dict[str, str]], target_version: str) -> bool:
+        """
+        Détermine si une version cible satisfait toutes les contraintes de version spécifiées.
+
+        Args:
+            constraints: Liste des dictionnaires de contraintes (opérateur, version).
+            target_version: La version du module à vérifier (ex: "1.5.0").
+
+        Returns:
+            True si la version cible est compatible avec TOUTES les contraintes, False sinon.
+        """
+
+        from packaging.version import parse as parse_version
+
+        # 1. Analyser la version cible une seule fois
+        try:
+            v_target = parse_version(target_version)
+        except Exception:
+            # Gérer les cas où la version cible est invalide
+            print(f"Erreur: La version cible '{target_version}' est invalide.")
+            return False
+            
+        # 2. Parcourir toutes les contraintes
+        for constraint in constraints:
+            op = constraint.get("operator")
+            ver_str = constraint.get("version")
+            
+            # 3. Analyser la version de la contrainte
+            try:
+                v_constraint = parse_version(ver_str)
+            except Exception:
+                print(f"Avertissement: La contrainte '{op}{ver_str}' est invalide et ignorée.")
+                continue
+
+            # 4. Évaluer la contrainte
+            is_satisfied = False
+            
+            if op == "==":
+                is_satisfied = (v_target == v_constraint)
+            elif op == ">=":
+                is_satisfied = (v_target >= v_constraint)
+            elif op == "<=":
+                is_satisfied = (v_target <= v_constraint)
+            elif op == ">":
+                is_satisfied = (v_target > v_constraint)
+            elif op == "<":
+                is_satisfied = (v_target < v_constraint)
+            elif op == "!=":
+                is_satisfied = (v_target != v_constraint)
+            else:
+                # Opérateur inconnu
+                print(f"Avertissement: Opérateur inconnu '{op}' ignoré.")
+                continue
+                
+            # Si une seule contrainte n'est pas satisfaite, le module est incompatible
+            if not is_satisfied:
+                return False
+
+        # Si toutes les contraintes ont été vérifiées et satisfaites
+        return True
+
+    def is_valid_module_name(self, name: str) -> bool:
+        """
+        Vérifie que le nom du module :
+        - contient uniquement des lettres et des underscores (_)
+        - ne commence pas par un underscore
+        - ne contient pas de chiffres ni de caractères spéciaux
+        """
+        import re
+
+        pattern = r"^[A-Za-z][A-Za-z_]*$"
+        return bool(re.match(pattern, name))

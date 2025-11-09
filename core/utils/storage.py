@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from core.utils import join_paths
+
 if TYPE_CHECKING:
     from core import Application
 
@@ -19,12 +21,23 @@ class Storage:
         self.app = app
         self.base_path = self.app.config.PATH_DIR_STORAGE
 
-    def _get_file_path(self, filename):
-        return os.path.join(self.base_path, secure_filename(filename))
+    def _get_file_path(self, filename, path_dir:str|list[str]=""):
+        if isinstance(path_dir, str):
+            base_path = join_paths(self.base_path, join_paths(path_dir))
+        elif isinstance(path_dir, list):
+            base_path = join_paths(self.base_path, join_paths(*path_dir))
+    
+        return join_paths(base_path, secure_filename(filename))
 
-    def _get_meta_path(self, filename):
+    def _get_meta_path(self, filename, path_dir:str|list[str]=""):
         safe_name = secure_filename(filename)
-        return os.path.join(self.base_path, f"{safe_name}.meta.json")
+       
+        if isinstance(path_dir, str):
+            base_path = join_paths(self.base_path, join_paths(path_dir))
+        elif isinstance(path_dir, list):
+            base_path = join_paths(self.base_path, join_paths(*path_dir))
+
+        return join_paths(base_path, f"{safe_name}.meta.json")
 
     def _now(self):
         return datetime.utcnow().isoformat()
@@ -32,7 +45,7 @@ class Storage:
     # --------------------------
     # 🔹 CRÉATION / UPLOAD
     # --------------------------
-    def save(self, file, access_rights="rw", visibility="private"):
+    def save(self, file, path_dir="", access_rights="rw", visibility="private"):
         """
         Sauvegarde un fichier uploadé et crée ses métadonnées.
         """
@@ -40,8 +53,11 @@ class Storage:
         file_path = self._get_file_path(filename)
         meta_path = self._get_meta_path(filename)
 
-        file.save(file_path)
-
+        try:
+            file.save(file_path)
+        except :
+            return False
+        
         metadata = {
             "filename": filename,
             "created_at": self._now(),
@@ -59,22 +75,22 @@ class Storage:
     # --------------------------
     # 🔹 LECTURE
     # --------------------------
-    def read(self, filename):
+    def read(self, filename, path_dir=''):
         """
         Retourne le contenu d’un fichier.
         """
-        file_path = self._get_file_path(filename)
+        file_path = self._get_file_path(filename, path_dir)
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"Fichier {filename} introuvable.")
 
         with open(file_path, "rb") as f:
             return f.read()
 
-    def get_metadata(self, filename):
+    def get_metadata(self, filename, path_dir=''):
         """
         Retourne les métadonnées d’un fichier.
         """
-        meta_path = self._get_meta_path(filename)
+        meta_path = self._get_meta_path(filename, path_dir)
         if not os.path.exists(meta_path):
             raise FileNotFoundError(f"Métadonnées pour {filename} introuvables.")
 
@@ -84,12 +100,12 @@ class Storage:
     # --------------------------
     # 🔹 MODIFICATION
     # --------------------------
-    def update(self, filename, new_file):
+    def update(self, filename, new_file, path_dir=''):
         """
         Remplace le contenu d’un fichier et met à jour les métadonnées.
         """
-        file_path = self._get_file_path(filename)
-        meta_path = self._get_meta_path(filename)
+        file_path = self._get_file_path(filename, path_dir)
+        meta_path = self._get_meta_path(filename, path_dir)
 
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"Fichier {filename} introuvable.")
@@ -110,12 +126,12 @@ class Storage:
     # --------------------------
     # 🔹 SUPPRESSION
     # --------------------------
-    def delete(self, filename):
+    def delete(self, filename, path_dir=''):
         """
         Supprime un fichier et son fichier de métadonnées.
         """
-        file_path = self._get_file_path(filename)
-        meta_path = self._get_meta_path(filename)
+        file_path = self._get_file_path(filename, path_dir)
+        meta_path = self._get_meta_path(filename, path_dir)
 
         deleted = False
 
