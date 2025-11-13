@@ -211,6 +211,9 @@ class ModuleManager:
             if not self.check_compatibility(constraints, version):
                 return False
             
+            if name == "base":
+                continue
+            
             if not self.on_module(name) == True:
                 return False
 
@@ -264,7 +267,7 @@ class ModuleManager:
             infos = json.loads(read_file(path_file=path))
         except:
             infos = {}
-                    
+
         return infos
     
     def get_depends_by(self, name_module):

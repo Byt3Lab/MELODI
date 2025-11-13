@@ -1,11 +1,6 @@
 {
     "version":"1.0",
-    "name":"name",
-    "title":"title",
-    "description":"description",
-    "depends":{
-        "core":"",
-        "modules":[],
-        "plugins":[]
-    }
+    "name":"melodi base",
+    "title":"",
+    "description":""
 }

@@ -1,18 +1,11 @@
-import os
-
-from core.utils import TimerManager, EventListener, create_dir_if_not_exist, join_paths, read_file
-
-from core.component import HomePageManager
-from core.component import MenuItemManager
+from core.router import WebRouter, APIRouter
+from core.utils import TimerManager, EventListener, Storage, create_dir_if_not_exist, join_paths, path_exist, read_file
+from core.component import HomePageManager, MenuItemManager, WidgetManager
 from core.module import ModuleManager
 from core.adapters.flask_adapter import FlaskAdapter
 from core.service import ServiceManager
 from core.db import DataBase
 from core.config import Config
-from core.router import Router
-from core.router.api_router import APIRouter
-from core.component.widget_manager import WidgetManager
-from core.utils import Storage
 
 class Application:
     def __init__(self):
@@ -24,7 +17,7 @@ class Application:
         self.event_listener = EventListener()
         self.timer_manager = TimerManager()
         self.db = DataBase(self)
-        self.router = Router(name="main", app=self)
+        self.router = WebRouter(name="main", app=self)
         self.api_router = APIRouter(app=self, name="main_api")
         self.module_manager = ModuleManager(app=self)
         self.service_manager = ServiceManager(app=self)
@@ -77,7 +70,7 @@ class Application:
     def register_route_not_found(self):
         def route_not_found(path):
             from flask import render_template_string
-            if os.path.exists(self.config.path_template_404_not_found):
+            if path_exist(self.config.path_template_404_not_found):
                 return render_template_string(read_file(self.config.path_template_404_not_found), path=path, hide_header=True, hide_footer=True), 404
             return render_template_string(f"route : {path} not found 404"), 404
 

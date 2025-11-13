@@ -8,35 +8,36 @@
 
     class Melodi{
         constructor(options) {
+            this.components = {}
+            this.store = {}
+            this.init(options)
+        }
+
+        init(options) {
             this.el = document.querySelector(options.el)
-            this.content = this.el.innerHTML
-            this.data = options.data
-            this.init()
         }
 
-        init() {
-            // // Crée un proxy réactif
-            // this.data = new Proxy(this.data, {
-            //     set: (target, key, value) => {
-            //         target[key] = value
-            //         this.update()
-            //         return true
-            //     }
-            // })
+        render(){
 
-            this.update()
+        }
+    }
+
+    class Component{
+        constructor (options) {
+            this.app = null
+            this.children = {}
         }
 
-        update() {
-            // Recherche les {{ ... }} dans le HTML
-            const content = this.content
-            this.el.innerHTML = content.replace(
-                /\[\[(.+?)\]\]/g,
-                (match, key) => {
-                    key = key.trim()
-                    return this.data[key] || ''
-                }
-            )
+        addComponent (name, component) {
+            this.children[name] = component
+        }
+
+        init(options){
+            
+        }
+
+        render () {
+
         }
     }
 

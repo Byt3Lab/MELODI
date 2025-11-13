@@ -4,8 +4,6 @@
     "title":"gestion de la documentation",
     "description":"gestion de la documentation",
     "depends":{
-        "core":"",
-        "modules":[],
-        "python":[]
+        "modules":[]
     }
 }
