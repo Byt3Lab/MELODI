@@ -44,6 +44,27 @@ def create_dir_if_not_exist(path_dir, parents=True, exist_ok=True):
     create_dir(path_dir, parents, exist_ok)
 
 
+def get_current_position():
+    """
+    Fetches the current GPS position of the user from an external API.
+    """
+    import requests
+
+    # Example using a generic IP-based geolocation API since direct GPS isn't standard in backend models
+    try:
+        response = requests.get('https://ipapi.co/json/')
+        response.raise_for_status()
+        data = response.json()
+        return {
+            'latitude': data.get('latitude'),
+            'longitude': data.get('longitude'),
+            'city': data.get('city'),
+            'country': data.get('country_name')
+        }
+    except requests.RequestException as e:
+        print(f"Error fetching location: {e}")
+        return None
+
 from .storage   import  Storage
 from .timer_manager import TimerManager   
 from .event_listener import EventListener   
