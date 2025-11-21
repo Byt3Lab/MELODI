@@ -48,27 +48,27 @@ class AdminRoutes(WebRouter):
         @self.add_route("/admin", methods=["GET"])
         def ds():
             widgets=self.app.widget_manager.list()
-            return self.render_template("admin_dashboard.html",widgets=widgets, theme=get_theme(request),hide_header=True,hide_footer=True)
+            return self.render_template("admin_dashboard.html",widgets=widgets, theme=get_theme(request))
 
         @self.add_route('/admin/users', methods=['GET'])
         def admin_users():
-            return self.render_template("admin_users.html", theme=get_theme(request),hide_header=True,hide_footer=True)
+            return self.render_template("admin_users.html", theme=get_theme(request))
 
         @self.add_route('/admin/profile', methods=['GET'])
         def profile():
-            return self.render_template("profile.html", theme=get_theme(request),hide_header=True,hide_footer=True)
+            return self.render_template("profile.html", theme=get_theme(request))
 
         @self.add_route('/admin/settings/widgets', methods=['GET'])
         def settings_widgets():
             widgets = self.app.widget_manager.list_widgets()
-            return self.render_template("admin_widgets.html", widgets=widgets, theme=get_theme(request),hide_header=True,hide_footer=True)
+            return self.render_template("admin_widgets.html", widgets=widgets, theme=get_theme(request))
 
         @self.add_route('/admin/settings/home_page', methods=['GET'])
         def settings_home_page():
             home_page_on = self.app.home_page_manager.home_page_on
             home_pages = self.app.home_page_manager.list_home_pages()
             home_pages_len = len(home_pages)
-            return self.render_template("admin_home_page.html", theme=get_theme(request), home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on, hide_header=True,hide_footer=True)
+            return self.render_template("admin_home_page.html", theme=get_theme(request), home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
 
         @self.add_route('/admin/settings/home_page/<path:home_page>/on', methods=['GET'])
         def settings_home_page_on(home_page):
@@ -84,7 +84,7 @@ class AdminRoutes(WebRouter):
         def admin_modules():
             modules = self.app.module_manager.list_modules()
             modules_len= len(modules)
-            return self.render_template("admin_modules.html", theme=get_theme(request), modules=modules, modules_len=modules_len, hide_header=True,hide_footer=True)
+            return self.render_template("admin_modules.html", theme=get_theme(request), modules=modules, modules_len=modules_len)
 
         @self.add_route('/admin/modules/<path:mod>/on', methods=['GET'])
         def on_module(mod:str):
@@ -98,7 +98,7 @@ class AdminRoutes(WebRouter):
        
         @self.add_route('/admin/settings', methods=['GET'])
         def admin_settings():
-            return self.render_template("admin_settings.html", theme=get_theme(request),hide_header=True,hide_footer=True)
+            return self.render_template("admin_settings.html", theme=get_theme(request))
         
         @self.add_route("/set_theme", methods=["GET"])
         def set_theme():

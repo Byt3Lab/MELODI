@@ -1,188 +1,428 @@
-{% extends "base/components/layout.html" %}
+{% extends "base/components/layout_with_header_and_footer.html" %}
 
-{% block title %}MELODI — ERP modulaire{% endblock %}
+{% block title %}MELODI — ERP Modulaire & Moderne{% endblock %}
 
 {% block head %}
-    <style>
-        /* full viewport sections */
-        .full-vh { min-height: 100vh; display:flex; align-items:center; }
-        @media (max-width:991px){ .full-vh { min-height:85vh } }
-        @media (max-width:767px){ .full-vh { min-height:70vh } }
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.5);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+    }
 
-        /* Hero style - softer gradient that blends with header */
-        .hero {
-            padding: 0;
-            background: linear-gradient(135deg, rgba(6,30,63,0.95) 0%, rgba(11,78,155,0.9) 100%);
-            color: #fff;
-        }
+    body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text-primary);
+    }
 
-        .brand-pill { background: rgba(255,255,255,0.08); color:#fff; padding:.35rem .65rem; border-radius:.5rem; font-weight:600 }
+    /* Hero Section */
+    .hero-section {
+        background: var(--primary-gradient);
+        color: white;
+        position: relative;
+        overflow: hidden;
+        padding: 8rem 0 6rem;
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+    }
 
-        /* Cards with glass effect */
-        .feature-card { border-radius:.8rem; transition:transform .18s, box-shadow .18s; background: var(--glass-bg); backdrop-filter: blur(6px); }
-        .feature-card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(3,37,76,0.12); }
+    .hero-bg-shape {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+        border-radius: 50%;
+        top: -100px;
+        right: -100px;
+        z-index: 0;
+    }
 
-                .step-badge { width:52px;height:52px;border-radius:12px;background:var(--primary-700);color:#fff;display:inline-grid;place-items:center;font-weight:700 }
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
 
-                /* CTA responsive: stack on small screens */
-                .d-grid.d-md-flex { grid-template-columns: 1fr auto; align-items:center }
-                @media (max-width:767px){
-                    .d-grid.d-md-flex { display: grid !important; grid-template-columns: 1fr; gap:.75rem }
-                    .d-grid.d-md-flex .btn { width:100% }
-                }
+    .hero-badge {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(10px);
+    }
 
-                /* Preformatted code block */
-                .pre-code{ overflow:auto; white-space:pre-wrap; word-break:break-word }
+    .hero-title {
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(to right, #ffffff, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-                /* Responsive typography */
-                .hero h1 { font-size: clamp(1.5rem, 3.2vw, 2.25rem) }
-                /* Desktop hero tweaks */
-                .hero .content-col { padding: 2.5rem 1rem }
-                .hero .image-col { padding: 2.5rem 1rem }
-                .hero-image { max-width:520px }
-                @media (min-width:1200px){
-                    .hero h1 { font-size: 3.25rem }
-                    .hero .content-col { padding-left:4rem }
-                    .hero .image-col { padding-right:4rem }
-                }
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: #94a3b8;
+        margin-bottom: 2.5rem;
+        max-width: 600px;
+        line-height: 1.6;
+    }
 
-                /* Section spacing */
-                section.py-5 { padding-top:3.5rem; padding-bottom:3.5rem }
+    .hero-image-container {
+        position: relative;
+        perspective: 1000px;
+    }
 
-                /* Buttons and responsive utilities */
-                .cta-grid { display: grid; gap: .75rem; grid-template-columns: 1fr auto; }
-                @media (max-width:767px){
-                    .cta-grid { grid-template-columns: 1fr; }
-                    .brand-pill { font-size: .9rem }
-                }
+    .hero-image {
+        width: 100%;
+        border-radius: 1rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        transform: rotateY(-5deg) rotateX(5deg);
+        transition: transform 0.5s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-                /* Preformatted code block: allow horizontal scroll on small screens */
-                .pre-code{ overflow:auto; white-space:pre; max-width:100%; border-radius:.5rem }
+    .hero-image:hover {
+        transform: rotateY(0) rotateX(0);
+    }
 
-                /* Feature cards responsive spacing */
-                .feature-card { margin: 0 auto }
+    /* Features Section */
+    .features-section {
+        padding: 6rem 0;
+        background: #f8fafc;
+    }
 
-        /* Muted text color for readability */
-        .text-muted { color: var(--muted) !important }
-        .text-muted2 { color: var(--muted2) !important }
-    </style>
+    .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: #3b82f6;
+    }
+
+    .feature-icon {
+        width: 3rem;
+        height: 3rem;
+        background: #eff6ff;
+        color: #3b82f6;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Steps Section */
+    .steps-section {
+        padding: 6rem 0;
+        background: white;
+    }
+
+    .step-item {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .step-number {
+        flex-shrink: 0;
+        width: 3rem;
+        height: 3rem;
+        background: var(--text-primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: var(--primary-gradient);
+        padding: 5rem 0;
+        color: white;
+        text-align: center;
+    }
+
+    .terminal-window {
+        background: #1e293b;
+        border-radius: 0.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 600px;
+        margin: 2rem auto 0;
+        text-align: left;
+        border: 1px solid #334155;
+    }
+
+    .terminal-header {
+        background: #0f172a;
+        padding: 0.75rem 1rem;
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 1px solid #334155;
+    }
+
+    .terminal-dot {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 50%;
+    }
+
+    .terminal-body {
+        padding: 1.5rem;
+        font-family: 'Fira Code', monospace;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+    }
+
+    .btn-glow {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-glow::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+        transform: scale(0);
+        transition: transform 0.5s;
+    }
+
+    .btn-glow:hover::after {
+        transform: scale(1);
+    }
+
+    /* Utilities */
+    .text-gradient {
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-    <section class="hero full-vh" style="background: linear-gradient(0deg,#ffffff 0%, #053c72 100%);">
-        <div class="container-fluid px-0">
-            <div class="container">
-            <div class="row align-items-center h-100">
-                <div class="col-lg-6 order-2 order-lg-1 content-col">
-                    <div class="mb-3"><span class="brand-pill">MELODI ERP</span></div>
-                    <h1 class="display-6 fw-bold">Gérez vos ventes, stocks et clients. Simplement.</h1>
-                    <p class="lead text-muted2 mt-3">Une plateforme modulaire, légère et extensible pensée pour les PME — évolutive avec vos besoins métiers.</p>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg-shape"></div>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <div class="hero-badge">
+                    <span style="width: 8px; height: 8px; background: #4ade80; border-radius: 50%;"></span>
+                    v1.0 Stable
+                </div>
+                <h1 class="hero-title">
+                    L'ERP Modulaire <br>
+                    Pour les PME Modernes
+                </h1>
+                <p class="hero-subtitle">
+                    Gérez vos ventes, stocks et clients avec une plateforme légère, extensible et conçue pour évoluer
+                    avec votre entreprise.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="/install/step1" class="btn btn-primary btn-lg px-4 py-3 rounded-pill btn-glow fw-bold">
+                        Commencer l'installation
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="ms-2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                    <a href="/admin" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill fw-bold">
+                        Démo Admin
+                    </a>
+                </div>
 
-                    <div class="d-grid gap-2 d-md-flex mt-4">
-                        <a href="/admin" class="btn btn-primary btn-lg" role="button">Essayer l'administration</a>
-                        <a href="/install/step1" class="btn btn-outline-primary btn-lg" role="button">Installer MELODI</a>
+                <div class="mt-5 d-flex gap-4 text-white-50">
+                    <div class="d-flex align-items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Open Source</span>
                     </div>
-
-                    <ul class="list-unstyled d-flex gap-3 mt-4 flex-wrap">
-                        <li class="text-muted2"><strong>• Rapide</strong> à déployer</li>
-                        <li class="text-muted2"><strong>• Modulaire</strong> & extensible</li>
-                        <li class="text-muted2"><strong>• Open</strong> et personnalisable</li>
-                    </ul>
-                </div>
-                <div class="col-lg-6 text-center mt-4 mt-lg-0 order-1 order-lg-2 image-col d-flex align-items-center justify-content-center">
-                    <img src="/static/base/melodi2.png" alt="MELODI interface" class="img-fluid rounded shadow-sm hero-image" style="max-height:420px;width:100%;height:auto;object-fit:contain;background-color:#fbfcfeab">
-                </div>
-            </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-5 full-vh" style="background: linear-gradient(0deg,#ffffff 5%, #ffffff 100%);">
-        <div class="container">
-            <div class="row text-center mb-4">
-                <div class="col-12">
-                    <h2 class="h3">Ce que MELODI vous apporte</h2>
-                    <p class="text-muted">Des modules clairs, une interface centrée sur l'opérationnel, et des APIs pour automatiser vos flux.</p>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="p-4 bg-white feature-card h-100">
-                        <div class="mb-3"><i class="fas fa-cubes fa-2x text-primary"></i></div>
-                        <h5>Architecture modulaire</h5>
-                        <p class="text-muted">Activez uniquement les modules dont vous avez besoin (Ventes, Stock, CRM, RH).</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-4 bg-white feature-card h-100">
-                        <div class="mb-3"><i class="fas fa-sync-alt fa-2x text-success"></i></div>
-                        <h5>Intégrations & API</h5>
-                        <p class="text-muted">Automatisez vos commandes, synchronisez votre stock et vos factures via API.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-4 bg-white feature-card h-100">
-                        <div class="mb-3"><i class="fas fa-shield-alt fa-2x text-warning"></i></div>
-                        <h5>Sécurité & permissions</h5>
-                        <p class="text-muted">Contrôlez l'accès par rôle, gardez l'historique et auditez les actions critiques.</p>
+                    <div class="d-flex align-items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Auto-hébergeable</span>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <section class="py-5 full-vh" style="background-color: #ffffff">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h4>Comment ça marche — en 3 étapes</h4>
-                    <ol class="list-unstyled mt-3">
-                        <li class="d-flex gap-3 mb-3 align-items-start">
-                            <div class="step-badge">1</div>
-                            <div>
-                                <strong>Installez</strong>
-                                <div class="text-muted">Installez MELODI et activez les modules nécessaires.</div>
-                            </div>
-                        </li>
-                        <li class="d-flex gap-3 mb-3 align-items-start">
-                            <div class="step-badge">2</div>
-                            <div>
-                                <strong>Configurez</strong>
-                                <div class="text-muted">Connectez vos flux (ventes, inventaire, compta) et paramétrez les utilisateurs.</div>
-                            </div>
-                        </li>
-                        <li class="d-flex gap-3 mb-3 align-items-start">
-                            <div class="step-badge">3</div>
-                            <div>
-                                <strong>Automatisez</strong>
-                                <div class="text-muted">Utilisez les APIs et plugins pour automatiser les tâches répétitives.</div>
-                            </div>
-                        </li>
-                    </ol>
-                </div>
-                <div class="col-md-6 text-center">
-                    <img src="/static/base/boot.png" alt="architecture" class="img-fluid" style="max-height:260px;">
+            <div class="col-lg-6 mt-5 mt-lg-0">
+                <div class="hero-image-container">
+                    <img src="/static/base/melodi2.png" alt="Interface MELODI" class="hero-image">
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section class="py-5 full-vh" style="background-color: #ffffff;">
-        <div class="container text-center">
-            <h4>Prêt à tester ?</h4>
-            <p class="text-muted">Lancez MELODI localement en quelques minutes et prenez le contrôle de vos opérations.</p>
-            <div class="d-flex justify-content-center">
-                 <pre class="bg-dark text-white p-3 rounded text-start pre-code" style="max-width:720px">python3 -m venv venv
-                    source venv/bin/activate
-                    pip install -r requirements.txt
-                    python3 main.py
-                 </pre>
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+            <p class="text-secondary lead">Une suite complète d'outils pour piloter votre activité.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                            </path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                    </div>
+                    <h4>Architecture Modulaire</h4>
+                    <p class="text-secondary mb-0">Activez uniquement les modules nécessaires. Gardez votre ERP léger et
+                        rapide sans fonctionnalités superflues.</p>
+                </div>
             </div>
-            <div class="mt-3">
-                <a href="/install/step1" class="btn btn-primary btn-lg me-2">Installer maintenant</a>
-                <a href="/admin" class="btn btn-secondary btn-lg m-1">Aller à l'administration</a>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4">
+                            </path>
+                        </svg>
+                    </div>
+                    <h4>API First</h4>
+                    <p class="text-secondary mb-0">Connectez vos outils existants. Synchronisez commandes, stocks et
+                        factures via notre API REST complète.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h4>Sécurité Avancée</h4>
+                    <p class="text-secondary mb-0">Gestion fine des permissions par rôle. Traçabilité complète des
+                        actions et protection des données sensibles.</p>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="steps-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="section-title mb-4">Démarrez en quelques minutes</h2>
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div>
+                        <h5>Installation</h5>
+                        <p class="text-secondary">Clonez le dépôt et lancez l'installateur automatique. Configuration de
+                            la base de données en 2 clics.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div>
+                        <h5>Configuration</h5>
+                        <p class="text-secondary">Créez votre compte administrateur et activez les modules dont vous
+                            avez besoin (Vente, Stock, etc.).</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div>
+                        <h5>Production</h5>
+                        <p class="text-secondary">Invitez vos collaborateurs et commencez à gérer votre activité
+                            immédiatement.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="/static/base/boot.png" alt="Architecture" class="img-fluid rounded shadow-lg"
+                    style="max-height: 400px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="mb-4">Prêt à prendre le contrôle ?</h2>
+        <p class="lead mb-5 text-white-50">Installez MELODI localement et testez sans engagement.</p>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dot" style="background: #ff5f56"></div>
+                <div class="terminal-dot" style="background: #ffbd2e"></div>
+                <div class="terminal-dot" style="background: #27c93f"></div>
+            </div>
+            <div class="terminal-body">
+                <div class="mb-2"><span style="color: #4ade80">$</span> python3 -m venv venv</div>
+                <div class="mb-2"><span style="color: #4ade80">$</span> source venv/bin/activate</div>
+                <div class="mb-2"><span style="color: #4ade80">$</span> pip install -r requirements.txt</div>
+                <div class="mb-2"><span style="color: #4ade80">$</span> python3 main.py</div>
+                <div class="mt-3 text-white-50"># Serveur démarré sur http://localhost:5000</div>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <a href="/install/step1" class="btn btn-light btn-lg px-5 py-3 rounded-pill fw-bold text-primary">
+                Lancer l'installation
+            </a>
+        </div>
+    </div>
+</section>
 {% endblock %}

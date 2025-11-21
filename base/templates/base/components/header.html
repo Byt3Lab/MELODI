@@ -1,45 +1,63 @@
+{% if not hide_before_header %}
+{% block before_header %}{% endblock %}
+{% endif %}
+
+{% if not hide_header %}
+
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(90deg,#003366 0%, #00509e 100%);">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="/static/base/melodi.png" alt="Melodi" style="width:42px;height:auto;" class="me-2">
-                    <!-- <span class="fw-bold">MELODI</span>
-                    <small class="ms-2 text-muted" style="opacity:0.9;"></small> -->
-                 <div style="font-size: 10px;">
-                  <strong>MELODI</strong>
-                  <div style="font-size:0.85rem;opacity:0.9;">Business Management</div>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="/static/base/melodi.png" alt="Melodi" style="width:40px;height:auto;"
+                    class="d-inline-block align-text-top">
+                <div class="navbar-brand-text d-flex flex-column text-white">
+                    <span class="fw-bold" style="font-size: 1.1rem; letter-spacing: 0.5px;">MELODI</span>
+                    <span style="font-size: 0.75rem; opacity: 0.8; font-weight: 300;">Business Management</span>
                 </div>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#melodiNavbar" aria-controls="melodiNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                data-bs-target="#melodiNavbar" aria-controls="melodiNavbar" aria-expanded="false"
+                aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="melodiNavbar">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/docs">docs</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/support">Support</a></li>
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link px-3" href="/">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/docs">Docs</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/support">Support</a></li>
                 </ul>
 
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-3">
                     {% if user %}
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                {{ user.username if user.username else user }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                                <li><a class="dropdown-item" href="/profile">Profil</a></li>
-                                <li><a class="dropdown-item" href="/settings">Paramètres</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="/logout">Se déconnecter</a></li>
-                            </ul>
-                        </div>
+                    <div class="dropdown">
+                        <button
+                            class="btn btn-nav-action btn-sm dropdown-toggle d-flex align-items-center gap-2 px-3 py-2 rounded-pill"
+                            type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            <span>{{ user.username if user.username else user }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="userMenu">
+                            <li><a class="dropdown-item py-2" href="/profile">Profil</a></li>
+                            <li><a class="dropdown-item py-2" href="/settings">Paramètres</a></li>
+                            <li>
+                                <hr class="dropdown-divider my-1">
+                            </li>
+                            <li><a class="dropdown-item py-2 text-danger" href="/logout">Se déconnecter</a></li>
+                        </ul>
+                    </div>
                     {% else %}
-                        <a href="/login" class="btn btn-sm btn-light">Administration >></a>
+                    <a href="/login" class="btn btn-nav-action btn-sm px-4 py-2 rounded-pill fw-medium">Connexion</a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 </header>
+
+{% endif %}
+
+{% if not hide_after_header %}
+{% block after_header %}{% endblock %}
+{% endif %}

@@ -4,4 +4,97 @@
     --glass-bg: rgba(255,255,255,0.7);
     --muted: rgba(0,0,0,0.65);
     --muted2: rgba(255, 255, 255, 0.65);
+    
+    /* New Design Variables */
+    --brand-dark: #003366;
+    --brand-light: #00509e;
+    --brand-accent: #FFD580;
+    --nav-height: 70px;
+}
+
+/* Header Styles */
+.navbar-custom {
+    background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-light) 100%);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 0.5rem 0;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand-text {
+    line-height: 1.2;
+}
+
+.navbar-custom .nav-link {
+    color: rgba(255,255,255,0.85) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link.active {
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+.btn-nav-action {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    transition: all 0.2s;
+}
+
+.btn-nav-action:hover {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border-color: rgba(255,255,255,0.4);
+}
+
+/* Footer Styles */
+.footer-custom {
+    background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-light) 100%);
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.footer-heading {
+    color: var(--brand-accent);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.footer-link {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: color 0.2s ease, padding-left 0.2s ease;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.footer-link:hover {
+    color: #fff;
+    padding-left: 5px;
+}
+
+.social-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.social-btn:hover {
+    background: var(--brand-accent);
+    color: var(--brand-dark);
+    transform: translateY(-3px);
 }

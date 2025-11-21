@@ -1,56 +1,96 @@
-<footer class="mt-auto" style="background: linear-gradient(90deg,#003366 0%, #00509e 100%); color: #fff;">
-  <div class="container py-4">
-    <div class="row">
-      <div class="col-12 col-md-4 mb-3">
-        <a href="/" class="d-flex align-items-center text-decoration-none text-white mb-2">
-          <img src="/static/base/melodi.png" alt="Melodi" style="width:42px;height:auto;" class="me-2">
-          <div>
-            <strong>MELODI</strong>
-            <div style="font-size:0.85rem;opacity:0.9;">Business Management</div>
+{% if not hide_before_footer %}
+{% block before_footer %}{% endblock %}
+{% endif %}
+
+{% if not hide_footer %}
+
+<footer class="mt-auto footer-custom">
+  <div class="container py-5">
+    <div class="row g-4">
+      <div class="col-12 col-lg-4 mb-4 mb-lg-0">
+        <a href="/" class="d-flex align-items-center text-decoration-none text-white mb-3">
+          <img src="/static/base/melodi.png" alt="Melodi" style="width:48px;height:auto;" class="me-3">
+          <div class="d-flex flex-column">
+            <span class="fw-bold fs-4" style="letter-spacing: 1px;">MELODI</span>
+            <span style="font-size:0.85rem; opacity:0.8; font-weight: 300;">Business Management</span>
           </div>
         </a>
-        <p style="color: #FFD580;">ERP modulaire pour la gestion d'entreprise.</p>
-      </div>
-
-      <div class="col-6 col-md-2 mb-3">
-        <h6 class="text-uppercase" style="color:#FFD580;">Produits</h6>
-        <ul class="list-unstyled">
-          <li><a class="text-white-50" href="/modules">gestion des ventes</a></li>
-          <li><a class="text-white-50" href="/modules">gestion des tocks</a></li>
-          <li><a class="text-white-50" href="/modules">Cgestion des Clients</a></li>
-          <li><a class="text-white-50" href="/modules">Analyse</a></li>
-        </ul>
-      </div>
-
-      <div class="col-6 col-md-2 mb-3">
-        <h6 class="text-uppercase" style="color:#FFD580;">Ressources</h6>
-        <ul class="list-unstyled">
-          <li><a class="text-white-50" href="/docs">Documentation</a></li>
-          <li><a class="text-white-50" href="/support">Support</a></li>
-        </ul>
-      </div>
-
-      <div class="col-12 col-md-4 mb-3">
-        <h6 class="text-uppercase" style="color:#FFD580;">Contact</h6>
-        <ul class="list-unstyled">
-          <p class="text-white-50 mb-1">email : <a href="mailto:gg.gomsugaetant@gmail.com">gg.gomsugaetant@gmail.com</a></p>
-          <p class="text-white-50 mb-1">téléphone : <a href="tel:+237696490559">237696490559</a></p>
-          <p class="text-white-50">whatsapp : <a href="https://wa.me/+237696490559">237696490559</a></p>
-        </ul>
-        
-        <div class="d-flex gap-2 mt-2">
-          <a class="btn btn-sm btn-outline-light" href="https://facebook.com/gomsugaetant" aria-label="Twitter">Facebook</a>
-          <a class="btn btn-sm btn-outline-light" href="https://linkedin.com/in/gomsugaetant" aria-label="LinkedIn">LinkedIn</a>
-          <a class="btn btn-sm btn-outline-light" href="https://x.com/@gomsugaetant" aria-label="X">X</a>
-          <a class="btn btn-sm btn-outline-light" href="https://github.com/gomsugaetant" aria-label="GitHub">GitHub</a>
+        <p class="text-white-50 mb-4" style="max-width: 300px; line-height: 1.6;">
+          ERP modulaire conçu pour simplifier et optimiser la gestion de votre entreprise.
+        </p>
+        <div class="d-flex gap-2">
+          <a class="social-btn" href="https://facebook.com/gomsugaetant" aria-label="Facebook"><i
+              class="bi bi-facebook"></i></a>
+          <a class="social-btn" href="https://linkedin.com/in/gomsugaetant" aria-label="LinkedIn"><i
+              class="bi bi-linkedin"></i></a>
+          <a class="social-btn" href="https://x.com/@gomsugaetant" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+          <a class="social-btn" href="https://github.com/gomsugaetant" aria-label="GitHub"><i
+              class="bi bi-github"></i></a>
         </div>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <h6 class="footer-heading">Produits</h6>
+        <ul class="list-unstyled">
+          <li><a class="footer-link" href="/modules">Gestion des Ventes</a></li>
+          <li><a class="footer-link" href="/modules">Gestion des Stocks</a></li>
+          <li><a class="footer-link" href="/modules">Gestion Clients</a></li>
+          <li><a class="footer-link" href="/modules">Analyses</a></li>
+        </ul>
+      </div>
+
+      <div class="col-6 col-md-4 col-lg-2">
+        <h6 class="footer-heading">Ressources</h6>
+        <ul class="list-unstyled">
+          <li><a class="footer-link" href="/docs">Documentation</a></li>
+          <li><a class="footer-link" href="/support">Support</a></li>
+          <li><a class="footer-link" href="/api">API</a></li>
+          <li><a class="footer-link" href="/status">Status</a></li>
+        </ul>
+      </div>
+
+      <div class="col-12 col-md-4 col-lg-4">
+        <h6 class="footer-heading">Contact</h6>
+        <ul class="list-unstyled">
+          <li class="mb-3">
+            <a href="mailto:gg.gomsugaetant@gmail.com"
+              class="d-flex align-items-center text-white-50 text-decoration-none gap-2">
+              <i class="bi bi-envelope"></i>
+              <span>gg.gomsugaetant@gmail.com</span>
+            </a>
+          </li>
+          <li class="mb-3">
+            <a href="tel:+237696490559" class="d-flex align-items-center text-white-50 text-decoration-none gap-2">
+              <i class="bi bi-telephone"></i>
+              <span>+237 696 490 559</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://wa.me/+237696490559"
+              class="d-flex align-items-center text-white-50 text-decoration-none gap-2">
+              <i class="bi bi-whatsapp"></i>
+              <span>WhatsApp Support</span>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <div class="row border-top" style="border-color: rgba(255,255,255,0.08);">
-      <div class="col-12 py-3 text-center text-white-50">
-        &copy; {{ current_year if current_year else "2025" }} MELODI BUSINESS MANAGEMENT. Tous droits réservés.
+    <div class="row mt-5 pt-4 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+      <div class="col-md-6 text-center text-md-start text-white-50 mb-3 mb-md-0">
+        &copy; {{ current_year if current_year else "2025" }} MELODI BUSINESS MANAGEMENT.
+      </div>
+      <div class="col-md-6 text-center text-md-end text-white-50">
+        <a href="/privacy" class="text-white-50 text-decoration-none me-3 hover-white">Confidentialité</a>
+        <a href="/terms" class="text-white-50 text-decoration-none hover-white">Conditions</a>
       </div>
     </div>
   </div>
 </footer>
+
+
+{% endif %}
+
+{% if not hide_before_footer %}
+{% block after_footer %}{% endblock %}
+{% endif %}

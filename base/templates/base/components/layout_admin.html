@@ -1,85 +1,481 @@
 {% extends "base/components/layout.html" %}
 
 {% block head %}
-    {{ super() }}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .admin-wrapper{display:flex;min-height:100vh}
-        #admin-sidebar,.offcanvas{min-width:250px;background: linear-gradient(90deg,#003366 0%, #00509e 100%);color:#fff}
-        #admin-sidebar a,.offcanvas a{color:#fff}
-        #admin-content{flex:1;background:#f8f9fa}
-        .nav-card{transition:transform .15s}
-        .nav-card:hover{transform:translateY(-4px)}
-    </style>
+{{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
+<style>
+    :root {
+        --sidebar-width: 280px;
+        --header-height: 70px;
+        --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        --accent-color: #3b82f6;
+        --text-muted: #94a3b8;
+        --border-color: #e2e8f0;
+        --bg-light: #f8fafc;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-light);
+    }
+
+    /* Layout Structure */
+    .admin-wrapper {
+        display: flex;
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    /* Sidebar Styling */
+    #admin-sidebar {
+        width: var(--sidebar-width);
+        background: var(--primary-gradient);
+        color: #fff;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-brand {
+        height: var(--header-height);
+        display: flex;
+        align-items: center;
+        padding: 0 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-brand img {
+        height: 32px;
+        width: auto;
+    }
+
+    .sidebar-brand span {
+        font-weight: 700;
+        font-size: 1.25rem;
+        letter-spacing: 0.5px;
+        margin-left: 0.75rem;
+    }
+
+    .sidebar-menu {
+        padding: 1.5rem 1rem;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .nav-item {
+        margin-bottom: 0.25rem;
+    }
+
+    .nav-link {
+        color: var(--text-muted) !important;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+        color: #fff !important;
+        background: rgba(255, 255, 255, 0.05);
+        transform: translateX(4px);
+    }
+
+    .nav-link.active {
+        color: #fff !important;
+        background: var(--accent-color);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .nav-link i {
+        width: 24px;
+        font-size: 1.1rem;
+        margin-right: 0.75rem;
+        text-align: center;
+    }
+
+    .sidebar-footer {
+        padding: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .user-mini-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: background 0.2s;
+        text-decoration: none;
+        color: white;
+    }
+
+    .user-mini-profile:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    /* Main Content Area */
+    #admin-main {
+        flex: 1;
+        margin-left: var(--sidebar-width);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        transition: margin-left 0.3s ease;
+    }
+
+    /* Header Styling */
+    .admin-header {
+        height: var(--header-height);
+        background: #fff;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        padding: 0 2rem;
+        position: sticky;
+        top: 0;
+        z-index: 900;
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .header-search {
+        position: relative;
+        max-width: 400px;
+        width: 100%;
+    }
+
+    .header-search input {
+        background: var(--bg-light);
+        border: 1px solid transparent;
+        padding-left: 2.5rem;
+        border-radius: 99px;
+        transition: all 0.2s;
+    }
+
+    .header-search input:focus {
+        background: #fff;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .header-search i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+    }
+
+    .header-actions .btn-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        transition: all 0.2s;
+        background: transparent;
+        border: none;
+    }
+
+    .header-actions .btn-icon:hover {
+        background: var(--bg-light);
+        color: var(--accent-color);
+    }
+
+    /* Content Container */
+    .admin-content {
+        padding: 2rem;
+        flex: 1;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 991.98px) {
+        #admin-sidebar {
+            transform: translateX(-100%);
+            width: 280px;
+        }
+
+        #admin-main {
+            margin-left: 0;
+        }
+
+        .admin-header {
+            padding: 0 1rem;
+        }
+
+        .sidebar-open #admin-sidebar {
+            transform: translateX(0);
+        }
+
+        /* Offcanvas specific overrides */
+        .offcanvas-start {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+
+        .offcanvas-header .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+    }
+
+    /* Utility Classes for Admin */
+    .card-admin {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        transition: transform 0.2s;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .breadcrumb-admin {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+    }
+</style>
 {% endblock %}
 
+{% set user={} %}
 {% block content %}
-        <div class="admin-wrapper">
-            <!-- Offcanvas sidebar for mobile -->
-            <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasSidebarLabel">MELODI</h5>
-                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                </div>
-                <div class="offcanvas-body p-0">
-                    <nav class="py-3">
-                        <div class="sidebar-header text-center mb-3">
-                            <img src="/static/base/melodi.png" alt="MELODI" class="img-fluid" style="max-width:140px">
-                        </div>
-                        <ul class="nav flex-column px-2">
-                            <li class="nav-item mb-1"><a href="/admin" class="nav-link"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-                            <li class="nav-item mb-1"><a href="/admin/users" class="nav-link"><i class="fas fa-users-cog me-2"></i>Utilisateurs</a></li>
-                            <li class="nav-item mb-1"><a href="/admin/modules" class="nav-link"><i class="fas fa-puzzle-piece me-2"></i>Modules</a></li>
-                            <li class="nav-item mb-1"><a href="/admin/settings" class="nav-link"><i class="fas fa-cogs me-2"></i>Paramètres</a></li>
-                        </ul>
-                    </nav>
-                </div>
+<div class="admin-wrapper">
+
+    <!-- Mobile Sidebar (Offcanvas) -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <div class="d-flex align-items-center">
+                <img src="/static/base/melodi.png" alt="MELODI" height="28" class="me-2">
+                <h5 class="offcanvas-title text-white fw-bold" id="mobileSidebarLabel">MELODI</h5>
             </div>
-
-            <!-- Desktop sidebar -->
-            <nav id="admin-sidebar" class="py-3 d-none d-lg-block">
-                <div class="sidebar-header text-center mb-3">
-                    <img src="/static/base/melodi.png" alt="MELODI" class="img-fluid" style="max-width:140px">
-                </div>
-                <ul class="nav flex-column px-2">
-                    <li class="nav-item mb-1"><a href="/admin" class="nav-link"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-                    <li class="nav-item mb-1"><a href="/admin/users" class="nav-link"><i class="fas fa-users-cog me-2"></i>Utilisateurs</a></li>
-                    <li class="nav-item mb-1"><a href="/admin/modules" class="nav-link"><i class="fas fa-puzzle-piece me-2"></i>Modules</a></li>
-                    <li class="nav-item mb-1"><a href="/admin/settings" class="nav-link"><i class="fas fa-cogs me-2"></i>Paramètres</a></li>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0 d-flex flex-column">
+            <!-- Mobile Menu Content - Same as Desktop -->
+            <div class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="/admin" class="nav-link {% if request.path == '/admin' %}active{% endif %}">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Tableau de bord</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                            style="font-size: 0.7rem; letter-spacing: 1px;">Gestion</div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/users" class="nav-link {% if 'users' in request.path %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            <span>Utilisateurs</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/modules" class="nav-link {% if 'modules' in request.path %}active{% endif %}">
+                            <i class="fas fa-cubes"></i>
+                            <span>Modules</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                            style="font-size: 0.7rem; letter-spacing: 1px;">Système</div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/settings" class="nav-link {% if 'settings' in request.path %}active{% endif %}">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/logs" class="nav-link {% if 'logs' in request.path %}active{% endif %}">
+                            <i class="fas fa-list-alt"></i>
+                            <span>Journaux</span>
+                        </a>
+                    </li>
                 </ul>
-            </nav>
-
-            <div id="admin-content">
-                <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-                    <div class="container-fluid">
-                        <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar"><i class="fas fa-bars"></i></button>
-                        <div class="ms-auto d-flex align-items-center">
-                            <div class="me-3">
-                                <button class="btn btn-sm btn-light position-relative">
-                                    <i class="fas fa-bell"></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
-                                </button>
-                            </div>
-                            <div>
-                                <div class="dropdown">
-                                    <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"><i class="fas fa-user-circle"></i></button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="/admin/profile">Profil</a></li>
-                                        <li><a class="dropdown-item" href="/">Aller à la page d'accueil</a></li>
-                                        <li><a class="dropdown-item" href="/logout">Se déconnecter</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+            </div>
+            <div class="sidebar-footer">
+                <a href="/admin/profile" class="user-mini-profile">
+                    <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                        style="width: 36px; height: 36px;">
+                        {{ user.username[0]|upper if user.username else 'A' }}
                     </div>
-                </nav>
-
-                <main class="container-fluid p-4">
-                    {% block admin_content %}{% endblock %}
-                </main>
+                    <div class="d-flex flex-column">
+                        <span class="fw-medium text-white" style="font-size: 0.9rem;">{{ user.username }}</span>
+                        <span class="text-muted" style="font-size: 0.75rem;">Administrateur</span>
+                    </div>
+                </a>
             </div>
         </div>
+    </div>
 
-        <!-- Bootstrap bundle (includes Offcanvas JS) -->
-        <script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Desktop Sidebar -->
+    <nav id="admin-sidebar" class="d-none d-lg-flex">
+        <div class="sidebar-brand">
+            <img src="/static/base/melodi.png" alt="MELODI">
+            <span>MELODI</span>
+        </div>
+
+        <div class="sidebar-menu">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="/admin" class="nav-link {% if request.path == '/admin' %}active{% endif %}">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Tableau de bord</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                        style="font-size: 0.7rem; letter-spacing: 1px;">Gestion</div>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin/users" class="nav-link {% if 'users' in request.path %}active{% endif %}">
+                        <i class="fas fa-users"></i>
+                        <span>Utilisateurs</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/modules" class="nav-link {% if 'modules' in request.path %}active{% endif %}">
+                        <i class="fas fa-cubes"></i>
+                        <span>Modules</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                        style="font-size: 0.7rem; letter-spacing: 1px;">Système</div>
+                </li>
+
+                <li class="nav-item">
+                    <a href="/admin/settings" class="nav-link {% if 'settings' in request.path %}active{% endif %}">
+                        <i class="fas fa-cog"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/logs" class="nav-link {% if 'logs' in request.path %}active{% endif %}">
+                        <i class="fas fa-list-alt"></i>
+                        <span>Journaux</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="/admin/profile" class="user-mini-profile">
+                <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                    style="width: 36px; height: 36px;">
+                    {{ user.username[0]|upper if user.username else 'A' }}
+                </div>
+                <div class="d-flex flex-column">
+                    <span class="fw-medium text-white" style="font-size: 0.9rem;">{{ user.username }}</span>
+                    <span class="text-muted" style="font-size: 0.75rem;">Administrateur</span>
+                </div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <button class="btn btn-icon d-lg-none me-2" type="button" data-bs-toggle="offcanvas"
+                data-bs-target="#mobileSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="header-search d-none d-md-block">
+                <i class="fas fa-search"></i>
+                <input type="text" class="form-control" placeholder="Rechercher...">
+            </div>
+
+            <div class="ms-auto d-flex align-items-center gap-2 header-actions">
+                <button class="btn btn-icon position-relative">
+                    <i class="far fa-bell"></i>
+                    <span
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"
+                        style="font-size: 0.6rem; padding: 0.25em 0.4em;">
+                        3
+                    </span>
+                </button>
+
+                <div class="dropdown ms-2">
+                    <button class="btn btn-light rounded-pill d-flex align-items-center gap-2 px-3 py-1 border"
+                        type="button" data-bs-toggle="dropdown">
+                        <div class="avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white"
+                            style="width: 28px; height: 28px; font-size: 0.8rem;">
+                            {{ user.username[0]|upper if user.username else 'A' }}
+                        </div>
+                        <span class="d-none d-sm-block small fw-medium">{{ user.username }}</span>
+                        <i class="fas fa-chevron-down small text-muted"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                        <li>
+                            <div class="dropdown-header">Connecté en tant que <strong>{{ user.username }}</strong></div>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item py-2" href="/admin/profile"><i
+                                    class="fas fa-user me-2 text-muted"></i> Mon Profil</a></li>
+                        <li><a class="dropdown-item py-2" href="/"><i
+                                    class="fas fa-external-link-alt me-2 text-muted"></i> Voir le site</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item py-2 text-danger" href="/logout"><i
+                                    class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="admin-content">
+            {% block admin_content %}
+            {% endblock %}
+        </main>
+
+        <footer class="mt-auto py-3 px-4 border-top bg-white">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start text-muted small">
+                    &copy; {{ current_year if current_year else "2025" }} MELODI Admin. Tous droits réservés.
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-muted small text-decoration-none me-3">Support</a>
+                    <a href="#" class="text-muted small text-decoration-none">Documentation</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Bootstrap bundle (includes Offcanvas JS) -->
+<script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.bundle.min.js') }}"></script>
 {% endblock %}
