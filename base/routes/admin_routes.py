@@ -3,112 +3,95 @@ from core.router import WebRouter, RequestContext
 
 class AdminRoutes(WebRouter):
     def load (self):
-        def get_theme(request:Request)->str:
-            theme=request.cookies.get("theme")
-            if theme is None:
-                theme="light"
-            return theme
+        self.before_request()(self.br)
+        self.before_request()(self.br2)
+        self.add_route("/", methods=["GET"])(self.home)
+        self.add_route("/login", methods=["GET"])(self.login)
+        self.add_route("/register", methods=["GET"])(self.register)
+        self.add_route("/logout", methods=["GET"])(self.logout)
+        self.add_route("/admin", methods=["GET"])(self.admin_dashboard)
+        self.add_route('/admin/users', methods=['GET'])(self.admin_users)
+        self.add_route('/admin/profile', methods=['GET'])(self.profile)
+        self.add_route('/admin/settings/widgets', methods=['GET'])(self.settings_widgets)
+        self.add_route('/admin/settings/home_page', methods=['GET'])(self.settings_home_page)
+        self.add_route('/admin/settings/home_page/<path:home_page>/on', methods=['GET'])(self.settings_home_page_on)
+        self.add_route('/admin/settings/home_page_clear', methods=['GET'])(self.settings_home_page_clear)
+        self.add_route('/admin/modules', methods=['GET'])(self.admin_modules)
+        self.add_route('/admin/modules/<path:mod>/off', methods=['GET'])(self.off_module)
+        self.add_route('/admin/settings', methods=['GET'])(self.admin_settings)
+        self.add_route('/admin/modules/<path:mod>/on', methods=['GET'])(self.on_module)
 
-        @self.before_request()
-        def br():
-            def sr(ctx:RequestContext):
-                ctx.data["hello"] = "hello wordl"
-                return ctx
-            
-            self.set_request_context(callback=sr)
-
-        @self.before_request()
-        def br2():
-            ctx: RequestContext = self.get_request_context()
-            print(ctx.data["hello"])
-
-        @self.add_route("/", methods=["GET"])
-        def home(): 
-            self.app.event_listener.notify_event("hi")
-
-            home_page = self.app.home_page_manager.render_home_page() 
-          
-            if home_page: 
-                return home_page
-
-            return self.render_template("home.html", theme=get_theme(request))
-
-        @self.add_route("/login", methods=["GET"])
-        def login():
-            return self.render_template("login.html",hide_header=True,hide_footer=True, theme=get_theme(request))
+    def br(self):
+        def sr(ctx:RequestContext):
+            ctx.data["hello"] = "hello wordl"
+            return ctx
         
-        @self.add_route("/register", methods=["GET"])
-        def register():
-            return self.render_template("register.html",hide_header=True,hide_footer=True, theme=get_theme(request))
-        
-        @self.add_route("/logout", methods=["GET"])
-        def logout():
-            return self.render_template("logout.html",hide_header=True,hide_footer=True, theme=get_theme(request))
+        self.set_request_context(callback=sr)
 
-        @self.add_route("/admin", methods=["GET"])
-        def ds():
-            widgets=self.app.widget_manager.list()
-            return self.render_template("admin_dashboard.html",widgets=widgets, theme=get_theme(request))
+    def br2(self):
+        ctx = self.get_request_context()
+        print(ctx.data["hello"])
 
-        @self.add_route('/admin/users', methods=['GET'])
-        def admin_users():
-            return self.render_template("admin_users.html", theme=get_theme(request))
+    def login(self):
+        return self.render_template("login.html")
+    
+    def register(self):
+        return self.render_template("register.html")
+    
+    def logout(self):
+        return self.render_template("logout.html")
 
-        @self.add_route('/admin/profile', methods=['GET'])
-        def profile():
-            return self.render_template("profile.html", theme=get_theme(request))
+    def admin_dashboard(self):
+        widgets=self.app.widget_manager.list()
+        return self.render_template("admin_dashboard.html",widgets=widgets)
 
-        @self.add_route('/admin/settings/widgets', methods=['GET'])
-        def settings_widgets():
-            widgets = self.app.widget_manager.list_widgets()
-            return self.render_template("admin_widgets.html", widgets=widgets, theme=get_theme(request))
+    def admin_users(self):
+        return self.render_template("admin_users.html")
 
-        @self.add_route('/admin/settings/home_page', methods=['GET'])
-        def settings_home_page():
+    def profile(self):
+        return self.render_template("profile.html")
+
+    def settings_widgets(self):
+        widgets = self.app.widget_manager.list_widgets()
+        return self.render_template("admin_widgets.html", widgets=widgets)
+
+    def settings_home_page(self):
             home_page_on = self.app.home_page_manager.home_page_on
             home_pages = self.app.home_page_manager.list_home_pages()
             home_pages_len = len(home_pages)
-            return self.render_template("admin_home_page.html", theme=get_theme(request), home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
+            return self.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
 
-        @self.add_route('/admin/settings/home_page/<path:home_page>/on', methods=['GET'])
-        def settings_home_page_on(home_page):
-            self.app.home_page_manager.set_home_page_on(name=home_page)
-            return self.redirect("/admin/settings/home_page")
+    def settings_home_page_on(self, home_page):
+        self.app.home_page_manager.set_home_page_on(name=home_page)
+        return self.redirect("/admin/settings/home_page")
+    
+    def settings_home_page_clear(self):
+        self.app.home_page_manager.clear()
+        return self.redirect("/admin/settings/home_page")
+
+    def admin_modules(self):
+        modules = self.app.module_manager.list_modules()
+        modules_len= len(modules)
+        return self.render_template("admin_modules.html",modules=modules, modules_len=modules_len)
+
+    def on_module(self,mod:str):
+        self.app.module_manager.on_module(mod)
+        return self.redirect("/admin/modules")
+
+    def off_module(self, mod:str):
+        self.app.module_manager.off_module(mod)
+        return self.redirect("/admin/modules")
+    
+
+    def admin_settings(self):
+        return self.render_template("admin_settings.html")
+
+    def home(self): 
+        self.app.event_listener.notify_event("hi")
+
+        home_page = self.app.home_page_manager.render_home_page() 
         
-        @self.add_route('/admin/settings/home_page_clear', methods=['GET'])
-        def settings_home_page_clear():
-            self.app.home_page_manager.clear()
-            return self.redirect("/admin/settings/home_page")
+        if home_page: 
+            return home_page
 
-        @self.add_route('/admin/modules', methods=['GET'])
-        def admin_modules():
-            modules = self.app.module_manager.list_modules()
-            modules_len= len(modules)
-            return self.render_template("admin_modules.html", theme=get_theme(request), modules=modules, modules_len=modules_len)
-
-        @self.add_route('/admin/modules/<path:mod>/on', methods=['GET'])
-        def on_module(mod:str):
-            self.app.module_manager.on_module(mod)
-            return self.redirect("/admin/modules")
-
-        @self.add_route('/admin/modules/<path:mod>/off', methods=['GET'])
-        def off_module(mod:str):
-            self.app.module_manager.off_module(mod)
-            return self.redirect("/admin/modules")
-       
-        @self.add_route('/admin/settings', methods=['GET'])
-        def admin_settings():
-            return self.render_template("admin_settings.html", theme=get_theme(request))
-        
-        @self.add_route("/set_theme", methods=["GET"])
-        def set_theme():
-            theme=request.cookies.get("theme")
-
-            if theme=="light":
-                theme="nigth"
-            else:
-                theme="light"
-
-            response = self.redirect("/")
-            
-            return self.set_cookie(response, "theme", value=theme)
+        return self.render_template("home.html")
