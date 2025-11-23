@@ -29,10 +29,10 @@ class Application:
         create_dir_if_not_exist(join_paths(self.config.PATH_DIR_STORAGE))
 
     def restart(self):
-        # self.stop()
-        # self.init()
-        # self.run()
-        pass
+        self.server = FlaskAdapter()
+        self.stop()
+        self.init()
+        self.build()
 
     def stop(self):
         self.server.clear()
@@ -57,7 +57,7 @@ class Application:
 
         self.register_route_not_found()
 
-    def run(self, host="0.0.0.0", port=5001, debug=True):
+    def run(self, host="0.0.0.0", port=5000, debug=True):
         self.server.app.run(host=host, port=port, debug=debug)
 
     def get_server(self):

@@ -4,10 +4,19 @@
 
 {% block admin_content %}
 
-    {% for widget in widgets %}
+    {% for mod in widgets %}
+        <div class="mb-2">
+            <div class="p-2 mb-2" style="background-color: white;">
+               module: <span style="font-weight: bold;">{{mod}} </span>
+            </div>
 
-        {{ widget|safe }}
-
+            {% for name in widgets[mod] %}
+                <div> {{ name }} </div>
+                <div class="mb-2">
+                    {{ widgets[mod][name]['widget']|safe }}
+                </div>
+             {% endfor %}
+        </div>
     {% endfor %}
 
 {% endblock %}

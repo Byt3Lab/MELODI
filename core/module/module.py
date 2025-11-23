@@ -110,6 +110,9 @@ class Module:
                 self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
         return decorator
 
+    def regsiter_home_page(self, home_page, infos):
+        self.app.home_page_manager.register(name_module=self.dirname, home_page=home_page, infos=infos)
+
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         if self.translation == None:
             return {}

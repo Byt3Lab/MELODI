@@ -15,8 +15,7 @@ class FlaskAdapter(WebServerInterface):
 
     def clear(self):
         self.app.view_functions.clear()
-        from werkzeug.routing import Map
-        self.app.url_map = Map()
+        self.app.url_map._rules.clear()
 
     def serve_static_directory(self, name:str, path_directory: str, prefix_path: str):
         def handler(filename):

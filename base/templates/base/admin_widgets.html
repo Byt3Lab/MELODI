@@ -2,8 +2,23 @@
 
 {% block title %}Gestion des widgets{% endblock %}
 
-{% block admin_content %}   
+
+{% block admin_content %}
     <h1>gestion des widgets</h1>
 
-    {{ widgets }}
+    {% for mod in widgets %}
+        <div class="mb-2">
+            <div class="p-2 mb-2" style="background-color: white;">
+               module: <span style="font-weight: bold;">{{mod}} </span>
+            </div>
+
+            {% for name in widgets[mod] %}
+                <div> {{ name }} </div>
+                <div class="mb-2">
+                    {{ widgets[mod][name]['widget']|safe }}
+                </div>
+             {% endfor %}
+        </div>
+    {% endfor %}
+
 {% endblock %}

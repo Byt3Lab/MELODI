@@ -42,6 +42,18 @@ class BaseRoutes(WebRouter):
 
     def admin_dashboard(self):
         widgets=self.app.widget_manager.list_widgets()
+
+        for key,w in widgets.items():
+            for key,i in w.items():
+                wid = i["widget"]
+
+                if callable(wid):
+                    i["widget"] = wid()
+                    continue
+                if isinstance(wid, str):
+                    i["widget"] = wid
+
+
         return self.render_template("admin_dashboard.html",widgets=widgets)
 
     def admin_users(self):
@@ -75,13 +87,14 @@ class BaseRoutes(WebRouter):
 
     def on_module(self,mod:str):
         self.app.module_manager.on_module(mod)
+        self.app.restart()
         return self.redirect("/admin/modules")
 
     def off_module(self, mod:str):
         self.app.module_manager.off_module(mod)
+        self.app.restart()
         return self.redirect("/admin/modules")
     
-
     def admin_settings(self):
         return self.render_template("admin_settings.html")
 

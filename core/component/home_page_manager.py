@@ -35,10 +35,10 @@ class HomePageManager:
         except:
             return None
     
-    def register_home_page(self, name_module:str, infos, home_page):
+    def register(self, name_module:str, infos, home_page):
         self.home_pages[name_module] = {home_page, infos}
 
-    def list(self):
+    def list_home_pages(self):
         return self.home_pages
     
     def on(self, name_module):
