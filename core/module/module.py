@@ -62,7 +62,7 @@ class Module:
         if self.app is None:
             raise ValueError("Application instance is not set for the module.")
         self.app.router.add_router(self.router)
-        self.app.api_router.add_router(self.api_router)
+        self.app.api_router.add_router(self.api_router, url_prefix=self.dirname)
 
         if self.dirname == "base":
             path_dir = join_paths(self.app.config.PATH_DIR_BASE_MODULE, "static")

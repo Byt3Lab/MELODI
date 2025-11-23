@@ -40,7 +40,7 @@ class WidgetManager:
         except:
             return False
         
-    def list(self):
+    def list_widgets(self):
         return self.widgets
     
     def clear(self):

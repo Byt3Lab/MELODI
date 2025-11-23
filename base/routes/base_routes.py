@@ -1,7 +1,6 @@
-from flask import request, Request, g
 from core.router import WebRouter, RequestContext
 
-class AdminRoutes(WebRouter):
+class BaseRoutes(WebRouter):
     def load (self):
         self.before_request()(self.br)
         self.before_request()(self.br2)
@@ -42,7 +41,7 @@ class AdminRoutes(WebRouter):
         return self.render_template("logout.html")
 
     def admin_dashboard(self):
-        widgets=self.app.widget_manager.list()
+        widgets=self.app.widget_manager.list_widgets()
         return self.render_template("admin_dashboard.html",widgets=widgets)
 
     def admin_users(self):

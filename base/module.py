@@ -3,7 +3,7 @@ from core.utils import join_paths
 
 class Base(ApplicationModule):
     def load(self):
-        from base.routes import AdminRoutes, AdminApiRoutes
+        from base.routes import BaseRoutes, BaseApiRoutes
 
         self.init_translation("fr")
 
@@ -16,9 +16,12 @@ class Base(ApplicationModule):
         
         self.register_widget("base")(xample_widget)
 
-        routes = AdminRoutes(name="base", app=self.app, dirname_module=self.dirname)
-        api_routes = AdminApiRoutes(name="base", app=self.app)
+        routes = BaseRoutes(name="base", app=self.app, dirname_module=self.dirname)
+        api_routes = BaseApiRoutes(name="base", app=self.app)
 
+        routes.module = self
+        api_routes.module = self
+        
         routes.load()
         api_routes.load()
 
