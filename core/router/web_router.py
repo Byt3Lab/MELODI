@@ -9,11 +9,17 @@ from core.utils import path_exist, read_file
 
 if TYPE_CHECKING:
     from core import Application
+    from core.module import Module
 
 class WebRouter(Router):
-    def __init__(self, name:str, app:Application,  template_folder=None, dirname_module="", module=None):
+    def __init__(self, name:str, app:Application, module:Module|None, template_folder=None):
         self.template_folder = template_folder
-        self.dirname_module = dirname_module
+        self.dirname_module = ""
+
+        from core.module import Module
+
+        if isinstance(module, Module):
+            self.dirname_module = module.dirname
         
         super().__init__(app=app, name=name, module=module)
     

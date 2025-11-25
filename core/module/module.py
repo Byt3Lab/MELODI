@@ -55,7 +55,7 @@ class Module:
             path_template_folder = None
 
         router_name = f'{self.type_module}_{self.dirname}'
-        self.router = WebRouter(app=self.app, name=router_name, template_folder=path_template_folder, dirname_module=self.dirname)
+        self.router = WebRouter(app=self.app, name=router_name, template_folder=path_template_folder, module=self)
         self.api_router = APIRouter(app=self.app, name=f'{self.router_name}_api')
 
     def _run(self):
@@ -110,7 +110,7 @@ class Module:
                 self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
         return decorator
 
-    def regsiter_home_page(self, home_page, infos):
+    def register_home_page(self, home_page, infos):
         self.app.home_page_manager.register(name_module=self.dirname, home_page=home_page, infos=infos)
 
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):

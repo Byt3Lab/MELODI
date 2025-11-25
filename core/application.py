@@ -17,7 +17,7 @@ class Application:
         self.event_listener = EventListener()
         self.timer_manager = TimerManager()
         self.db = DataBase(self)
-        self.router = WebRouter(name="main", app=self)
+        self.router = WebRouter(name="main", app=self, module=None)
         self.api_router = APIRouter(app=self, name="main_api")
         self.module_manager = ModuleManager(app=self)
         self.service_manager = ServiceManager(app=self)

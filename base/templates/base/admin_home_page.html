@@ -26,17 +26,35 @@
     </div>
 
     <div id="app">
-        <h1> [[name]] ok</h1>
+        <h-a></h-a>
     </div>
 
-    <script>
-        const m = new mljs.Melodi({el:"#app", data:{name:"gg"} })
+    {% raw %}
+        <script>
+            app = createMelodiApp({
+                components:{
+                    "h-a":{
+                        data(){
+                            return {
+                                name: "gg"
+                            }
+                        },
+                        template:"hello {{ name }} ",
+                        hooks:{
+                            mounted(){
+                            }
+                        },
+                        methods:{
+                            hello(){
+                                alert("helllo")
+                            }
+                        }
+                    }
+                }
+            })
 
-        setTimeout(function(){
-            m.data.name = "ss"
-            m.update()
-        }, 3000)
+        app.mount("#app")
+        </script>
+    {% endraw %}
 
-       
-    </script>
 {% endblock %}

@@ -11,7 +11,7 @@ class Base(ApplicationModule):
         self.register_widget("base")(self.base_widget)
         self.register_widget("base2")(self.base_widget)
 
-        routes = BaseRoutes(name="base", app=self.app, dirname_module=self.dirname)
+        routes = BaseRoutes(name="base", app=self.app, module=self)
         api_routes = BaseApiRoutes(name="base", app=self.app)
 
         routes.module = self
