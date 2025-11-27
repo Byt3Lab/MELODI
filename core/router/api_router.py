@@ -2,7 +2,7 @@ from .router import Router
 from flask import jsonify
 
 class APIRouter(Router):
-    def render_json(self, data: dict, status_code: int = 200):
+    def render_json(self, data: dict = {}, status_code: int = 200):
         try:
             data["status_code"] = status_code
             response = jsonify(data)

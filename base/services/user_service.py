@@ -1,5 +1,5 @@
-from base.repository.user_repository import UserRepository
-from core import Service
+from base.repositories.user_repository import UserRepository
+from core.service import Service
 
 class UserService(Service):
     def list_users(self):

@@ -26,35 +26,17 @@
     </div>
 
     <div id="app">
-        <h-a></h-a>
+        <h-a4>
+            <h-a></h-a>
+        </h-a4>
     </div>
 
-    {% raw %}
-        <script>
-            app = createMelodiApp({
-                components:{
-                    "h-a":{
-                        data(){
-                            return {
-                                name: "gg"
-                            }
-                        },
-                        template:"hello {{ name }} ",
-                        hooks:{
-                            mounted(){
-                            }
-                        },
-                        methods:{
-                            hello(){
-                                alert("helllo")
-                            }
-                        }
-                    }
-                }
-            })
+    <template id="tpl">
+        <p>page 4</p>
 
-        app.mount("#app")
-        </script>
-    {% endraw %}
+        <slot></slot>
+    </template>
+
+    <script src="/static_templates_melodijs/base/demo.js"></script>
 
 {% endblock %}

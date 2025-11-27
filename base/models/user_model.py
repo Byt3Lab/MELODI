@@ -1,6 +1,6 @@
-from core import Model
+from core.db import Model
 
-class UserModel(Model):
+class UserModel():
     __tablename__ = "users"
 
     

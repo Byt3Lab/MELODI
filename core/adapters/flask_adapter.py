@@ -17,14 +17,24 @@ class FlaskAdapter(WebServerInterface):
         self.app.view_functions.clear()
         self.app.url_map._rules.clear()
 
-    def serve_static_directory(self, name:str, path_directory: str, prefix_path: str):
+    def send_from_directory(self, name:str, path_directory: str, prefix_path: str):
         def handler(filename):
             return send_from_directory(path_directory, filename)
         
-        bp = Blueprint(f'static_{name}', __name__)
-        bp.route(f'/static/{prefix_path}/<path:filename>')(handler)
+        bp = Blueprint(name, __name__)
+        bp.route(f'/{prefix_path}/<path:filename>')(handler)
         self.app.register_blueprint(bp)
 
+    def serve_static_directory(self, name:str, path_directory: str, prefix_path: str):
+        prefix_path = f'static/{prefix_path}'
+        name = "_static_" + name
+        self.send_from_directory(name, path_directory, prefix_path)
+
+    def serve_static_templates_melodijs_directory(self, name:str, path_directory: str, prefix_path: str):
+        prefix_path = f'static_templates_melodijs/{prefix_path}'
+        name = "static_templates_melodijs_" + name
+        self.send_from_directory(name, path_directory, prefix_path)
+    
     def serve_template(self, template_name: str, **context):
         from flask import render_template
         return render_template(template_name, **context)

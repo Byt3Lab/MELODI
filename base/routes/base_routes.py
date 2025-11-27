@@ -1,7 +1,11 @@
 from core.router import WebRouter, RequestContext
+from base.services import HomePageService, WidgetService
 
 class BaseRoutes(WebRouter):
     def load (self):
+        self.home_page_service = HomePageService(module=self.module)
+        self.widget_service = WidgetService(module=self.module)
+
         self.before_request()(self.br)
         self.before_request()(self.br2)
         self.add_route("/", methods=["GET"])(self.home)
@@ -73,11 +77,11 @@ class BaseRoutes(WebRouter):
             return self.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
 
     def settings_home_page_on(self, home_page):
-        self.app.home_page_manager.set_home_page_on(name=home_page)
+        self.home_page_service.on(home_page)
         return self.redirect("/admin/settings/home_page")
     
     def settings_home_page_clear(self):
-        self.app.home_page_manager.clear()
+        self.home_page_service.clear()
         return self.redirect("/admin/settings/home_page")
 
     def admin_modules(self):

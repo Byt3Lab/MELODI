@@ -63,16 +63,20 @@ class Module:
             raise ValueError("Application instance is not set for the module.")
         self.app.router.add_router(self.router)
         self.app.api_router.add_router(self.api_router, url_prefix=self.dirname)
+        prefix_url = self.dirname
 
         if self.dirname == "base":
-            path_dir = join_paths(self.app.config.PATH_DIR_BASE_MODULE, "static")
-            prefix_url = "base"
+            path_dir_static = join_paths(self.app.config.PATH_DIR_BASE_MODULE, "static")
+            path_dir_templates_melodijs = join_paths(self.app.config.PATH_DIR_BASE_MODULE, "templates", "melodijs")
         else:
-            path_dir = join_paths(self.app.config.PATH_DIR_MODULES, self.dirname, "static")
-            prefix_url = self.dirname
+            path_dir_static = join_paths(self.app.config.PATH_DIR_MODULES, self.dirname, "static")
+            path_dir_templates_melodijs = join_paths(self.app.config.PATH_DIR_MODULES, self.dirname, "templates", "melodijs")
             
-        if path_exist(path_dir):    
-            self.app.server.serve_static_directory(name=f'{self.type_module}_{self.dirname}', prefix_path=prefix_url, path_directory=path_dir)
+        if path_exist(path_dir_static):    
+            self.app.server.serve_static_directory(name=f'{self.type_module}_{self.dirname}', prefix_path=prefix_url, path_directory=path_dir_static)
+
+        if path_exist(path_dir_templates_melodijs):  
+            self.app.server.serve_static_templates_melodijs_directory(name=f'{self.type_module}_{self.dirname}', prefix_path=prefix_url, path_directory=path_dir_templates_melodijs)
 
     def get_router(self)->WebRouter:
         return self.router

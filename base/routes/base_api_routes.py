@@ -1,7 +1,11 @@
 from core.router import APIRouter
+from base.services import HomePageService, WidgetService
 
 class BaseApiRoutes(APIRouter):
     def load(self):
+        self.home_page_service = HomePageService(module=self.module)
+        self.widget_service = WidgetService(module=self.module)
+
         self.add_route("/status", methods=["GET"])(self.status)
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
@@ -41,16 +45,12 @@ class BaseApiRoutes(APIRouter):
         return self.render_json(data)
 
     def settings_home_page_on(self, home_page):
-        # self.app.home_page_manager.set_home_page_on(name=home_page)
-        data = {"home_page":home_page}
-
-        return self.render_json(data)
+        self.home_page_service.on(home_page)
+        return self.render_json()
     
     def settings_home_page_clear(self):
-        self.app.home_page_manager.clear()
-        data = {"m":"clear"}
-
-        return self.render_json(data)
+        self.home_page_service.clear()
+        return self.render_json()
 
     def admin_modules(self):
         modules = self.app.module_manager.list_modules()

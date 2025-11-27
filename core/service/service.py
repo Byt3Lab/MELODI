@@ -5,22 +5,16 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..module.module import Module
 
+class Response:
+    def __init__(self, data=None, code=200, message=""):
+        self.data = data
+        self.code = code
+        self.message = message    
+
 class Service:
     def __init__(self, module:Module):
         self.module = module
+        self.app = self.module.app
         
-    def response(self, data=None, status="success", code=200, message=""):
-        return {
-            "data": data,
-            "status": status,
-            "code": code,
-            "message": message
-        }
-    
-    def add_service(self, name_service:str|None=None):
-        def decorator (func):
-            self.module.add_service(name_service)(func)
-        return  decorator
-    
-    def get_service(self, name_module:str, name_service:str):
-        return self.module.app.service_manager.get(name_module,name_service)
+    def response(self, data=None, code=200, message=""):
+        return Response(data,code,message)
