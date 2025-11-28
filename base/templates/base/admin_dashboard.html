@@ -1,22 +1,54 @@
 {% extends "base/components/layout_admin.html" %}
 
-{% block title %} Dashboard Admin{% endblock %}
+{% block title %}Dashboard Admin{% endblock %}
 
 {% block admin_content %}
 
-    {% for mod in widgets %}
-        <div class="mb-2">
-            <div class="p-2 mb-2" style="background-color: white;">
-               module: <span style="font-weight: bold;">{{mod}} </span>
-            </div>
+<div class="container-fluid">
 
-            {% for name in widgets[mod] %}
-                <div> {{ name }} </div>
-                <div class="mb-2">
-                    {{ widgets[mod][name]['widget']|safe }}
+  {% for mod in widgets %}
+
+    <!-- Section du module -->
+    <div class="mb-4">
+
+      <div class="p-3 bg-white shadow-sm rounded mb-3">
+        <h5 class="m-0">
+          <span class="text-primary">Module :</span>
+          <strong>{{ mod }}</strong>
+        </h5>
+      </div>
+
+      <div class="row g-3">
+
+        {% for name in widgets[mod] %}
+        
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+
+              <div class="card-body">
+
+                <!-- Nom du widget -->
+                <h6 class="card-title mb-2">
+                  <strong>{{ name }}</strong>
+                </h6>
+
+                <!-- Le widget généré (safe) -->
+                <div class="widget-container mt-2">
+                  {{ widgets[mod][name]['widget'] | safe }}
                 </div>
-             {% endfor %}
-        </div>
-    {% endfor %}
+
+              </div>
+            </div>
+          </div>
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+  {% endfor %}
+
+</div>
 
 {% endblock %}

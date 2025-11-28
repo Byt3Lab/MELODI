@@ -1,9 +1,81 @@
 {% extends "base/components/layout_admin.html" %}
 
-{% block title %} profil user{% endblock %}
+{% block title %}Profil utilisateur{% endblock %}
 
 {% block admin_content %}
 
-<h1>profile utilisateur</h1>
- 
+<div class="container mt-4">
+
+    <h1 class="mb-4 d-flex align-items-center">
+        <i class="bi bi-person-circle me-2"></i> Profil de l'utilisateur
+    </h1>
+
+    <div class="card shadow-sm" style="max-width: 800px;">
+        <div class="card-body d-flex flex-column flex-md-row align-items-start">
+
+            <!-- Avatar -->
+            <div class="me-md-4 mb-3 mb-md-0">
+                <img src="{{ user.avatar_url or '/static/img/default_avatar.png' }}" 
+                     alt="avatar"
+                     class="rounded"
+                     style="
+                        width: 130px; 
+                        height: 130px; 
+                        object-fit: cover; 
+                        border: 3px solid #e0e0e0;
+                     ">
+            </div>
+
+            <!-- Infos -->
+            <div class="flex-grow-1">
+
+                <h3 class="mb-3">{{ user.name or "John Doe" }}</h3>
+
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th class="text-muted" style="width: 180px;">Email</th>
+                            <td>{{ user.email or "john.doe@example.com" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Rôle</th>
+                            <td>
+                                <span class="badge bg-primary">{{ user.role or "Administrateur" }}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Compte créé le</th>
+                            <td>{{ user.created_at or "2024-01-15" }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Statut</th>
+                            <td>
+                                {% if user.active %}
+                                    <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Désactivé</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Actions -->
+    <div class="mt-4 d-flex gap-2">
+        <a href="/admin/user/edit/{{ user.id }}" class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1"></i> Modifier le profil
+        </a>
+
+        <a href="/admin/user/change-password/{{ user.id }}" class="btn btn-warning">
+            <i class="bi bi-shield-lock-fill me-1"></i> Modifier le mot de passe
+        </a>
+    </div>
+
+</div>
+
 {% endblock %}

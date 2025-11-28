@@ -23,6 +23,7 @@ class BaseRoutes(WebRouter):
         self.add_route('/admin/modules/<path:mod>/off', methods=['GET'])(self.off_module)
         self.add_route('/admin/settings', methods=['GET'])(self.admin_settings)
         self.add_route('/admin/modules/<path:mod>/on', methods=['GET'])(self.on_module)
+        self.add_route('/admin/logs', methods=['GET'])(self.logs)
 
     def br(self):
         def sr(ctx:RequestContext):
@@ -43,6 +44,9 @@ class BaseRoutes(WebRouter):
     
     def logout(self):
         return self.render_template("logout.html")
+    
+    def logs(self):
+        return self.render_template("admin_logs.html")
 
     def admin_dashboard(self):
         widgets=self.app.widget_manager.list_widgets()

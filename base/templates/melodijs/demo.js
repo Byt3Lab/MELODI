@@ -1,10 +1,12 @@
+import { createApp } from '/static/base/melodiJS/melodiJS.js'
+
 function getUrlTemplate(template) {
     return "/static_templates_melodijs/base/"+template+".html"
 }
 
-app = createMelodiApp({
+const app = createApp({
         components:{
-            "h-a":{
+            "c-demo":{
                 data(){
                     return {
                         name: "gaetant"
@@ -21,26 +23,31 @@ app = createMelodiApp({
                     }
                 }
             },
-            "h-a2":{
+            "c-demo2":{
                 data(){
                     return {
                     }
                 },
-                template:{url:getUrlTemplate("demo2")},
-            },
-            "h-a3":{
-                data(){
-                    return {
+                template:"hello 2  <button @click='hello'>click 2</button>",
+                methods:{
+                    hello(){
+                        alert("helllo 2")
                     }
-                },
-                template:{url:getUrlTemplate("demo3")},
+                }
             },
-            "h-a4":{
+            "c-demo3":{
                 data(){
                     return {
                     }
                 },
                 template:{el:"#tpl"},
+            },
+               "c-demo4":{
+                data(){
+                    return {
+                    }
+                },
+                template:{url:getUrlTemplate("demo2")},
             }
         }
     })

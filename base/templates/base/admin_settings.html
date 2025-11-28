@@ -2,9 +2,58 @@
 
 {% block title %}Gestion des paramètres{% endblock %}
 
-{% block admin_content %}   
-    <h1>parametres globale</h1>
+{% block admin_content %}
 
-    <a href="/admin/settings/widgets" class="btn btn-primary">gérer vos widgets</a>
-    <a href="/admin/settings/home_page" class="btn btn-primary">gérer la page d'accueil</a>
+<div class="card shadow-sm p-4">
+    
+    <h3 class="mb-4">Paramètres globaux</h3>
+
+    <div class="row g-3">
+
+        <!-- Widgets -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Widgets</h5>
+                    <p class="text-muted">Gérez les widgets disponibles</p>
+                    <a href="/admin/settings/widgets"
+                       class="btn btn-primary mt-auto">
+                        Gérer les widgets
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home page -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Page d'accueil</h5>
+                    <p class="text-muted">Définissez la page d’accueil active</p>
+                    <a href="/admin/settings/home_page"
+                       class="btn btn-primary mt-auto">
+                        Gérer la page d'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Widgets -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">A propos de l'entreprise</h5>
+                    <p class="text-muted">Paramétrer les informations de l'entreprise</p>
+                    <a href="/admin/settings/org"
+                       class="btn btn-primary mt-auto">
+                        Paramétrer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 {% endblock %}

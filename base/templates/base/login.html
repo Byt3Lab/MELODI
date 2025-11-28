@@ -3,108 +3,157 @@
 {% block title %}Connexion{% endblock %}
 
 {% block head %}
-  <style>
-    .auth-page {
-      min-height: 75vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 0;
-      min-height: max-content;
+<style>
+  .auth-page {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+
+  .auth-card {
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+  }
+
+  /* --- Left Section --- */
+  .auth-left {
+    background: linear-gradient(145deg, #003366, #0055a4);
+    color: #fff;
+    padding: 2.75rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .auth-left .brand img {
+    width: 56px;
+    height: auto;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  }
+
+  .auth-left p {
+    opacity: 0.9;
+    line-height: 1.5;
+  }
+
+  .auth-left .footnote {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  /* --- Right Section --- */
+  .auth-right {
+    padding: 2.5rem;
+    background: #fafafa;
+  }
+
+  .auth-right h4 {
+    font-weight: 600;
+  }
+
+  .auth-right .form-control {
+    height: 48px;
+    border-radius: 8px;
+  }
+
+  .auth-right .btn-primary {
+    height: 48px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 767px) {
+    .auth-left {
+      display: none;
     }
     .auth-card {
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      overflow: hidden;
+      border-radius: 10px;
     }
-    .auth-left {
-      background: linear-gradient(135deg, #003366 0%, #00509e 100%);
-      color: #fff;
-      padding: 2.5rem;
-    }
-    .auth-left .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-    }
-    .auth-left h3 {
-      margin-top: 1rem;
-      font-weight: 600;
-    }
-    .auth-right {
-      padding: 2.5rem;
-      background: #fff;
-    }
-    @media (max-width: 767px) {
-      .auth-left { display: none; }
-      .auth-card { border-radius: 8px; }
-    }
-  </style>
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-  <section class="auth-page">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8">
-          <div class="row g-0 auth-card">
-            <div class="col-md-5 auth-left d-flex flex-column">
-              <div class="brand">
-                <img src="/static/base/melodi.png" alt="Melodi" style="width:56px;height:auto;">
-                <div>
-                  <a href="/" style="text-decoration: none;color: #fff;">
-                    <strong>MELODI</strong>
-                    <div style="font-size:0.85rem;opacity:0.9;">Business Management</div>
-                  </a>
-                </div>
+<section class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8">
+
+        <div class="row g-0 auth-card">
+
+          <!-- Left Panel -->
+          <div class="col-md-5 auth-left">
+            <div class="brand d-flex align-items-center gap-2 mb-3">
+              <img src="/static/base/melodi.png" alt="Melodi">
+              <div>
+                <a href="/" style="color:#fff;text-decoration:none;">
+                  <strong>MELODI</strong>
+                  <div style="font-size:0.85rem;">Business Management</div>
+                </a>
               </div>
-              <h3>Bienvenue</h3>
-              <p style="opacity:0.95;">Connectez-vous pour accéder à votre espace de gestion. Si vous n'avez pas de compte, contactez votre administrateur.</p>
-              <div class="mt-auto" style="font-size:0.85rem;opacity:0.85;">Sécurité & confidentialité garanties</div>
             </div>
 
-            <div class="col-md-7 auth-right">
-              <h4 class="mb-3">Connexion</h4>
+            <h3>Bienvenue 👋</h3>
+            <p>Connectez-vous pour accéder à votre tableau de bord.  
+               Si vous n’avez pas de compte, contactez votre administrateur.</p>
 
-              {% if error %}
-                <div class="alert alert-danger" role="alert">{{ error }}</div>
+            <div class="mt-auto footnote">Sécurité & confidentialité garanties</div>
+          </div>
+
+          <!-- Right Panel -->
+          <div class="col-md-7 auth-right">
+            <h4 class="mb-3">Connexion</h4>
+
+            {% if error %}
+              <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+
+            <form method="post" action="/login">
+
+              {% if csrf_token %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
               {% endif %}
 
-              <form action="/login" method="post" novalidate>
-                {# CSRF token placeholder si utilisé par le framework #}
-                {% if csrf_token %}
-                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                {% endif %}
+              <div class="mb-3">
+                <label for="username" class="form-label">Email ou identifiant</label>
+                <input type="text" id="username" name="username" class="form-control"
+                       placeholder="ex: admin@entreprise.com" required>
+              </div>
 
-                <div class="mb-3">
-                  <label for="username" class="form-label">Email ou nom d'utilisateur</label>
-                  <input id="username" name="username" type="text" class="form-control" placeholder="votre@email.com" required>
+              <div class="mb-3">
+                <label for="password" class="form-label">Mot de passe</label>
+                <input type="password" id="password" name="password" class="form-control"
+                       placeholder="Entrez votre mot de passe" required>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                  <label class="form-check-label" for="remember">Se souvenir de moi</label>
                 </div>
+                <a href="/forgot" class="small">Mot de passe oublié ?</a>
+              </div>
 
-                <div class="mb-3">
-                  <label for="password" class="form-label">Mot de passe</label>
-                  <input id="password" name="password" type="password" class="form-control" placeholder="Mot de passe" required>
-                </div>
+              <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary">Se connecter</button>
+              </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="1" id="remember" name="remember">
-                    <label class="form-check-label" for="remember">Se souvenir de moi</label>
-                  </div>
-                  <a href="/forgot" class="small">Mot de passe oublié ?</a>
-                </div>
+              <div class="text-center small">
+                Pas de compte ? <a href="/register">Demander un accès</a>
+              </div>
 
-                <div class="d-grid mb-3">
-                  <button type="submit" class="btn btn-primary btn-lg">Se connecter</button>
-                </div>
-
-                <div class="text-center small">Vous n'avez pas de compte ? <a href="/register">Demander un accès</a></div>
-              </form>
-            </div>
+            </form>
           </div>
+
         </div>
+
       </div>
     </div>
-  </section>
+  </div>
+</section>
 {% endblock %}

@@ -2,41 +2,69 @@
 
 {% block title %}Gestion de la page d'accueil{% endblock %}
 
-{% block admin_content %}   
-    <h1>Gestion de la page d'accueil</h1>
+{% block admin_content %}
+<div class="card p-4 shadow-sm">
+    <h1 class="mb-3">Gestion de la page d'accueil</h1>
 
-    <div>
-        total déclarée(s) : {{home_pages_len}}
-        |
-        <a href="/admin/settings/home_page_clear" class="btn">rénitialiser</a>
+    <!-- Résumé -->
+    <div class="mb-4">
+        <span class="badge bg-primary">Total déclarée(s) : {{ home_pages_len }}</span>
 
-    </div>
-    <div>
-        acitive : {{home_page_on}}
-    </div>
-    <div>
-        {% for home_page in home_pages %}
-            <div>
-                <p>{{home_page}}</p>
-                <div>
-                    <a href="/admin/settings/home_page/{{ home_page }}/on" class="btn">definir comme page d'accueil</a>
-                </div>
-            </div>
-        {% endfor %}
+        <a href="/admin/settings/home_page_clear"
+           class="btn btn-danger btn-sm ms-3"
+           onclick="return confirm('Voulez-vous vraiment réinitialiser la configuration ?')">
+           Réinitialiser
+        </a>
     </div>
 
-    <div id="app">
-        <h-a4>
-            <h-a></h-a>
-        </h-a4>
+    <!-- Page active -->
+    <div class="mb-4">
+        <h5>Page d'accueil active :</h5>
+        {% if home_page_on %}
+            <span class="badge bg-success">{{ home_page_on }}</span>
+        {% else %}
+            <span class="badge bg-secondary">Aucune définie</span>
+        {% endif %}
     </div>
 
-    <template id="tpl">
-        <p>page 4</p>
+    <!-- Liste des pages -->
+    <div class="card p-3">
+        <h5 class="mb-3">Liste des pages déclarées</h5>
 
-        <slot></slot>
-    </template>
-
-    <script src="/static_templates_melodijs/base/demo.js"></script>
-
+        {% if home_pages %}
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th style="width: 180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for home_page in home_pages %}
+                    <tr>
+                        <td>
+                            {{ home_page }}
+                            {% if home_page == home_page_on %}
+                                <span class="badge bg-success ms-2">Active</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if home_page != home_page_on %}
+                                <a href="/admin/settings/home_page/{{ home_page }}/on"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Définir comme page d'accueil
+                                </a>
+                            {% else %}
+                                <span class="text-muted">Déjà active ✓</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-muted">Aucune page déclarée.</p>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

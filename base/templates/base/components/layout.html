@@ -37,7 +37,7 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='base/base.css') }}">
   <script src="{{ url_for('static', filename='base/base.js') }}"></script>
-  <script src="{{ url_for('static', filename='base/melodiJS/melodiJS.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='base/melodiJS/melodiJS.js') }}"></script>
 
   {% if (theme=="light") %}
   <link rel="stylesheet" href="{{ url_for('static', filename='base/themes/default.css') }}">
