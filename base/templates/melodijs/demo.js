@@ -1,4 +1,4 @@
-import { createApp } from '/static/base/melodiJS/melodiJS.js'
+import { createApp } from '/static/base/melodiJS/melodijs.js'
 
 function getUrlTemplate(template) {
     return "/static_templates_melodijs/base/"+template+".html"
@@ -43,6 +43,7 @@ const app = createApp({
                 template:{el:"#tpl"},
             },
                "c-demo4":{
+                props:["name"],
                 data(){
                     return {
                     }

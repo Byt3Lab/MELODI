@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MELODI - Documentation Développeur</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --sidebar-bg: #f8f9fa;
+            --sidebar-border: #e9ecef;
+            --text-main: #2c3e50;
+            --text-muted: #6c757d;
+            --bg-main: #ffffff;
+            --code-bg: #f5f5f5;
+            --border-color: #dee2e6;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --header-height: 60px;
+            --sidebar-width: 280px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #4a9eff;
+            --primary-hover: #5fadff;
+            --sidebar-bg: #1a1a1a;
+            --sidebar-border: #2d2d2d;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --bg-main: #121212;
+            --code-bg: #1e1e1e;
+            --border-color: #404040;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--text-main);
+            background: var(--bg-main);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            height: var(--header-height);
+            background: var(--bg-main);
+            border-bottom: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .brand img {
+            height: 32px;
+            width: auto;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .layout {
+            display: flex;
+            margin-top: var(--header-height);
+            min-height: calc(100vh - var(--header-height));
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
+            position: fixed;
+            height: calc(100vh - var(--header-height));
+            overflow-y: auto;
+            padding: 20px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-group {
+            margin-bottom: 20px;
+        }
+
+        .nav-header {
+            padding: 5px 20px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 8px 20px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.1);
+            font-weight: 500;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            max-width: 1000px;
+        }
+
+        section {
+            margin-bottom: 60px;
+            scroll-margin-top: 80px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 40px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin: 30px 0 15px;
+            color: var(--text-main);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin: 20px 0 10px;
+            color: var(--text-main);
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        ul,
+        ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9em;
+            color: var(--primary-color);
+            background: var(--code-bg);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        pre code {
+            color: inherit;
+            background: none;
+            padding: 0;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .alert-warning {
+            background: rgba(241, 196, 15, 0.1);
+            border-color: var(--warning-color);
+        }
+
+        .alert-success {
+            background: rgba(46, 204, 113, 0.1);
+            border-color: var(--success-color);
+        }
+
+        .api-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .api-header {
+            background: var(--sidebar-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .api-body {
+            padding: 20px;
+        }
+
+        .method-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .method-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .method-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .method-sig {
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .method-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .param-list {
+            margin-left: 0;
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        .param-list li {
+            margin: 5px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 999;
+                width: 250px;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 998;
+            }
+
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <a href="#" class="brand">
+                <img src="icon.png" alt="Logo">
+                MELODI Docs
+            </a>
+        </div>
+        <div class="header-controls">
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        </div>
+    </header>
+
+    <div class="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="nav-group">
+                <div class="nav-header">Introduction</div>
+                <a href="#intro" class="nav-link">Qu'est-ce que MELODI ?</a>
+                <a href="#installation" class="nav-link">Installation</a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-header">Architecture</div>
+                <a href="#architecture" class="nav-link">Vue d'ensemble</a>
+                <a href="#lifecycle" class="nav-link">Cycle de Vie</a>
+                <a href="#modules-vs-plugins" class="nav-link">Modules vs Plugins</a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-header">Système de Routing</div>
+                <a href="#routers" class="nav-link">WebRouter & APIRouter</a>
+                <a href="#static-files" class="nav-link">Fichiers Statiques</a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-header">Composants</div>
+                <a href="#widgets" class="nav-link">Widgets</a>
+                <a href="#menus" class="nav-link">Menus</a>
+                <a href="#homepage" class="nav-link">HomePage Manager</a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-header">Systèmes</div>
+                <a href="#events" class="nav-link">Événements</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#translation" class="nav-link">Translation (i18n)</a>
+                <a href="#storage" class="nav-link">Storage</a>
+                <a href="#timer" class="nav-link">Timer</a>
+                <a href="#config" class="nav-link">Configuration</a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-header">Base de Données</div>
+                <a href="#database" class="nav-link">DataBase ORM</a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-header">Tutoriels</div>
+                <a href="#tutorial-contact" class="nav-link">Module Contact</a>
+                <a href="#tutorial-blog" class="nav-link">Module Blog (i18n)</a>
+            </div>
+            <div class="nav-group">
+                <div class="nav-header">API Reference</div>
+                <a href="#api-application" class="nav-link">Application</a>
+                <a href="#api-module" class="nav-link">ApplicationModule</a>
+                <a href="#api-managers" class="nav-link">Managers</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+
+            <section id="intro">
+                <h1>Qu'est-ce que MELODI ?</h1>
+                <p>MELODI est un framework ERP modulaire et extensible écrit en Python. Conçu pour les applications
+                    métiers complexes (ERP, CRM, applications d'entreprise), il offre une architecture modulaire qui
+                    favorise le découplage et la maintenance à long terme.</p>
+
+                <div class="alert alert-info">
+                    <strong>Philosophie :</strong> Contrairement aux frameworks monolithiques, MELODI adopte une
+                    approche où chaque fonctionnalité métier est encapsulée dans un module autonome. Vous pouvez
+                    ajouter, supprimer ou modifier des modules sans toucher au core.
+                </div>
+
+                <h3>Points Forts</h3>
+                <ul>
+                    <li><strong>Modularité totale</strong> : Isolation stricte des responsabilités</li>
+                    <li><strong>Performance</strong> : Core léger, chargement à la demande</li>
+                    <li><strong>Extensibilité</strong> : Système de plugins dynamiques</li>
+                    <li><strong>DX (Developer Experience)</strong> : API claire, conventions simples</li>
+                    <li><strong>i18n natif</strong> : Support multi-langues intégré</li>
+                </ul>
+            </section>
+
+            <section id="installation">
+                <h2>Installation</h2>
+                <pre><code># Cloner le repo
+git clone https://github.com/votre-repo/MELODI.git
+cd MELODI
+
+# Environnement virtuel
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Dépendances
+pip install -r requirements.txt
+
+# Lancer
+python main.py</code></pre>
+            </section>
+
+            <section id="architecture">
+                <h2>Architecture - Vue d'ensemble</h2>
+                <p>MELODI repose sur une architecture en couches où le <strong>Core</strong> orchestre les
+                    <strong>Modules</strong>.
+                </p>
+
+                <h3>Structure du Projet</h3>
+                <pre><code>MELODI/
+├── core/               # Framework (NE PAS MODIFIER)
+│   ├── application.py  # Singleton principal
+│   ├── module/         # Système de modules
+│   ├── router/         # WebRouter & APIRouter
+│   ├── db/             # ORM SQLite
+│   ├── component/      # Widget, Menu, HomePage
+│   ├── utils/          # Event, Storage, Timer, Translation
+│   └── service/        # ServiceManager
+├── modules/            # VOS MODULES MÉTIERS
+│   └── mon_module/
+│       ├── infos.json
+│       ├── module.py
+│       ├── templates/
+│       └── static/
+├── plugins/            # Scripts dynamiques
+├── config/             # Configuration
+└── main.py             # Point d'entrée</code></pre>
+
+                <h3>Classes Principales</h3>
+                <ul>
+                    <li><code>Application</code> : Singleton qui initialise tous les managers</li>
+                    <li><code>ApplicationModule</code> : Classe de base pour vos modules</li>
+                    <li><code>ModuleManager</code> : Découvre et charge les modules</li>
+                    <li><code>WebRouter / APIRouter</code> : Gestion des routes</li>
+                    <li><code>DataBase</code> : ORM SQLite simplifié</li>
+                </ul>
+            </section>
+
+            <section id="lifecycle">
+                <h2>Cycle de Vie de l'Application</h2>
+                <p>Comprendre le cycle de vie est essentiel pour un développement avancé.</p>
+
+                <ol>
+                    <li><strong>Initialisation (init)</strong> : <code>Application</code> instancie tous les managers
+                        (DB, Router, ModuleManager, etc.)</li>
+                    <li><strong>Build</strong> : Le <code>ModuleManager</code> scanne <code>modules/</code> et instancie
+                        chaque module</li>
+                    <li><strong>Load Phase</strong> : La méthode <code>load()</code> de chaque module est appelée
+                        (routes, DB, services)</li>
+                    <li><strong>Run Phase</strong> : <code>module_manager.run_modules()</code> active les routes</li>
+                    <li><strong>Démarrage serveur</strong> : Flask démarre et écoute les requêtes</li>
+                </ol>
+
+                <div class="alert alert-warning">
+                    <strong>Attention :</strong> Toute logique dans <code>load()</code> s'exécute au démarrage, pas à
+                    chaque requête. Utilisez les décorateurs de route pour la logique par requête.
+                </div>
+            </section>
+
+            <section id="modules-vs-plugins">
+                <h2>Modules vs Plugins</h2>
+
+                <h3>Modules (ApplicationModule)</h3>
+                <p>Les modules sont des packages Python complets avec leur propre structure, templates, et routes.</p>
+                <pre><code>class MonModule(ApplicationModule):
+    def load(self):
+        # Routes, Services, Widgets, DB
+        super().load()
+
+module = MonModule(name="Mon Module", router_name="mon_module")</code></pre>
+
+                <h3>Plugins (PluginModule)</h3>
+                <p>Les plugins sont des scripts Python simples pour des tâches ponctuelles ou des extensions légères.
+                </p>
+                <pre><code># plugins/mon_script.py
+def run():
+    print("Plugin exécuté!")</code></pre>
+
+                <div class="alert alert-info">
+                    <strong>Conseil :</strong> Utilisez un <code>ApplicationModule</code> pour des fonctionnalités
+                    complexes, un <code>Plugin</code> pour des scripts utilitaires.
+                </div>
+            </section>
+
+            <section id="routers">
+                <h2>WebRouter & APIRouter</h2>
+                <p>MELODI propose deux types de routers pour séparer clairement UI et API.</p>
+
+                <h3>WebRouter</h3>
+                <p>Pour les routes retournant du HTML (pages web).</p>
+                <pre><code>@self.router.add_route("/clients", methods=["GET"])
+def liste_clients():
+    clients = self.app.db.select("clients")
+    return self.router.render_template("clients.html", clients=clients)</code></pre>
+
+                <h3>APIRouter</h3>
+                <p>Pour les routes retournant du JSON (API REST).</p>
+                <pre><code>@self.api_router.add_route("/clients", methods=["GET"])
+def api_liste_clients():
+    clients = self.app.db.select("clients")
+    return {"status": "success", "data": clients}</code></pre>
+
+                <div class="alert alert-info">
+                    <strong>URLs :</strong>
+                    <ul>
+                        <li>WebRouter : <code>/mon_module/clients</code></li>
+                        <li>APIRouter : <code>/api/mon_module/clients</code></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="static-files">
+                <h2>Fichiers Statiques</h2>
+                <p>Chaque module peut avoir son propre dossier <code>static/</code> pour CSS, JS, images.</p>
+
+                <h3>Structure</h3>
+                <pre><code>mon_module/
+└── static/
+    ├── css/
+    │   └── style.css
+    ├── js/
+    │   └── app.js
+    └── images/
+        └── logo.png</code></pre>
+
+                <h3>Utilisation dans les templates</h3>
+                <pre><code>&lt;link rel="stylesheet" href="/mon_module/static/css/style.css"&gt;
+&lt;script src="/mon_module/static/js/app.js"&gt;&lt;/script&gt;
+&lt;img src="/mon_module/static/images/logo.png"&gt;</code></pre>
+            </section>
+
+            <section id="melodijs">
+                <h2>MelodiJS - Composants Réactifs</h2>
+                <p><strong>MelodiJS</strong> est un framework JavaScript réactif intégré à MELODI, similaire à Vue.js.
+                    Il permet de créer des interfaces dynamiques avec data binding, composants réutilisables et gestion
+                    d'événements.</p>
+
+                <div class="alert alert-info">
+                    <strong>Templates MelodiJS :</strong> Les composants MelodiJS sont stockés dans
+                    <code>modulename/templates/melodijs/</code> et exposés automatiquement via
+                    <code>/static_templates_melodijs/modulename/fichier.html</code>
+                </div>
+
+                <h3>Architecture MelodiJS</h3>
+                <p>MelodiJS suit le pattern composant avec :</p>
+                <ul>
+                    <li><strong>data()</strong> : État réactif du composant</li>
+                    <li><strong>methods</strong> : Fonctions du composant</li>
+                    <li><strong>template</strong> : HTML du composant (inline, URL, ou sélecteur)</li>
+                    <li><strong>props</strong> : Propriétés passées au composant</li>
+                    <li><strong>hooks</strong> : Lifecycle hooks (mounted, etc.)</li>
+                </ul>
+
+                <h3>Structure des Templates</h3>
+                <pre><code>mon_module/
+├── templates/
+│   └── mon_module/     # Templates standard Jinja2 (IMPORTANT!)
+│       └── page.html
+└── templates/melodijs/ # Composants MelodiJS réactifs
+    ├── demo.html
+    ├── demo.js
+    └── widget.html</code></pre>
+
+                <div class="alert alert-warning">
+                    <strong>Attention :</strong> Les templates Jinja2 doivent être dans
+                    <code>modulename/templates/modulename/</code>. Par exemple :
+                    <code>contacts/templates/contacts/list.html</code>
+                </div>
+
+                <h3>Créer un Composant Simple</h3>
+                <p><strong>Fichier : mon_module/static/js/app.js</strong></p>
+                <pre><code>import { createApp } from '/static/base/melodiJS/melodijs.js'
+
+const app = createApp({
+    components: {
+        "mon-composant": {
+            data() {
+                return {
+                    count: 0,
+                    message: "Hello MelodiJS!"
+                }
+            },
+            methods: {
+                incrementer() {
+                    this.count++
+                }
+            },
+            template: `
+                &lt;div&gt;
+                    &lt;h3&gt;{{ message }}&lt;/h3&gt;
+                    &lt;p&gt;Compteur : {{ count }}&lt;/p&gt;
+                    &lt;button @click="incrementer"&gt;+1&lt;/button&gt;
+                &lt;/div&gt;
+            `
+        }
+    }
+})
+
+app.mount("#app")</code></pre>
+
+                <h3>Utiliser un Template Externe</h3>
+                <p><strong>Fichier : mon_module/templates/melodijs/compteur.html</strong></p>
+                <pre><code>&lt;div class="compteur"&gt;
+    &lt;h3&gt;{{ titre }}&lt;/h3&gt;
+    &lt;p&gt;Valeur : {{ valeur }}&lt;/p&gt;
+    &lt;button @click="incrementer"&gt;Augmenter&lt;/button&gt;
+    &lt;button @click="decrementer"&gt;Diminuer&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+                <p><strong>Fichier : mon_module/static/js/app.js</strong></p>
+                <pre><code>import { createApp } from '/static/base/melodiJS/melodijs.js'
+
+function getUrlTemplate(template) {
+    return "/static_templates_melodijs/mon_module/" + template + ".html"
+}
+
+const app = createApp({
+    components: {
+        "c-compteur": {
+            data() {
+                return {
+                    titre: "Mon Compteur",
+                    valeur: 0
+                }
+            },
+            template: { url: getUrlTemplate("compteur") },
+            methods: {
+                incrementer() {
+                    this.valeur++
+                },
+                decrementer() {
+                    this.valeur--
+                }
+            }
+        }
+    }
+})
+
+app.mount("#app")</code></pre>
+
+                <h3>Props (Passage de Données)</h3>
+                <p>Les props permettent de passer des données du parent vers les enfants.</p>
+
+                <p><strong>Parent :</strong></p>
+                <pre><code>&lt;c-user name="Gomsu Gaetant" role="Admin"&gt;&lt;/c-user&gt;</code></pre>
+
+                <p><strong>Composant :</strong></p>
+                <pre><code>{
+    "c-user": {
+        props: ["name", "role"],
+        template: `
+            &lt;div class="user-card"&gt;
+                &lt;h4&gt;{{ name }}&lt;/h4&gt;
+                &lt;p&gt;Rôle : {{ role }}&lt;/p&gt;
+            &lt;/div&gt;
+        `
+    }
+}</code></pre>
+
+                <h3>Composition de Composants</h3>
+                <p>Les composants peuvent s'imbriquer les uns dans les autres.</p>
+                <pre><code>// Composant parent
+"c-dashboard": {
+    template: `
+        &lt;div&gt;
+            &lt;h2&gt;Dashboard&lt;/h2&gt;
+            &lt;c-stats&gt;&lt;/c-stats&gt;
+            &lt;c-user-list&gt;&lt;/c-user-list&gt;
+        &lt;/div&gt;
+    `
+}
+
+// Composants enfants
+"c-stats": {
+    template: `&lt;div&gt;Statistiques...&lt;/div&gt;`
+},
+"c-user-list": {
+    template: `&lt;div&gt;Liste utilisateurs...&lt;/div&gt;`
+}</code></pre>
+
+                <h3>Événements (@click, @submit, etc.)</h3>
+                <pre><code>&lt;button @click="sauvegarder"&gt;Sauvegarder&lt;/button&gt;
+&lt;form @submit="traiterFormulaire"&gt;
+    &lt;input type="text" v-model="nom"&gt;
+    &lt;button type="submit"&gt;Envoyer&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+                <h3>Hooks Lifecycle</h3>
+                <pre><code>{
+    "mon-composant": {
+        data() {
+            return { users: [] }
+        },
+        hooks: {
+            mounted() {
+                // Appelé quand le composant est monté dans le DOM
+                console.log("Composant monté!")
+                this.chargerDonnees()
+            }
+        },
+        methods: {
+            async chargerDonnees() {
+                const response = await fetch('/api/mon_module/users')
+                this.users = await response.json()
+            }
+        }
+    }
+}</code></pre>
+
+                <h3>Exemple Complet : TodoList Réactive</h3>
+                <p><strong>mon_module/templates/melodijs/todolist.html</strong></p>
+                <pre><code>&lt;div class="todo-app"&gt;
+    &lt;h2&gt;Ma TodoList&lt;/h2&gt;
+    
+    &lt;form @submit="ajouterTache"&gt;
+        &lt;input type="text" v-model="nouvelleTache" placeholder="Nouvelle tâche"&gt;
+        &lt;button type="submit"&gt;Ajouter&lt;/button&gt;
+    &lt;/form&gt;
+
+    &lt;ul&gt;
+        &lt;li v-for="(tache, index) in taches" :key="index"&gt;
+            {{ tache }}
+            &lt;button @click="supprimerTache(index)"&gt;✕&lt;/button&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;</code></pre>
+
+                <p><strong>mon_module/static/js/todo.js</strong></p>
+                <pre><code>import { createApp } from '/static/base/melodiJS/melodijs.js'
+
+const app = createApp({
+    components: {
+        "c-todolist": {
+            data() {
+                return {
+                    nouvelleTache: "",
+                    taches: []
+                }
+            },
+            template: {
+                url: "/static_templates_melodijs/mon_module/todolist.html"
+            },
+            methods: {
+                ajouterTache(e) {
+                    e.preventDefault()
+                    if (this.nouvelleTache.trim()) {
+                        this.taches.push(this.nouvelleTache)
+                        this.nouvelleTache = ""
+                    }
+                },
+                supprimerTache(index) {
+                    this.taches.splice(index, 1)
+                }
+            },
+            hooks: {
+                mounted() {
+                    console.log("TodoList montée!")
+                }
+            }
+        }
+    }
+})
+
+app.mount("#app")</code></pre>
+
+                <p><strong>Page HTML principale</strong></p>
+                <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;TodoList&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="app"&gt;
+        &lt;c-todolist&gt;&lt;/c-todolist&gt;
+    &lt;/div&gt;
+    
+    &lt;script type="module" src="/mon_module/static/js/todo.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                <div class="alert alert-success">
+                    <strong>Astuce :</strong> MelodiJS gère automatiquement la réactivité. Quand vous modifiez
+                    <code>this.taches</code>, le DOM se met à jour automatiquement !
+                </div>
+            </section>
+
+            <section id="widgets">
+
+                <h2>Widgets (WidgetManager)</h2>
+                <p>Les widgets sont des composants HTML réutilisables que vous pouvez injecter dans n'importe quelle
+                    page.</p>
+
+                <h3>Enregistrement</h3>
+                <pre><code>@self.register_widget("stats_widget")
+def stats_widget():
+    total = self.app.db.select("commandes")
+    html = f'''
+    &lt;div class="widget-stats"&gt;
+        &lt;h3&gt;Statistiques&lt;/h3&gt;
+        &lt;p&gt;Commandes : {len(total)}&lt;/p&gt;
+    &lt;/div&gt;
+    '''
+    return self.router.render_template_string(html)</code></pre>
+
+                <h3>Utilisation dans un template</h3>
+                <pre><code>{{ get_widget("mon_module", "stats_widget") }}</code></pre>
+            </section>
+
+            <section id="menus">
+                <h2>Menus (MenuItemManager)</h2>
+                <p>Gérez la navigation de votre application avec le <code>MenuItemManager</code>.</p>
+
+                <h3>Enregistrement d'un élément de menu</h3>
+                <pre><code>self.app.menu_item_manager.register(
+    name_module=self.dirname,
+    name="clients",
+    label="Clients",
+    url="/clients/list",
+    icon="users"
+)</code></pre>
+            </section>
+
+            <section id="homepage">
+                <h2>HomePage Manager</h2>
+                <p>Le <code>HomePageManager</code> permet à chaque module de contribuer à la page d'accueil.</p>
+
+                <h3>Enregistrement</h3>
+                <pre><code>def ma_home_page():
+    return self.router.render_template("home_widget.html")
+
+self.register_home_page(ma_home_page, {"priority": 10})</code></pre>
+            </section>
+
+            <section id="events">
+                <h2>Système d'Événements (EventListener)</h2>
+                <p>Pour éviter le couplage fort entre modules, utilisez le système d'événements pub/sub.</p>
+
+                <h3>Émettre un événement</h3>
+                <pre><code># Module A
+self.app.event_listener.emit("commande_creee", {
+    "id": 123,
+    "montant": 1500,
+    "client_id": 45
+})</code></pre>
+
+                <h3>Écouter un événement</h3>
+                <pre><code># Module B
+def on_commande_creee(data):
+    print(f"Nouvelle commande #{data['id']} - {data['montant']}€")
+    # Envoi email, mise à jour stock, etc.
+
+self.app.event_listener.on("commande_creee", on_commande_creee)</code></pre>
+            </section>
+
+            <section id="services">
+                <h2>Services (ServiceManager)</h2>
+                <p>Les services permettent de partager de la logique métier réutilisable entre modules.</p>
+
+                <h3>Enregistrement</h3>
+                <pre><code>@self.register_service("calcul_tva")
+def calcul_tva(montant_ht, taux=0.20):
+    return montant_ht * taux</code></pre>
+
+                <h3>Utilisation</h3>
+                <pre><code># Dans n'importe quel module
+tva_service = self.app.service_manager.get("mon_module", "calcul_tva")
+montant_tva = tva_service(1000)  # 200.0</code></pre>
+            </section>
+
+            <section id="translation">
+                <h2>Translation (Internationalisation)</h2>
+                <p>MELODI supporte nativement plusieurs langues via le système <code>Translation</code>.</p>
+
+                <h3>Structure</h3>
+                <pre><code>mon_module/
+└── langs/
+    ├── fr/
+    │   └── messages.json
+    └── en/
+        └── messages.json</code></pre>
+
+                <h3>Fichier de traduction (langs/fr/messages.json)</h3>
+                <pre><code>{
+  "welcome": "Bienvenue",
+  "goodbye": "Au revoir",
+  "users_count": "Nombre d'utilisateurs"
+}</code></pre>
+
+                <h3>Initialisation dans le module</h3>
+                <pre><code>self.init_translation(default_lang="fr")</code></pre>
+
+                <h3>Utilisation</h3>
+                <pre><code>translations = self.translate("messages", ["welcome", "goodbye"], lang="fr")
+print(translations["welcome"])  # "Bienvenue"</code></pre>
+            </section>
+
+            <section id="storage">
+                <h2>Storage (Gestion de fichiers)</h2>
+                <p>Le <code>Storage</code> facilite la gestion des fichiers uploadés.</p>
+
+                <h3>Sauvegarder un fichier</h3>
+                <pre><code>from flask import request
+
+@self.router.add_route("/upload", methods=["POST"])
+def upload_file():
+    file = request.files['document']
+    path = self.app.storage.save(file, folder="documents")
+    return {"path": path}</code></pre>
+
+                <h3>Récupérer un fichier</h3>
+                <pre><code>file_path = self.app.storage.get_path("documents/mon_fichier.pdf")</code></pre>
+            </section>
+
+            <section id="timer">
+                <h2>Timer (Tâches planifiées)</h2>
+                <p>Le <code>TimerManager</code> permet d'exécuter des tâches à intervalles réguliers.</p>
+
+                <h3>Planifier une tâche</h3>
+                <pre><code>def tache_quotidienne():
+    print("Nettoyage des données...")
+
+self.app.timer_manager.schedule(tache_quotidienne, interval=86400)  # 24h en secondes</code></pre>
+            </section>
+
+            <section id="config">
+                <h2>Configuration</h2>
+                <p>Le système de configuration centralise tous les paramètres de l'application.</p>
+
+                <h3>Accès à la config</h3>
+                <pre><code># Dans un module
+debug_mode = self.app.config.DEBUG
+db_path = self.app.config.PATH_DB</code></pre>
+
+                <h3>Variables disponibles</h3>
+                <ul>
+                    <li><code>PATH_DIR_RACINE</code> : Racine du projet</li>
+                    <li><code>PATH_DIR_MODULES</code> : Dossier des modules</li>
+                    <li><code>PATH_DIR_STORAGE</code> : Dossier de stockage</li>
+                    <li><code>PATH_DB</code> : Chemin de la base de données</li>
+                </ul>
+            </section>
+
+            <section id="database">
+                <h2>Base de Données (ORM)</h2>
+                <p>MELODI fournit un ORM SQLite simple mais puissant.</p>
+
+                <h3>Créer une table</h3>
+                <pre><code>self.app.db.create_table("produits", {
+    "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+    "nom": "TEXT NOT NULL",
+    "prix": "REAL",
+    "stock": "INTEGER DEFAULT 0",
+    "created_at": "DATETIME DEFAULT CURRENT_TIMESTAMP"
+})</code></pre>
+
+                <h3>Opérations CRUD</h3>
+                <pre><code># INSERT
+self.app.db.insert("produits", {"nom": "Laptop", "prix": 999.99, "stock": 10})
+
+# SELECT (tous)
+produits = self.app.db.select("produits")
+
+# SELECT (avec condition)
+produits_chers = self.app.db.select("produits", where={"prix": ">500"})
+
+# UPDATE
+self.app.db.update("produits", {"stock": 5}, where={"id": 1})
+
+# DELETE
+self.app.db.delete("produits", where={"id": 1})</code></pre>
+            </section>
+
+            <section id="tutorial-contact">
+                <h2>Tutoriel : Module de Gestion de Contacts</h2>
+                <p>Créons un module complet avec CRUD, widgets et événements.</p>
+
+                <h3>1. Structure</h3>
+                <pre><code>modules/
+└── contacts/
+    ├── infos.json
+    ├── module.py
+    ├── templates/
+    │   ├── list.html
+    │   └── form.html
+    └── static/
+        └── css/
+            └── contacts.css</code></pre>
+
+                <h3>2. infos.json</h3>
+                <pre><code>{
+  "version": "1.0",
+  "name": "contacts",
+  "title": "Gestion Contacts",
+  "description": "Module de gestion de contacts",
+  "depends": {
+    "modules": []
+  }
+}</code></pre>
+
+                <h3>3. module.py (Complet)</h3>
+                <pre><code>from core.module import ApplicationModule
+from flask import request, redirect
+
+class ContactModule(ApplicationModule):
+    def load(self):
+        # Création table
+        self.app.db.create_table("contacts", {
+            "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+            "nom": "TEXT NOT NULL",
+            "email": "TEXT",
+            "telephone": "TEXT",
+            "created_at": "DATETIME DEFAULT CURRENT_TIMESTAMP"
+        })
+
+        # Route liste
+        @self.router.add_route("/list")
+        def liste():
+            contacts = self.app.db.select("contacts")
+            return self.router.render_template("list.html", contacts=contacts)
+
+        # Route ajout (POST)
+        @self.router.add_route("/add", methods=["POST"])
+        def add():
+            data = {
+                "nom": request.form.get("nom"),
+                "email": request.form.get("email"),
+                "telephone": request.form.get("telephone")
+            }
+            contact_id = self.app.db.insert("contacts", data)
+            
+            # Émettre événement
+            self.app.event_listener.emit("contact_cree", {"id": contact_id, **data})
+            
+            return redirect("/contacts/list")
+
+        # Route suppression
+        @self.router.add_route("/delete/&lt;int:id&gt;")
+        def delete(id):
+            self.app.db.delete("contacts", where={"id": id})
+            return redirect("/contacts/list")
+
+        # Widget compteur
+        @self.register_widget("compteur_contacts")
+        def compteur():
+            total = len(self.app.db.select("contacts"))
+            return self.router.render_template_string(
+                f"&lt;div class='widget'&gt;&lt;h4&gt;Contacts&lt;/h4&gt;&lt;p&gt;{total}&lt;/p&gt;&lt;/div&gt;"
+            )
+
+        super().load()
+
+module = ContactModule(name="Contacts", router_name="contacts")</code></pre>
+
+                <h3>4. templates/list.html</h3>
+                <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Contacts&lt;/title&gt;
+    &lt;link rel="stylesheet" href="/contacts/static/css/contacts.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Liste des Contacts&lt;/h1&gt;
+    
+    &lt;form action="/contacts/add" method="POST"&gt;
+        &lt;input type="text" name="nom" placeholder="Nom" required&gt;
+        &lt;input type="email" name="email" placeholder="Email"&gt;
+        &lt;input type="tel" name="telephone" placeholder="Téléphone"&gt;
+        &lt;button type="submit"&gt;Ajouter&lt;/button&gt;
+    &lt;/form&gt;
+
+    &lt;table&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Nom&lt;/th&gt;
+                &lt;th&gt;Email&lt;/th&gt;
+                &lt;th&gt;Téléphone&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            {% for contact in contacts %}
+            &lt;tr&gt;
+                &lt;td&gt;{{ contact.nom }}&lt;/td&gt;
+                &lt;td&gt;{{ contact.email }}&lt;/td&gt;
+                &lt;td&gt;{{ contact.telephone }}&lt;/td&gt;
+                &lt;td&gt;
+                    &lt;a href="/contacts/delete/{{ contact.id }}"&gt;Supprimer&lt;/a&gt;
+                &lt;/td&gt;
+            &lt;/tr&gt;
+            {% endfor %}
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            </section>
+
+            <section id="tutorial-blog">
+                <h2>Tutoriel : Module Blog avec i18n</h2>
+                <p>Un module blog avec support multilingue.</p>
+
+                <h3>Structure avec traductions</h3>
+                <pre><code>modules/
+└── blog/
+    ├── infos.json
+    ├── module.py
+    ├── langs/
+    │   ├── fr/
+    │   │   └── messages.json
+    │   └── en/
+    │       └── messages.json
+    └── templates/
+        └── index.html</code></pre>
+
+                <h3>langs/fr/messages.json</h3>
+                <pre><code>{
+  "title": "Blog",
+  "new_post": "Nouvel article",
+  "published": "Publié le",
+  "no_posts": "Aucun article pour le moment"
+}</code></pre>
+
+                <h3>module.py avec traductions</h3>
+                <pre><code>class BlogModule(ApplicationModule):
+    def load(self):
+        # Initialiser traductions
+        self.init_translation(default_lang="fr")
+        
+        self.app.db.create_table("posts", {
+            "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+            "title": "TEXT NOT NULL",
+            "content": "TEXT",
+            "published_at": "DATETIME DEFAULT CURRENT_TIMESTAMP"
+        })
+
+        @self.router.add_route("/")
+        def index():
+            posts = self.app.db.select("posts")
+            lang = request.args.get("lang", "fr")
+            t = self.translate("messages", ["title", "new_post", "no_posts"], lang=lang)
+            return self.router.render_template("index.html", posts=posts, t=t)
+
+        super().load()
+
+module = BlogModule(name="Blog", router_name="blog")</code></pre>
+            </section>
+
+            <section id="api-application">
+                <h2>API Reference - Application</h2>
+
+                <div class="api-card">
+                    <div class="api-header">class core.application.Application</div>
+                    <div class="api-body">
+                        <p>Singleton central de MELODI. Accessible via <small><code>self.app</code></small> dans les
+                            modules.</p>
+
+                        <h4>Attributs</h4>
+                        <ul class="param-list">
+                            <li><code>server</code> : Instance FlaskAdapter</li>
+                            <li><code>config</code> : Configuration globale</li>
+                            <li><code>db</code> : Instance DataBase</li>
+                            <li><code>router</code> : WebRouter principal</li>
+                            <li><code>api_router</code> : APIRouter principal</li>
+                            <li><code>module_manager</code> : Gestionnaire de modules</li>
+                            <li><code>service_manager</code> : Gestionnaire de services</li>
+                            <li><code>widget_manager</code> : Gestionnaire de widgets</li>
+                            <li><code>menu_item_manager</code> : Gestionnaire de menus</li>
+                            <li><code>home_page_manager</code> : Gestionnaire de homepage</li>
+                            <li><code>event_listener</code> : Système d'événements</li>
+                            <li><code>timer_manager</code> : Gestionnaire de timers</li>
+                            <li><code>storage</code> : Gestionnaire de fichiers</li>
+                        </ul>
+
+                        <h4>Méthodes</h4>
+                        <ul class="method-list">
+                            <li class="method-item">
+                                <div class="method-sig">init() -> None</div>
+                                <div class="method-desc">Initialise tous les managers.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">build() -> None</div>
+                                <div class="method-desc">Charge et initialise tous les modules.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">run(host="0.0.0.0", port=5000, debug=True) -> None</div>
+                                <div class="method-desc">Démarre le serveur Flask.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="api-module">
+                <h2>API Reference - ApplicationModule</h2>
+
+                <div class="api-card">
+                    <div class="api-header">class core.module.ApplicationModule</div>
+                    <div class="api-body">
+                        <p>Classe de base pour tous les modules MELODI.</p>
+
+                        <h4>Attributs</h4>
+                        <ul class="param-list">
+                            <li><code>app</code> : Référence à Application</li>
+                            <li><code>router</code> : WebRouter du module</li>
+                            <li><code>api_router</code> : APIRouter du module</li>
+                            <li><code>dirname</code> : Nom du dossier du module</li>
+                            <li><code>translation</code> : Instance Translation (si initialisée)</li>
+                        </ul>
+
+                        <h4>Méthodes</h4>
+                        <ul class="method-list">
+                            <li class="method-item">
+                                <div class="method-sig">load() -> None</div>
+                                <div class="method-desc"><strong>À surcharger.</strong> Point d'entrée pour définir
+                                    routes, services, widgets. Appelez toujours <code>super().load()</code> à la fin.
+                                </div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">register_service(name: str)</div>
+                                <div class="method-desc">Décorateur pour enregistrer un service.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">register_widget(name: str, infos: dict = {})</div>
+                                <div class="method-desc">Décorateur pour enregistrer un widget.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">register_home_page(func, infos: dict)</div>
+                                <div class="method-desc">Enregistre un composant de homepage.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">init_translation(default_lang: str) -> None</div>
+                                <div class="method-desc">Initialise le système de traduction.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">translate(filename: str|list, keys: str|list, lang: str = None)
+                                    -> dict</div>
+                                <div class="method-desc">Récupère des traductions.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="api-managers">
+                <h2>API Reference - Managers</h2>
+
+                <div class="api-card">
+                    <div class="api-header">class core.db.DataBase</div>
+                    <div class="api-body">
+                        <ul class="method-list">
+                            <li class="method-item">
+                                <div class="method-sig">create_table(name: str, schema: dict) -> None</div>
+                                <div class="method-desc">Crée une table si elle n'existe pas.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">select(table: str, where: dict = None) -> list</div>
+                                <div class="method-desc">Sélectionne des enregistrements.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">insert(table: str, data: dict) -> int</div>
+                                <div class="method-desc">Insère un enregistrement. Retourne l'ID.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">update(table: str, data: dict, where: dict) -> None</div>
+                                <div class="method-desc">Met à jour des enregistrements.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">delete(table: str, where: dict) -> None</div>
+                                <div class="method-desc">Supprime des enregistrements.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="api-card">
+                    <div class="api-header">class core.component.WidgetManager</div>
+                    <div class="api-body">
+                        <ul class="method-list">
+                            <li class="method-item">
+                                <div class="method-sig">register(name_module: str, name_widget: str, widget, infos:
+                                    dict) -> None</div>
+                                <div class="method-desc">Enregistre un widget.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">get(name_module: str, name_widget: str) -> callable</div>
+                                <div class="method-desc">Récupère un widget.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">render(name_module: str, name_widget: str) -> str</div>
+                                <div class="method-desc">Rend un widget (HTML).</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="api-card">
+                    <div class="api-header">class core.service.ServiceManager</div>
+                    <div class="api-body">
+                        <ul class="method-list">
+                            <li class="method-item">
+                                <div class="method-sig">register(name_module: str, name_service: str, service) -> None
+                                </div>
+                                <div class="method-desc">Enregistre un service.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">get(name_module: str, name_service: str) -> callable</div>
+                                <div class="method-desc">Récupère un service.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="api-card">
+                    <div class="api-header">class core.utils.EventListener</div>
+                    <div class="api-body">
+                        <ul class="method-list">
+                            <li class="method-item">
+                                <div class="method-sig">emit(event_name: str, data: dict) -> None</div>
+                                <div class="method-desc">Émet un événement.</div>
+                            </li>
+                            <li class="method-item">
+                                <div class="method-sig">on(event_name: str, callback: callable) -> None</div>
+                                <div class="method-desc">Écoute un événement.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+
+        const saved = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', saved);
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('open');
+            document.querySelector('.overlay').classList.toggle('active');
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === '#' + entry.target.id) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('section').forEach(section => observer.observe(section));
+    </script>
+
+</body>
+
+</html>
