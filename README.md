@@ -47,7 +47,6 @@ python main.py
 
 - `core/` : Le cœur du framework (Router, ModuleManager, DB, etc.)
 - `modules/` : Vos modules métiers personnalisés
-- `plugins/` : Scripts de plugins dynamiques
 - `config/` : Fichiers de configuration
 - `docs/` : Documentation développeur
 
