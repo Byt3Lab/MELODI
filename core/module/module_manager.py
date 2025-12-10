@@ -101,6 +101,13 @@ class ModuleManager:
             # skip directories without python module.py in dir of current_module_dirname
             return
 
+        # # VENDORING : Add vendor directory to sys.path
+        # path_vendor = join_paths(path_dir_to_current_module, "vendor")
+        # if path_exist(path_vendor):
+        #     if path_vendor not in sys.path:
+        #         sys.path.insert(0, path_vendor)
+
+
         module_name_space = f"modules.{name_module}.module"
 
         try:
