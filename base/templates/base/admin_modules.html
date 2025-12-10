@@ -3,148 +3,144 @@
 {% block title %}Gestion des modules{% endblock %}
 
 {% block admin_content %}
-<div class="card shadow-sm">
-    <div class="card-body">
+<div class="">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0">
+            Modules installés : 
+            <span class="">{{ modules_len }}</span>
+        </h4>
+        <a href="/admin/add_module" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Ajouter un module
+        </a>
+    </div>
 
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0">
-                Modules installés : 
-                <span class="badge bg-primary">{{ modules_len }}</span>
-            </h4>
-            <a href="/admin/add_module" class="btn btn-dark btn-sm">
-                <i class="bi bi-plus-circle"></i> Ajouter un module
+    <!-- Liste -->
+    <div class="list-group">
+
+        {% for module in modules %}
+        <div class="list-group-item py-3 mb-2 shadow-sm">
+
+            <div class="d-flex justify-content-between align-items-center">
+                
+                <!-- Info module -->
+                <div class="d-flex align-items-start">
+
+                    <!-- Icon -->
+                    <img src="/static/{{module.name}}/icon.png"
+                            alt="icone module"
+                            class="me-3"
+                            style="width: 55px; height: 55px; object-fit: contain;">
+
+                    <div>
+                        <!-- Nom -->
+                        <h6 class="mb-1">
+                            <strong>{{ module.infos.name }}</strong>
+                        </h6>
+
+                        <!-- Titre -->
+                        <div class="text-muted">{{ module.infos.title }}</div>
+
+                        <!-- Bouton details -->
+                        <button class="btn btn-sm btn-link p-0 mt-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#module_{{module.name}}">
+                            Voir les détails →
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="text-end">
+                    {% if module.enabled %}
+                        <span class="badge bg-success ms-2">Actif</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark ms-2">Désactivé</span>
+                    {% endif %}
+                    
+                    {% if module.enabled %}
+                        <a class="btn btn-sm btn-outline-danger"
+                            href="/admin/modules/{{module.name}}/off">
+                            Désactiver
+                        </a>
+
+                        <a class="btn btn-sm btn-outline-secondary ms-2"
+                            href="/admin/modules/{{module.name}}">
+                            Gérer
+                        </a>
+                    {% else %}
+                        <a class="btn btn-sm btn-outline-success"
+                            href="/admin/modules/{{module.name}}/on">
+                            Activer
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="module_{{module.name}}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                    <div class="modal-content">
+                        
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                {{ module.infos.title }} – {{ module.infos.version }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+
+                            <!-- Banner -->
+                            <div class="mb-3 text-center">
+                                <img src="/static/{{module.name}}/banner.png"
+                                        alt="banner"
+                                        style="width: 100%; max-height: 180px; object-fit: cover;">
+                            </div>
+
+                            <!-- Infos -->
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item">
+                                    <strong>Nom :</strong> {{ module.infos.name }}
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Titre :</strong> {{ module.infos.title }}
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Version :</strong> {{ module.infos.version }}
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Dépendances :</strong>
+                                    <br>
+                                    <code>{{ module.infos.depends }}</code>
+                                </li>
+                            </ul>
+
+                            <p class="mb-0">{{ module.infos.description }}</p>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Fermer
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+
+        <!-- Ajouter un module -->
+        <div class="">
+            <a href="/admin/add_module" class="btn btn-primary w-100">
+                <i class="bi bi-plus"></i> Ajouter un module
             </a>
         </div>
 
-        <!-- Liste -->
-        <div class="list-group">
-
-            {% for module in modules %}
-            <div class="list-group-item py-3">
-
-                <div class="d-flex justify-content-between align-items-center">
-                    
-                    <!-- Info module -->
-                    <div class="d-flex align-items-start">
-
-                        <!-- Icon -->
-                        <img src="/static/{{module.name}}/icon.png"
-                             alt="icone module"
-                             class="me-3"
-                             style="width: 55px; height: 55px; object-fit: contain;">
-
-                        <div>
-                            <!-- Nom -->
-                            <h6 class="mb-1">
-                                <strong>{{ module.infos.name }}</strong>
-                                {% if module.enabled %}
-                                    <span class="badge bg-success ms-2">Actif</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark ms-2">Désactivé</span>
-                                {% endif %}
-                            </h6>
-
-                            <!-- Titre -->
-                            <div class="text-muted">{{ module.infos.title }}</div>
-
-                            <!-- Bouton details -->
-                            <button class="btn btn-sm btn-link p-0 mt-1"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#module_{{module.name}}">
-                                Voir les détails →
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="text-end">
-
-                        {% if module.enabled %}
-                            <a class="btn btn-sm btn-outline-danger"
-                               href="/admin/modules/{{module.name}}/off">
-                                Désactiver
-                            </a>
-
-                            <a class="btn btn-sm btn-outline-secondary ms-2"
-                               href="/admin/modules/{{module.name}}">
-                                Gérer
-                            </a>
-                        {% else %}
-                            <a class="btn btn-sm btn-outline-success"
-                               href="/admin/modules/{{module.name}}/on">
-                                Activer
-                            </a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Modal -->
-                <div class="modal fade" id="module_{{module.name}}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-scrollable modal-lg">
-                        <div class="modal-content">
-                            
-                            <div class="modal-header">
-                                <h5 class="modal-title">
-                                    {{ module.infos.title }} – {{ module.infos.version }}
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-
-                            <div class="modal-body">
-
-                                <!-- Banner -->
-                                <div class="mb-3 text-center">
-                                    <img src="/static/{{module.name}}/banner.png"
-                                         alt="banner"
-                                         style="width: 100%; max-height: 180px; object-fit: cover;">
-                                </div>
-
-                                <!-- Infos -->
-                                <ul class="list-group mb-3">
-                                    <li class="list-group-item">
-                                        <strong>Nom :</strong> {{ module.infos.name }}
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Titre :</strong> {{ module.infos.title }}
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Version :</strong> {{ module.infos.version }}
-                                    </li>
-                                    <li class="list-group-item">
-                                        <strong>Dépendances :</strong>
-                                        <br>
-                                        <code>{{ module.infos.depends }}</code>
-                                    </li>
-                                </ul>
-
-                                <p class="mb-0">{{ module.infos.description }}</p>
-
-                            </div>
-
-                            <div class="modal-footer">
-                                <button type="button"
-                                        class="btn btn-secondary"
-                                        data-bs-dismiss="modal">
-                                    Fermer
-                                </button>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            {% endfor %}
-
-            <!-- Ajouter un module -->
-            <div class="list-group-item text-center py-3">
-                <a href="/admin/add_module" class="btn btn-dark w-50">
-                    <i class="bi bi-plus"></i> Installer un module
-                </a>
-            </div>
-
-        </div>
     </div>
 </div>
 {% endblock %}

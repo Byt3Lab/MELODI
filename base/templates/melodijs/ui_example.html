@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MelodiUI Showcase</title>
+    <link rel="stylesheet" href="/static/base/melodiUI/melodi.ui.css">
+</head>
+
+<body>
+
+    <div id="app">
+        <m-navbar brand="MelodiUI" variant="dark" class="mb-4">
+            <div class="m-navbar-nav">
+                <m-btn variant="outline-light" size="sm" @click="showAlert = !showAlert">Toggle Alert</m-btn>
+            </div>
+        </m-navbar>
+
+        <div class="m-container">
+
+            <m-alert v-model="showAlert" dismissible variant="info">
+                Welcome to the MelodiUI Component Showcase! This is a dismissible alert.
+            </m-alert>
+
+            <div class="section">
+                <h2>Buttons</h2>
+                <div class="demo-box">
+                    <div class="mb-2">
+                        <m-btn variant="primary" class="me-2">Primary</m-btn>
+                        <m-btn variant="secondary" class="me-2">Secondary</m-btn>
+                        <m-btn variant="success" class="me-2">Success</m-btn>
+                        <m-btn variant="danger" class="me-2">Danger</m-btn>
+                        <m-btn variant="warning" class="me-2">Warning</m-btn>
+                        <m-btn variant="info" class="me-2">Info</m-btn>
+                        <m-btn variant="light" class="me-2">Light</m-btn>
+                        <m-btn variant="dark" class="me-2">Dark</m-btn>
+                    </div>
+                    <div class="mb-2">
+                        <m-btn variant="primary" outline class="me-2">Outline Primary</m-btn>
+                        <m-btn variant="danger" outline class="me-2">Outline Danger</m-btn>
+                    </div>
+                    <div>
+                        <m-btn variant="primary" size="sm" class="me-2">Small</m-btn>
+                        <m-btn variant="primary" class="me-2">Default</m-btn>
+                        <m-btn variant="primary" size="lg" class="me-2">Large</m-btn>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Inputs</h2>
+                <div class="demo-box">
+                    <m-input label="Username" v-model="username" placeholder="Enter username"></m-input>
+                    <p>Bound value: <strong>{{ username }}</strong></p>
+
+                    <m-input label="Email (with error)" v-model="email" type="email"
+                        error="Invalid email address"></m-input>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Cards</h2>
+                <div class="demo-box">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <m-card title="Card Title" subtitle="Card Subtitle">
+                            <p>Some quick example text to build on the card title and make up the bulk of the card's
+                                content.</p>
+                            <template v-slot:footer>
+                                <m-btn variant="primary" size="sm">Go somewhere</m-btn>
+                            </template>
+                        </m-card>
+
+                        <m-card>
+                            <template v-slot:header>
+                                Custom Header Slot
+                            </template>
+                            <p>This card uses a custom header slot instead of props.</p>
+                        </m-card>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Modals</h2>
+                <div class="demo-box">
+                    <m-btn variant="primary" @click="showModal = true">Open Modal</m-btn>
+
+                    <m-modal v-model="showModal" title="Example Modal">
+                        <p>This is the modal body content.</p>
+                        <p>You can put anything here.</p>
+                        <template v-slot:footer>
+                            <m-btn variant="secondary" @click="showModal = false" class="me-2">Close</m-btn>
+                            <m-btn variant="primary" @click="saveChanges">Save Changes</m-btn>
+                        </template>
+                    </m-modal>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        import { createApp } from '/static/base/melodiJS/melodijs.js'
+        import { MelodiUI } from '/static/base/melodiUI/melodi.ui.js'
+
+        const app = createApp({
+            data() {
+                return {
+                    username: 'JohnDoe',
+                    email: 'john@example',
+                    showModal: true,
+                    showAlert: true
+                };
+            },
+            methods: {
+                saveChanges() {
+                    alert('Changes saved!');
+                    this.showModal = false;
+                }
+            }
+        });
+
+        // Install MelodiUI plugin
+        app.use(MelodiUI);
+
+        app.mount('#app');
+    </script>
+
+</body>
+
+</html>

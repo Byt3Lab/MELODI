@@ -27,3 +27,12 @@ class Config:
         if not path_exist(path):
             return
         self.infos_entreprise = json.loads(read_file(path_file=path))
+
+    def is_installed(self):
+        return path_exist(join_paths(self.PATH_DIR_CONFIG, "infos_entreprise.json"))
+
+    def save_infos_entreprise(self, data):
+        path = join_paths(self.PATH_DIR_CONFIG, "infos_entreprise.json")
+        with open(path, "w") as f:
+            json.dump(data, f, indent=4)
+        self.infos_entreprise = data

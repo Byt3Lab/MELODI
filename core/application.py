@@ -41,11 +41,14 @@ class Application:
         self.db.init_database()
 
         self.register_request_maintenance()
+        self.register_install_check()
 
         from base.module import module as base_module
 
         base_module.init(app=self, dirname="base")
         base_module.load()
+        
+        self.db.create_all()
 
         self.module_manager.load_modules()
 
@@ -56,6 +59,16 @@ class Application:
         self.register_routers()
 
         self.register_route_not_found()
+
+    def register_install_check(self):
+        @self.server.app.before_request
+        def before_request():
+            from flask import request, redirect
+            if not self.config.is_installed():
+                if request.path.startswith("/static"):
+                    return
+                if request.path != "/install" and request.path != "/install/submit":
+                    return redirect("/install")
 
     def run(self, host="0.0.0.0", port=5000, debug=True):
         self.server.app.run(host=host, port=port, debug=debug)

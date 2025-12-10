@@ -1,13 +1,17 @@
 from core.router import WebRouter, RequestContext
-from base.services import HomePageService, WidgetService
+from base.services import HomePageService, WidgetService, InstallService
+from flask import request
 
 class BaseRoutes(WebRouter):
     def load (self):
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
+        self.install_service = InstallService(module=self.module)
 
         self.before_request()(self.br)
         self.before_request()(self.br2)
+        self.add_route("/install", methods=["GET"])(self.install)
+        self.add_route("/install/submit", methods=["POST"])(self.install_submit)
         self.add_route("/", methods=["GET"])(self.home)
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
@@ -115,3 +119,11 @@ class BaseRoutes(WebRouter):
             return home_page
 
         return self.render_template("home.html")
+
+    def install(self):
+        return self.render_template("install/install.html")
+
+    def install_submit(self):
+        form_data = request.form
+        self.install_service.install(form_data)
+        return self.redirect("/login")

@@ -8,12 +8,16 @@ if TYPE_CHECKING:
 class MenuItemManager:
     def __init__(self, app: Application):
         self.app = app
-        self.menu_items = {}
-        self.managers:dict[str,"MenuItemManager"] = {}
+        self.menu_items:dict[dict[list]] = {}
 
-    def new_manager(self, name):
-        self.managers[name] = MenuItemManager(self.app)
+    def get(self, name_module, name_menu_item):
+        return self.menu_items.get(name_module, {}).get(name_menu_item)
 
-    def get_manager(self, name)->"MenuItemManager":
-        return self.managers[name]
-    
+    def add(self, name_module, name_menu_item, menu_item):
+        if name_module not in self.menu_items:
+            self.menu_items[name_module] = {}
+        
+        if name_menu_item not in self.menu_items[name_module]:
+            self.menu_items[name_module][name_menu_item] = []
+        
+        self.menu_items[name_module][name_menu_item].append(menu_item)
