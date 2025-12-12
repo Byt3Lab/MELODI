@@ -1,6 +1,6 @@
 from core.router import WebRouter, RequestContext
 from base.services import HomePageService, WidgetService, InstallService
-from flask import request
+from flask import Response, request
 
 class BaseRoutes(WebRouter):
     def load (self):
@@ -8,15 +8,20 @@ class BaseRoutes(WebRouter):
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
 
-        self.before_request()(self.br)
-        self.before_request()(self.br2)
+        # self.before_request()(self.br)
+        # self.before_request()(self.br2)
+        self.after_request()(self.deny_iframe)
+
         self.add_route("/install", methods=["GET"])(self.install)
         self.add_route("/install/submit", methods=["POST"])(self.install_submit)
-        self.add_route("/", methods=["GET"])(self.home)
+        self.add_route("/", methods=["GET"], before_request=[self.br,self.br2])(self.home)
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
+
+        
         self.add_route("/logout", methods=["GET"])(self.logout)
         self.add_route("/admin", methods=["GET"])(self.admin_dashboard)
+        # self.add_route("/admin", methods=["GET"], before_request=[self.br,self.br2], after_request=[self.deny_iframe])(self.admin_dashboard)
         self.add_route('/admin/users', methods=['GET'])(self.admin_users)
         self.add_route('/admin/profile', methods=['GET'])(self.profile)
         self.add_route('/admin/settings/widgets', methods=['GET'])(self.settings_widgets)
@@ -29,6 +34,11 @@ class BaseRoutes(WebRouter):
         self.add_route('/admin/modules/<path:mod>/on', methods=['GET'])(self.on_module)
         self.add_route('/admin/logs', methods=['GET'])(self.logs)
 
+        # self.add_many_routes([
+        #     {"path": "/admin", "methods": ["GET"], "handler": self.admin_dashboard},
+        # ], before_request=[self.br,self.br2], after_request=[self.deny_iframe])
+
+
     def br(self):
         def sr(ctx:RequestContext):
             ctx.data["hello"] = "hello wordl"
@@ -39,6 +49,10 @@ class BaseRoutes(WebRouter):
     def br2(self):
         ctx = self.get_request_context()
         print(ctx.data["hello"])
+
+    def deny_iframe(self,response: Response) -> Response:
+        response.headers['X-Frame-Options'] = 'DENY'
+        return response
 
     def login(self):
         return self.render_template("login.html")

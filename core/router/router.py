@@ -21,16 +21,65 @@ class Router:
 
         self.router = Blueprint(name,import_name, template_folder=self.template_folder)
 
-    def add_route(self, path: str, methods=None):
+    def add_route(self, path: str, methods=None, before_request:None|list[function]=None, after_request:None|list[function]=None):
         def decorator(f):
-            return self.router.route(path, methods=methods)(f)
+            def create_bp():
+                bp = Blueprint(self.router.name+"_"+f.__name__+"_mw", self.router.import_name)
+                return bp
+
+            bp = None
+            use_before = isinstance(before_request, list) and len(before_request) > 0
+            use_after = isinstance(after_request, list) and len(after_request) > 0
+            use_bp = use_before or use_after
+
+            if not use_bp:
+                return self.router.route(path, methods=methods)(f)
+        
+            bp = create_bp()
+
+            if use_before:
+                for bmw in before_request:
+                    bp.before_request(bmw)
+
+            if use_after:
+                for amw in after_request:
+                    bp.after_request(amw)
+            
+            bp.route(path, methods=methods)(f)
+            return self.router.register_blueprint(bp)
         return decorator
 
+    def add_many_routes(self, routes: list[dict], before_request:None|list[function]=None, after_request:None|list[function]=None):
+        use_global_before = isinstance(before_request, list) and len(before_request) > 0
+        use_global_after = isinstance(after_request, list) and len(after_request) > 0
+        
+        for route in routes:
+            path = route.get("path")
+            methods = route.get("methods", None)
+            br = route.get("before_request", None)
+            ar = route.get("after_request", None)
+            handler = route.get("handler")
+
+            if use_global_before:
+                br = br if isinstance(br, list) else []
+                br = before_request + br
+            
+            if use_global_after:
+                ar = ar if isinstance(ar, list) else []
+                ar = after_request + ar
+               
+            self.add_route(path, methods=methods, before_request=br, after_request=ar)(handler)
+    
     def before_request(self):
         def decorator(f):
             return self.router.before_request(f)
         return decorator
-        
+    
+    def after_request(self):
+        def decorator(f):
+            return self.router.after_request(f)
+        return decorator
+    
     def get_request():
         from flask import request
         return request
