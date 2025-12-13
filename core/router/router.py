@@ -98,6 +98,10 @@ class Router:
     def get_request_context(self)-> RequestContext:
         return self.app.server.get_request_context()
     
+    def get_request(self):
+        from flask import request
+        return request
+    
     def get_router(self):
         return self.router
 

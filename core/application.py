@@ -40,9 +40,6 @@ class Application:
     def build(self):
         self.db.init_database()
 
-        self.register_request_maintenance()
-        self.register_install_check()
-
         from base.module import module as base_module
 
         base_module.init(app=self, dirname="base")
@@ -58,16 +55,6 @@ class Application:
         self.register_route_not_found()
         self.register_routers()
 
-    def register_install_check(self):
-        @self.server.app.before_request
-        def before_request():
-            from flask import request, redirect
-            if not self.config.is_installed():
-                if request.path.startswith("/static"):
-                    return
-                if request.path != "/install" and request.path != "/install/submit":
-                    return redirect("/install")
-
     def run(self, host="0.0.0.0", port=5000, debug=True):
         self.server.app.run(host=host, port=port, debug=debug)
 
@@ -75,8 +62,8 @@ class Application:
         return self.server.app
 
     def register_routers(self):
-        self.server.add_router(self.api_router.get_router(), url_prefix="/api")
         self.server.add_router(self.router.get_router())
+        self.server.add_router(self.api_router.get_router(), url_prefix="/api")
 
     def register_route_not_found(self):
         def route_not_found(path):
@@ -89,14 +76,8 @@ class Application:
             return self.api_router.render_json({"error": "route not found", "path": path}), 404
 
         def api_route_not_found2():
-            return self.api_router.render_json({"error": "route not found", "path": "/"}), 404
+            return self.api_router.render_json({"error": "route not found", "path": "/  "}), 404
 
         self.router.add_route("/<path:path>")(route_not_found)
         self.api_router.add_route("/")(api_route_not_found2)
         self.api_router.add_route("/<path:path>")(api_route_not_found)
-
-    def register_request_maintenance(self):
-        @self.server.app.before_request
-        def before_request():
-            if not self.config.allow_request:
-                return "Service Unavailable for maintenance", 503

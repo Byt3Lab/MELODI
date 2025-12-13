@@ -26,7 +26,7 @@ class BaseApiRoutes(APIRouter):
     def deny_iframe(self,response: Response) -> Response:
         response.headers['X-Frame-Options'] = 'DENY'
         return response
-
+     
     def login(self):
         data = {"p":"login"}
 

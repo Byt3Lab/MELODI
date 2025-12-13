@@ -39,10 +39,16 @@ class FlaskAdapter(WebServerInterface):
         from flask import render_template
         return render_template(template_name, **context)
     
+    def before_request(self):
+        def decorator(f):
+            self.app.before_request(f)
+        return decorator
 
-    def add_middleware(self, middleware):
-        self.app.before_request(middleware)        
-
+    def after_request(self):
+        def decorator(f):
+            self.app.after_request(f)
+        return decorator
+    
     def add_router(self, router:Blueprint, url_prefix:str=""):
         self.app.register_blueprint(router, url_prefix=url_prefix)
 

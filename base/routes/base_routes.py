@@ -8,11 +8,8 @@ class BaseRoutes(WebRouter):
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
 
+        self.before_request()(self.check_installation)
         self.after_request()(self.deny_iframe)
-
-        self.add_route("/install", methods=["GET"])(self.install)
-        self.add_route("/install/submit", methods=["POST"])(self.install_submit)
-
 
         self.add_route("/", methods=["GET"])(self.home)
         self.add_route("/login", methods=["GET"])(self.login)
@@ -36,8 +33,29 @@ class BaseRoutes(WebRouter):
         #     {"path": "/admin", "methods": ["GET"], "handler": self.admin_dashboard},
         #     {"path": "/admin/users", "methods": ["GET"], "handler": self.admin_users},
         # ], before_request=[self.br,self.br2], after_request=[self.deny_iframe])
+        self.register_request_maintenance()
 
+    def check_installation(self):
+        request = self.get_request()
+        print(request.path)
+        # return "dsd"
+        if self.app.config.is_installed():
+            return None
 
+        if request.path == "/":
+            return self.render_template("home_welcome.html", hide_header=True)
+        
+        if request.path == "/install":
+            return self.render_template("install/install.html")
+        
+        return self.redirect("/install")
+        
+    def register_request_maintenance(self):
+        @self.app.server.before_request()
+        def before_request():
+            if not self.app.config.allow_request:
+                return "Service Unavailable for maintenance", 503
+       
     def br(self):
         def sr(ctx:RequestContext):
             ctx.data["hello"] = "hello wordl"

@@ -1,10 +1,10 @@
-:root{
+:root {
     --primary-900: #002a4e;
     --primary-700: #0b5ed7;
-    --glass-bg: rgba(255,255,255,0.7);
-    --muted: rgba(0,0,0,0.65);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --muted: rgba(0, 0, 0, 0.65);
     --muted2: rgba(255, 255, 255, 0.65);
-    
+
     /* New Design Variables */
     --brand-dark: #003366;
     --brand-light: #00509e;
@@ -15,7 +15,7 @@
 /* Header Styles */
 .navbar-custom {
     background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-light) 100%);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     padding: 0.5rem 0;
     transition: all 0.3s ease;
 }
@@ -25,7 +25,7 @@
 }
 
 .navbar-custom .nav-link {
-    color: rgba(255,255,255,0.85) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     font-weight: 500;
     padding: 0.5rem 1rem;
     transition: color 0.2s ease, transform 0.2s ease;
@@ -38,16 +38,16 @@
 }
 
 .btn-nav-action {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: #fff;
     transition: all 0.2s;
 }
 
 .btn-nav-action:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     color: #fff;
-    border-color: rgba(255,255,255,0.4);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Footer Styles */
@@ -67,7 +67,7 @@
 }
 
 .footer-link {
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     transition: color 0.2s ease, padding-left 0.2s ease;
     display: block;
@@ -86,15 +86,130 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     color: #fff;
     text-decoration: none;
     transition: all 0.3s ease;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .social-btn:hover {
     background: var(--brand-accent);
     color: var(--brand-dark);
     transform: translateY(-3px);
+}
+
+/* Home Page Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, rgba(0, 51, 102, 0.9) 0%, rgba(0, 80, 158, 0.8) 100%), url('/static/base/melodi_hero_bg.png');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 8rem 0 6rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.05)"/></svg>') repeat;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-light) 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--brand-dark);
+    margin-bottom: 1rem;
+}
+
+.feature-text {
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Call to Action Section */
+.cta-section {
+    background: var(--brand-dark);
+    color: white;
+    padding: 5rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent);
+    background-size: 30px 30px;
+    opacity: 0.1;
+}
+
+.cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.cta-text {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 2rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
