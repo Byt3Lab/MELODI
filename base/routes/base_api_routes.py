@@ -1,3 +1,4 @@
+from flask import Response
 from core.router import APIRouter
 from base.services import HomePageService, WidgetService
 
@@ -5,6 +6,8 @@ class BaseApiRoutes(APIRouter):
     def load(self):
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
+
+        self.after_request()(self.deny_iframe)
 
         self.add_route("/status", methods=["GET"])(self.status)
         self.add_route("/login", methods=["GET"])(self.login)
@@ -18,6 +21,11 @@ class BaseApiRoutes(APIRouter):
         self.add_route('/modules/<path:mod>/off', methods=['GET'])(self.off_module)
         self.add_route('/modules/<path:mod>/on', methods=['GET'])(self.on_module)
         self.add_route('/<path:path>', methods=['GET'])(self.not_found)
+
+
+    def deny_iframe(self,response: Response) -> Response:
+        response.headers['X-Frame-Options'] = 'DENY'
+        return response
 
     def login(self):
         data = {"p":"login"}

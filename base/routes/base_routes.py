@@ -8,24 +8,22 @@ class BaseRoutes(WebRouter):
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
 
-        # self.before_request()(self.br)
-        # self.before_request()(self.br2)
         self.after_request()(self.deny_iframe)
 
         self.add_route("/install", methods=["GET"])(self.install)
         self.add_route("/install/submit", methods=["POST"])(self.install_submit)
-        self.add_route("/", methods=["GET"], before_request=[self.br,self.br2])(self.home)
+
+
+        self.add_route("/", methods=["GET"])(self.home)
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
-
         
         self.add_route("/logout", methods=["GET"])(self.logout)
         self.add_route("/admin", methods=["GET"])(self.admin_dashboard)
-        # self.add_route("/admin", methods=["GET"], before_request=[self.br,self.br2], after_request=[self.deny_iframe])(self.admin_dashboard)
         self.add_route('/admin/users', methods=['GET'])(self.admin_users)
         self.add_route('/admin/profile', methods=['GET'])(self.profile)
         self.add_route('/admin/settings/widgets', methods=['GET'])(self.settings_widgets)
-        self.add_route('/admin/settings/home_page', methods=['GET'])(self.settings_home_page)
+        self.add_route('/admin/settings/home_page', methods=['GET'])(self.settings_home_page)   
         self.add_route('/admin/settings/home_page/<path:home_page>/on', methods=['GET'])(self.settings_home_page_on)
         self.add_route('/admin/settings/home_page_clear', methods=['GET'])(self.settings_home_page_clear)
         self.add_route('/admin/modules', methods=['GET'])(self.admin_modules)
@@ -36,6 +34,7 @@ class BaseRoutes(WebRouter):
 
         # self.add_many_routes([
         #     {"path": "/admin", "methods": ["GET"], "handler": self.admin_dashboard},
+        #     {"path": "/admin/users", "methods": ["GET"], "handler": self.admin_users},
         # ], before_request=[self.br,self.br2], after_request=[self.deny_iframe])
 
 

@@ -55,10 +55,8 @@ class Application:
         base_module._run()
 
         self.module_manager.run_modules()
-
-        self.register_routers()
-
         self.register_route_not_found()
+        self.register_routers()
 
     def register_install_check(self):
         @self.server.app.before_request
@@ -82,12 +80,20 @@ class Application:
 
     def register_route_not_found(self):
         def route_not_found(path):
-            from flask import render_template_string
-            if path_exist(self.config.path_template_404_not_found):
-                return render_template_string(read_file(self.config.path_template_404_not_found), path=path, hide_header=True, hide_footer=True), 404
-            return render_template_string(f"route : {path} not found 404"), 404
+            path_file_not_found = self.config.path_template_404_not_found
+            if path_exist(path_file_not_found):
+                return self.router.render_template_string(read_file(self.config.path_template_404_not_found), path=path, hide_header=True, hide_footer=True), 404
+            return self.router.render_template_string(f"route : {path} not found 404"), 404
 
-        self.server.app.route("/<path:path>")(route_not_found)
+        def api_route_not_found(path):
+            return self.api_router.render_json({"error": "route not found", "path": path}), 404
+
+        def api_route_not_found2():
+            return self.api_router.render_json({"error": "route not found", "path": "/"}), 404
+
+        self.router.add_route("/<path:path>")(route_not_found)
+        self.api_router.add_route("/")(api_route_not_found2)
+        self.api_router.add_route("/<path:path>")(api_route_not_found)
 
     def register_request_maintenance(self):
         @self.server.app.before_request
