@@ -16,8 +16,17 @@ class Config:
     PATH_DIR_STORAGE = join_paths(PATH_DIR_RACINE, "storage")
     allow_request = True
     path_template_404_not_found: str = ""
-    DB_URL = os.environ.get("url_database") or "sqlite:///erp.db"
     infos_entreprise = {}
+    
+    DB_URL = os.environ.get("db_url") or "sqlite:///erp.db"
+    DB_USER = os.environ.get("db_user") or "user"
+    DB_PASSWORD = os.environ.get("db_password") or "root"
+    DB_HOST = os.environ.get("db_host") or "localhost"
+    DB_PORT = os.environ.get("db_port") or "5432"
+    DB_PROVIDER = os.environ.get("db_provider") or "sqlite"
+    DB_NAME = os.environ.get("db_name") or "melodi_database"
+
+    # // postgresql://user:password@host:port/dbname
 
     def __init__(self):
         self.load_infos_entreprise()
@@ -29,7 +38,7 @@ class Config:
         self.infos_entreprise = json.loads(read_file(path_file=path))
 
     def is_installed(self):
-        return True 
+        return False 
         return path_exist(join_paths(self.PATH_DIR_CONFIG, "infos_entreprise.json"))
 
     def save_infos_entreprise(self, data):

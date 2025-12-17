@@ -9,6 +9,11 @@ class BaseApiRoutes(APIRouter):
 
         self.after_request()(self.deny_iframe)
 
+        if not self.app.app_is_installed:
+            self.add_route("/install", methods=["POST"])(self.install)
+            self.add_route('/<path:path>', methods=['GET'])(self.not_found)
+            return
+
         self.add_route("/status", methods=["GET"])(self.status)
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
@@ -85,6 +90,23 @@ class BaseApiRoutes(APIRouter):
     def status(self):
         return self.render_json(data={"status": "Admin API is working!"}, status_code=200)
 
+    def install(self):
+        req = self.get_request()
+
+        data = req.get_json()
+
+        if data is None:
+            return self.render_json(data={"message":"Contenu JSON manquant ou invalide"}, status_code=400)
+
+        # 2. Extraire les variables du dictionnaire
+        db_provider = data.get('db_provider')
+        db_user = data.get('db_user')
+        db_password = data.get('db_password')
+        db_host = data.get('db_host')
+        db_port = data.get('db_port')
+        db_name = data.get('db_name')
+        
+        return self.render_json(data={"message":"ok"}, status_code=200)
 
     def not_found(self,path):
         data = {"end_point_not_found":path}

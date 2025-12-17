@@ -25,6 +25,7 @@ class Application:
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
         self.storage = Storage(app=self)
+        self.app_is_installed = self.config.is_installed()
         
         create_dir_if_not_exist(join_paths(self.config.PATH_DIR_STORAGE))
 
@@ -38,21 +39,25 @@ class Application:
         self.server.clear()
 
     def build(self):
-        self.db.init_database()
+        if self.app_is_installed:
+            self.db.init_database()
 
         from base.module import module as base_module
 
         base_module.init(app=self, dirname="base")
         base_module.load()
         
-        self.db.create_all()
-
-        self.module_manager.load_modules()
+        if self.app_is_installed:
+            self.db.create_all()
+            self.module_manager.load_modules()
 
         base_module._run()
 
-        self.module_manager.run_modules()
+        if self.app_is_installed:
+            self.module_manager.run_modules()
+        
         self.register_route_not_found()
+        
         self.register_routers()
 
     def run(self, host="0.0.0.0", port=5000, debug=True):
@@ -67,6 +72,9 @@ class Application:
 
     def register_route_not_found(self):
         def route_not_found(path):
+            if not self.app_is_installed:
+                return self.router.redirect("/")
+
             path_file_not_found = self.config.path_template_404_not_found
             if path_exist(path_file_not_found):
                 return self.router.render_template_string(read_file(self.config.path_template_404_not_found), path=path, hide_header=True, hide_footer=True), 404
@@ -75,9 +83,9 @@ class Application:
         def api_route_not_found(path):
             return self.api_router.render_json({"error": "route not found", "path": path}), 404
 
-        def api_route_not_found2():
+        def api_route_not_found():
             return self.api_router.render_json({"error": "route not found", "path": "/  "}), 404
 
         self.router.add_route("/<path:path>")(route_not_found)
-        self.api_router.add_route("/")(api_route_not_found2)
+        self.api_router.add_route("/")(api_route_not_found)
         self.api_router.add_route("/<path:path>")(api_route_not_found)

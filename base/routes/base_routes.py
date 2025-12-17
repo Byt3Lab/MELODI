@@ -9,12 +9,17 @@ class BaseRoutes(WebRouter):
         self.install_service = InstallService(module=self.module)
 
         self.before_request()(self.check_installation)
+        self.before_request()(self.check_maintenance)
+
         self.after_request()(self.deny_iframe)
 
-        self.add_route("/", methods=["GET"])(self.home)
+        if not self.app.app_is_installed:
+            self.add_route("/", methods=["GET"])(self.home)
+            self.add_route("/install", methods=["GET"])(self.install)
+            return None
+        
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
-        
         self.add_route("/logout", methods=["GET"])(self.logout)
         self.add_route("/admin", methods=["GET"])(self.admin_dashboard)
         self.add_route('/admin/users', methods=['GET'])(self.admin_users)
@@ -33,29 +38,25 @@ class BaseRoutes(WebRouter):
         #     {"path": "/admin", "methods": ["GET"], "handler": self.admin_dashboard},
         #     {"path": "/admin/users", "methods": ["GET"], "handler": self.admin_users},
         # ], before_request=[self.br,self.br2], after_request=[self.deny_iframe])
-        self.register_request_maintenance()
 
     def check_installation(self):
-        request = self.get_request()
-        print(request.path)
-        # return "dsd"
         if self.app.config.is_installed():
+            if request.path == "/install":
+                return self.redirect("/")
             return None
 
         if request.path == "/":
-            return self.render_template("home_welcome.html", hide_header=True)
+            return None
         
         if request.path == "/install":
-            return self.render_template("install/install.html")
+            return None
         
         return self.redirect("/install")
         
-    def register_request_maintenance(self):
-        @self.app.server.before_request()
-        def before_request():
-            if not self.app.config.allow_request:
-                return "Service Unavailable for maintenance", 503
-       
+    def check_maintenance(self):
+        if not self.app.config.allow_request:
+            return "Service Unavailable for maintenance", 503
+    
     def br(self):
         def sr(ctx:RequestContext):
             ctx.data["hello"] = "hello wordl"
@@ -142,6 +143,9 @@ class BaseRoutes(WebRouter):
         return self.render_template("admin_settings.html")
 
     def home(self): 
+        if not self.app.config.is_installed():
+            return self.render_template("/home_welcome.html")
+        
         self.app.event_listener.notify_event("hi")
 
         home_page = self.app.home_page_manager.render_home_page() 
