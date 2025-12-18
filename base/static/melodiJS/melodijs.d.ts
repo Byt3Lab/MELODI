@@ -104,7 +104,10 @@ export declare class Component {
     _compile(): Promise<void>;
     _processNodeList(nodes: NodeListOf<ChildNode> | Node[], scope?: any): DocumentFragment;
     _walk(node: Node, scope: any): Node | DocumentFragment;
-    _handleVIf(node: Element, scope: any): Comment;
+    _handleConditional(startNode: Element, nodes: Node[], startIndex: number, scope: any): {
+        anchor: Comment;
+        nextIndex: number;
+    };
     _handleVFor(node: Element, scope: any): Comment;
     _escape(v: any): string;
     _bindEvents(): void;

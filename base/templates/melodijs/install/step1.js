@@ -1,5 +1,6 @@
 import { createApp } from '/static/base/melodiJS/melodijs.js'
 import { MelodiRouter } from '/static/base/melodiJS/router.js'
+import { MelodiUI } from '/static/base/melodiUI/melodi.ui.js'
 import { RenderURLTemplate } from '/static/base/melodiJS/render_url_template.js'
 import { RenderURLAPI } from '/static/base/melodiJS/render_url_api.js'
 
@@ -44,7 +45,7 @@ const components = {
                         db_name:this.db_name
                     })
                 })
-                const b = await res.text()
+                const b = await res.json()
 
                 console.log(b);
 
@@ -63,4 +64,5 @@ const options = {
 
 const app = createApp(options)
 
+app.use(MelodiUI)
 app.mount("#app")

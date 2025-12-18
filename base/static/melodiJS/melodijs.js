@@ -1,6 +1,6 @@
 // --- Fine-grain reactivity primitives regroupées ---
 var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function (t) {
+    __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
             s = arguments[i];
             for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
@@ -20,8 +20,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function () { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function () { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -62,7 +62,7 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __values = (this && this.__values) || function (o) {
+var __values = (this && this.__values) || function(o) {
     var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
     if (m) return m.call(o);
     if (o && typeof o.length === "number") return {
@@ -365,12 +365,10 @@ var Component = /** @class */ (function () {
             this.state.$emit = function (eventName, payload) {
                 try {
                     var local = comp_1._events[eventName] || [];
-                    local.forEach(function (h) {
-                        try {
-                            h.call(comp_1.state, payload);
-                        }
-                        catch (e) { }
-                    });
+                    local.forEach(function (h) { try {
+                        h.call(comp_1.state, payload);
+                    }
+                    catch (e) { } });
                     // bubble
                     // first try DOM parent chain
                     var p = comp_1.el.parentElement;
@@ -378,12 +376,10 @@ var Component = /** @class */ (function () {
                         var parentComp = p.__melodijs_instance;
                         if (parentComp) {
                             var handlers = parentComp._events[eventName] || [];
-                            handlers.forEach(function (h) {
-                                try {
-                                    h.call(parentComp.state, payload);
-                                }
-                                catch (e) { }
-                            });
+                            handlers.forEach(function (h) { try {
+                                h.call(parentComp.state, payload);
+                            }
+                            catch (e) { } });
                             // stop if handled? keep bubbling to allow multiple ancestors
                         }
                         p = p.parentElement;
@@ -396,12 +392,10 @@ var Component = /** @class */ (function () {
                         var lp_1 = comp_1._parent;
                         while (lp_1) {
                             var handlers = lp_1._events[eventName] || [];
-                            handlers.forEach(function (h) {
-                                try {
-                                    h.call(lp_1.state, payload);
-                                }
-                                catch (e) { }
-                            });
+                            handlers.forEach(function (h) { try {
+                                h.call(lp_1.state, payload);
+                            }
+                            catch (e) { } });
                             lp_1 = lp_1._parent;
                         }
                     }
@@ -804,18 +798,26 @@ var Component = /** @class */ (function () {
         });
     };
     Component.prototype._processNodeList = function (nodes, scope) {
-        var _this = this;
         if (scope === void 0) { scope = {}; }
         var fragment = document.createDocumentFragment();
-        Array.from(nodes).forEach(function (node) {
-            var processed = _this._walk(node, scope);
+        var nodesArray = Array.from(nodes);
+        for (var i = 0; i < nodesArray.length; i++) {
+            var node = nodesArray[i];
+            // Check for v-if start
+            if (node.nodeType === 1 && node.hasAttribute('v-if')) {
+                var _a = this._handleConditional(node, nodesArray, i, scope), anchor = _a.anchor, nextIndex = _a.nextIndex;
+                fragment.appendChild(anchor);
+                i = nextIndex - 1; // Skip consumed nodes
+                continue;
+            }
+            var processed = this._walk(node, scope);
             if (Array.isArray(processed)) {
                 processed.forEach(function (n) { return fragment.appendChild(n); });
             }
             else if (processed) {
                 fragment.appendChild(processed);
             }
-        });
+        }
         return fragment;
     };
     Component.prototype._walk = function (node, scope) {
@@ -856,10 +858,10 @@ var Component = /** @class */ (function () {
                 clone.removeAttribute('v-pre');
                 return clone;
             }
-            // Check for v-if
-            if (elNode.hasAttribute('v-if')) {
-                return this._handleVIf(elNode, scope);
-            }
+            // Check for v-if - REMOVED (Handled in _processNodeList)
+            // if (elNode.hasAttribute('v-if')) {
+            //    return this._handleVIf(elNode, scope);
+            // }
             // Check for v-for
             if (elNode.hasAttribute('v-for')) {
                 return this._handleVFor(elNode, scope);
@@ -973,91 +975,133 @@ var Component = /** @class */ (function () {
         }
         return node.cloneNode(true);
     };
-    Component.prototype._handleVIf = function (node, scope) {
+    Component.prototype._handleConditional = function (startNode, nodes, startIndex, scope) {
         var _this = this;
-        var anchor = document.createComment('v-if');
-        var expr = node.getAttribute('v-if');
+        var _a;
+        var anchor = document.createComment('v-if-chain');
+        var branches = [];
+        // First node is always v-if
+        branches.push({
+            type: 'if',
+            condition: startNode.getAttribute('v-if'),
+            node: startNode
+        });
+        var currentIndex = startIndex + 1;
+        while (currentIndex < nodes.length) {
+            var node = nodes[currentIndex];
+            // Skip text nodes (whitespace) between branches
+            if (node.nodeType === 3 && !((_a = node.nodeValue) === null || _a === void 0 ? void 0 : _a.trim())) {
+                currentIndex++;
+                continue;
+            }
+            if (node.nodeType === 1) {
+                var el = node;
+                if (el.hasAttribute('v-else-if')) {
+                    branches.push({
+                        type: 'else-if',
+                        condition: el.getAttribute('v-else-if'),
+                        node: el
+                    });
+                    currentIndex++;
+                    continue;
+                }
+                else if (el.hasAttribute('v-else')) {
+                    branches.push({
+                        type: 'else',
+                        node: el
+                    });
+                    currentIndex++;
+                    // v-else must be the last one
+                    break;
+                }
+            }
+            // If we reach here, it's not part of the chain
+            break;
+        }
+        // 2. Create Effect
         var currentEl = null;
-        // Defer the effect until mount so anchor has a parent
         var effectFn = function () {
             _this._createEffect(function () {
-                var shouldShow = !!_this._evalExpression(expr, scope);
-                // Check for transition parent
-                var transitionName = null;
-                if (anchor.parentNode && anchor.parentNode.dataset && anchor.parentNode.dataset.melodiTransition) {
-                    transitionName = anchor.parentNode.dataset.melodiTransition;
-                }
-                if (shouldShow) {
-                    if (!currentEl) {
-                        var clone = node.cloneNode(true);
-                        clone.removeAttribute('v-if');
-                        var processed = _this._walk(clone, scope);
-                        if (processed.nodeType === 11) {
-                            currentEl = processed; // Fragment handling is limited
+                var e_4, _a;
+                var activeBranch = null;
+                try {
+                    // Find first matching branch
+                    for (var branches_1 = __values(branches), branches_1_1 = branches_1.next(); !branches_1_1.done; branches_1_1 = branches_1.next()) {
+                        var branch = branches_1_1.value;
+                        if (branch.type === 'else') {
+                            activeBranch = branch;
+                            break;
                         }
-                        else {
-                            currentEl = processed;
-                        }
-                        if (anchor.parentNode) {
-                            // Transition Enter
-                            if (transitionName && currentEl && currentEl.nodeType === 1) {
-                                var el_2 = currentEl;
-                                el_2.classList.add(transitionName + '-enter-from');
-                                el_2.classList.add(transitionName + '-enter-active');
-                                anchor.parentNode.insertBefore(currentEl, anchor);
-                                requestAnimationFrame(function () {
-                                    el_2.classList.remove(transitionName + '-enter-from');
-                                    el_2.classList.add(transitionName + '-enter-to');
-                                    var onEnd = function () {
-                                        el_2.classList.remove(transitionName + '-enter-active');
-                                        el_2.classList.remove(transitionName + '-enter-to');
-                                        el_2.removeEventListener('transitionend', onEnd);
-                                    };
-                                    el_2.addEventListener('transitionend', onEnd);
-                                });
-                            }
-                            else {
-                                anchor.parentNode.insertBefore(currentEl, anchor);
-                            }
+                        var val = _this._evalExpression(branch.condition, scope);
+                        if (!!val) {
+                            activeBranch = branch;
+                            break;
                         }
                     }
                 }
-                else {
+                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                finally {
+                    try {
+                        if (branches_1_1 && !branches_1_1.done && (_a = branches_1.return)) _a.call(branches_1);
+                    }
+                    finally { if (e_4) throw e_4.error; }
+                }
+                // Render logic
+                if (activeBranch) {
+                    // If we are already showing this branch's node (cloned), do nothing?
+                    // No, we need to re-render if data changed, but _walk handles that recursion.
+                    // However, we are in an effect. If activeBranch changes, we swap.
+                    // If activeBranch is same, we might need to update? 
+                    // Actually, since we are inside an effect, if any dependency changes, this whole block runs.
+                    // We should check if the *rendered element* corresponds to the active branch.
+                    // But we don't track which branch created currentEl easily.
+                    // Simplest: Always unmount old, mount new. (Inefficient but correct for v1)
+                    // Optimization: If same branch, don't destroy/recreate.
+                    // For now, let's implement simple swap.
+                    // Clean up previous
                     if (currentEl) {
                         var elToRemove = currentEl;
+                        currentEl = null; // Clear ref first
+                        if (elToRemove.parentNode) {
+                            elToRemove.parentNode.removeChild(elToRemove);
+                        }
+                    }
+                    // Mount new
+                    var clone = activeBranch.node.cloneNode(true);
+                    clone.removeAttribute('v-if');
+                    clone.removeAttribute('v-else-if');
+                    clone.removeAttribute('v-else');
+                    var processed = _this._walk(clone, scope);
+                    if (processed.nodeType === 11) {
+                        // Fragment handling
+                        // We need a single reference for currentEl to remove it later.
+                        // If fragment, we might need a wrapper or track all nodes.
+                        // For simplicity in this fix, let's assume single element or wrap in text?
+                        // _walk returns Node | DocumentFragment.
+                        // If fragment, we can't easily track "currentEl" as a single node.
+                        // But v-if usually is on an Element, so _walk(element) usually returns Element.
+                        // Unless the element contains only text? No, _walk(element) returns element.
+                        currentEl = processed;
+                    }
+                    else {
+                        currentEl = processed;
+                    }
+                    if (anchor.parentNode && currentEl) {
+                        anchor.parentNode.insertBefore(currentEl, anchor);
+                    }
+                }
+                else {
+                    // No branch active
+                    if (currentEl) {
+                        if (currentEl.parentNode)
+                            currentEl.parentNode.removeChild(currentEl);
                         currentEl = null;
-                        if (transitionName && elToRemove.nodeType === 1 && elToRemove.parentNode) {
-                            // Transition Leave
-                            var el_3 = elToRemove;
-                            el_3.classList.add(transitionName + '-leave-from');
-                            el_3.classList.add(transitionName + '-leave-active');
-                            requestAnimationFrame(function () {
-                                el_3.classList.remove(transitionName + '-leave-from');
-                                el_3.classList.add(transitionName + '-leave-to');
-                                var onEnd = function () {
-                                    el_3.classList.remove(transitionName + '-leave-active');
-                                    el_3.classList.remove(transitionName + '-leave-to');
-                                    if (el_3.parentNode)
-                                        el_3.parentNode.removeChild(el_3);
-                                    el_3.removeEventListener('transitionend', onEnd);
-                                };
-                                el_3.addEventListener('transitionend', onEnd);
-                            });
-                        }
-                        else {
-                            if (elToRemove.nodeType === 11) {
-                                // Fragment
-                            }
-                            else if (elToRemove.parentNode) {
-                                elToRemove.parentNode.removeChild(elToRemove);
-                            }
-                        }
                     }
                 }
             });
         };
         this._postMountEffects.push(effectFn);
-        return anchor;
+        return { anchor: anchor, nextIndex: currentIndex };
     };
     Component.prototype._handleVFor = function (node, scope) {
         var _this = this;
@@ -1335,12 +1379,10 @@ var Component = /** @class */ (function () {
         });
         this._listeners = [];
         // cleanup effects
-        this._effects.forEach(function (fn) {
-            try {
-                fn();
-            }
-            catch (e) { }
-        });
+        this._effects.forEach(function (fn) { try {
+            fn();
+        }
+        catch (e) { } });
         this._effects = [];
         // remove from app mounted list
         try {
@@ -1362,8 +1404,8 @@ var Component = /** @class */ (function () {
     };
     Component.prototype._mountNestedComponents = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var globalComponents, localComponents, allComponents, tags, tags_2, tags_2_1, tag, nodes, nodes_1, nodes_1_1, node, parent_1, skip, t, compDef, comp, e_4, e_5_1, e_6_1;
-            var e_6, _a, e_5, _b;
+            var globalComponents, localComponents, allComponents, tags, tags_2, tags_2_1, tag, nodes, nodes_1, nodes_1_1, node, parent_1, skip, t, compDef, comp, e_5, e_6_1, e_7_1;
+            var e_7, _a, e_6, _b;
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
@@ -1385,7 +1427,7 @@ var Component = /** @class */ (function () {
                         _c.label = 3;
                     case 3:
                         _c.trys.push([3, 10, 11, 12]);
-                        nodes_1 = (e_5 = void 0, __values(nodes)), nodes_1_1 = nodes_1.next();
+                        nodes_1 = (e_6 = void 0, __values(nodes)), nodes_1_1 = nodes_1.next();
                         _c.label = 4;
                     case 4:
                         if (!!nodes_1_1.done) return [3 /*break*/, 9];
@@ -1426,36 +1468,36 @@ var Component = /** @class */ (function () {
                         node.__melodijs_mounted = true;
                         return [3 /*break*/, 8];
                     case 7:
-                        e_4 = _c.sent();
-                        console.error('Error mounting nested component:', tag, e_4);
+                        e_5 = _c.sent();
+                        console.error('Error mounting nested component:', tag, e_5);
                         return [3 /*break*/, 8];
                     case 8:
                         nodes_1_1 = nodes_1.next();
                         return [3 /*break*/, 4];
                     case 9: return [3 /*break*/, 12];
                     case 10:
-                        e_5_1 = _c.sent();
-                        e_5 = { error: e_5_1 };
+                        e_6_1 = _c.sent();
+                        e_6 = { error: e_6_1 };
                         return [3 /*break*/, 12];
                     case 11:
                         try {
                             if (nodes_1_1 && !nodes_1_1.done && (_b = nodes_1.return)) _b.call(nodes_1);
                         }
-                        finally { if (e_5) throw e_5.error; }
+                        finally { if (e_6) throw e_6.error; }
                         return [7 /*endfinally*/];
                     case 12:
                         tags_2_1 = tags_2.next();
                         return [3 /*break*/, 2];
                     case 13: return [3 /*break*/, 16];
                     case 14:
-                        e_6_1 = _c.sent();
-                        e_6 = { error: e_6_1 };
+                        e_7_1 = _c.sent();
+                        e_7 = { error: e_7_1 };
                         return [3 /*break*/, 16];
                     case 15:
                         try {
                             if (tags_2_1 && !tags_2_1.done && (_a = tags_2.return)) _a.call(tags_2);
                         }
-                        finally { if (e_6) throw e_6.error; }
+                        finally { if (e_7) throw e_7.error; }
                         return [7 /*endfinally*/];
                     case 16: return [2 /*return*/];
                 }

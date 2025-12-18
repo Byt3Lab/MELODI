@@ -26,6 +26,7 @@ class Application:
         self.home_page_manager = HomePageManager(app=self)
         self.storage = Storage(app=self)
         self.app_is_installed = self.config.is_installed()
+        self.user_sudo_exist = False
         
         create_dir_if_not_exist(join_paths(self.config.PATH_DIR_STORAGE))
 
@@ -41,6 +42,7 @@ class Application:
     def build(self):
         if self.app_is_installed:
             self.db.init_database()
+            self.user_sudo_exist = self.verify_user_sudo_exist()
 
         from base.module import module as base_module
 
@@ -48,7 +50,6 @@ class Application:
         base_module.load()
         
         if self.app_is_installed:
-            self.db.create_all()
             self.module_manager.load_modules()
 
         base_module._run()
@@ -89,3 +90,14 @@ class Application:
         self.router.add_route("/<path:path>")(route_not_found)
         self.api_router.add_route("/")(api_route_not_found)
         self.api_router.add_route("/<path:path>")(api_route_not_found)
+
+    def verify_user_sudo_exist(self):
+        from base.models import UserModel as User
+        
+        User.metadata.create_all(self.db.engine)
+
+        sudo_user = self.db.get_session().query(User).filter_by(is_sudo=True).first()
+        
+        if sudo_user:
+            return True
+        return False

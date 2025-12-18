@@ -13,7 +13,7 @@ class DataBase():
         self.engine = None
 
     def init_database(self):
-        self.engine = create_engine(self.app.config.DB_URL, echo=False)
+        self.engine = create_engine(self.app.config.get_db_url(), echo=False)
 
     def create_all(self):
         Model.metadata.create_all(self.engine) 

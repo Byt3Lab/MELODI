@@ -37,32 +37,34 @@
                     </select>
                 </div>
 
-                <div v-if="db_provider != 'sqlite'" class="form-grid">
-                    <div>
-                        <label for="db_user">Nom d'utilisateur</label>
-                        <input type="text" id="db_user" name="db_user" placeholder="ex: jean_pierre" v-model="db_user" required>
-                    </div>
+                <div>
+                    <div v-if="db_provider != 'sqlite'"  class="form-grid">
+                        <div>
+                            <label for="db_user">Nom d'utilisateur</label>
+                            <input type="text" id="db_user" name="db_user" placeholder="ex: jean_pierre" v-model="db_user" required>
+                        </div>
 
-                    <div>
-                        <label for="db_host">Hôte</label>
-                        <input type="text" id="db_host" name="db_host" placeholder="ex: localhost" required>
-                    </div>
+                        <div>
+                            <label for="db_host">Hôte</label>
+                            <input type="text" id="db_host" name="db_host" placeholder="ex: localhost" required>
+                        </div>
 
-                    <div>
-                        <label for="db_password">Mot de passe</label>
-                        <input type="password" id="db_password" name="db_password" required>
-                    </div>
+                        <div>
+                            <label for="db_password">Mot de passe</label>
+                            <input type="password" id="db_password" name="db_password" required>
+                        </div>
 
-                    <div>
-                        <label for="db_password_confirm">Confirmer le mot de passe</label>
-                        <input type="password" id="db_password_confirm" name="db_password_confirm" required>
-                    </div>
+                        <div>
+                            <label for="db_password_confirm">Confirmer le mot de passe</label>
+                            <input type="password" id="db_password_confirm" name="db_password_confirm" required>
+                        </div>
 
-                    <div>
-                        <label for="db_port">Port</label>
-                        <input type="number" min="0" id="db_port" name="db_port" placeholder="ex: 5432" required>
+                        <div>
+                            <label for="db_port">Port</label>
+                            <input type="number" min="0" id="db_port" name="db_port" placeholder="ex: 5432" required>
+                        </div>
                     </div>
-
+                    
                     <div class="full">
                         <label for="db_name">Nom de la base de données</label>
                         <input type="text" id="db_name" name="db_name" placeholder="ex: melodi_database" required>
@@ -72,9 +74,8 @@
 
             <div class="actions mt-5">
                 <button type="button" class="secondary" onclick="history.back();">Retour</button>
-               
-                <span v-if="loading_btn==true" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spinner"></span>
-                <span v-if="loading_btn==false" @click="submit" class="primary-btn">Enregistrer</span>
+                <span v-if="loading_btn" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" id="spinner"></span>
+                <span v-else @click="submit" class="primary-btn">Enregistrer</span>
             </div>
 
             <p class="note">Les informations de connexion à la base de données resteront confidentielles et seront utilisées uniquement pour configurer l'application.</p>

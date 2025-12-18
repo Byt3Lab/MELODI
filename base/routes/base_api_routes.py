@@ -1,6 +1,10 @@
 from flask import Response
 from core.router import APIRouter
 from base.services import HomePageService, WidgetService
+import os
+from pathlib import Path
+
+from core.utils import join_paths, path_exist, write_file
 
 class BaseApiRoutes(APIRouter):
     def load(self):
@@ -106,6 +110,28 @@ class BaseApiRoutes(APIRouter):
         db_port = data.get('db_port')
         db_name = data.get('db_name')
         
+        mapping = {
+            "DB_PROVIDER": db_provider,
+            "DB_USER": db_user,
+            "DB_PASSWORD": db_password,
+            "DB_HOST": db_host,
+            "DB_PORT": db_port,
+            "DB_NAME": db_name
+        }
+
+        db_conf_path = join_paths(self.app.config.PATH_DIR_CONFIG, "db_conf.json")
+
+        if not path_exist(db_conf_path):
+            write_file(db_conf_path, "")
+
+        import json
+
+        write_file(db_conf_path, json.dumps(mapping))
+
+        install_lock_path = join_paths(self.app.config.PATH_DIR_CONFIG, "instal.lock")
+      
+        write_file(install_lock_path, "")
+
         return self.render_json(data={"message":"ok"}, status_code=200)
 
     def not_found(self,path):

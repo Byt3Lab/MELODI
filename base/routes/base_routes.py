@@ -10,14 +10,11 @@ class BaseRoutes(WebRouter):
 
         self.before_request()(self.check_installation)
         self.before_request()(self.check_maintenance)
-
         self.after_request()(self.deny_iframe)
-
+        self.add_route("/", methods=["GET"])(self.home)
         if not self.app.app_is_installed:
-            self.add_route("/", methods=["GET"])(self.home)
             self.add_route("/install", methods=["GET"])(self.install)
             return None
-        
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
         self.add_route("/logout", methods=["GET"])(self.logout)
