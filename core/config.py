@@ -31,6 +31,16 @@ class Config:
         
         self.load_infos_org()
 
+    def set_db_config(self, config:dict):
+        self.db_config = config
+        self.DB_PROVIDER = config.get("db_provider", self.DB_PROVIDER)
+        self.DB_USER = config.get("db_user", self.DB_USER)
+        self.DB_PASSWORD = config.get("db_password", self.DB_PASSWORD)
+        self.DB_HOST = config.get("db_host", self.DB_HOST)
+        self.DB_PORT = config.get("db_port", self.DB_PORT)
+        self.DB_NAME = config.get("db_name", self.DB_NAME)
+        
+
     def load_db_config(self):
         path = join_paths(self.PATH_DIR_CONFIG, "db_conf.json")
         if not path_exist(path):

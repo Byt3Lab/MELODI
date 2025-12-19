@@ -8,13 +8,9 @@ class BaseRoutes(WebRouter):
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
 
-        self.before_request()(self.check_installation)
         self.before_request()(self.check_maintenance)
         self.after_request()(self.deny_iframe)
         self.add_route("/", methods=["GET"])(self.home)
-        if not self.app.app_is_installed:
-            self.add_route("/install", methods=["GET"])(self.install)
-            return None
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
         self.add_route("/logout", methods=["GET"])(self.logout)
@@ -36,11 +32,14 @@ class BaseRoutes(WebRouter):
         #     {"path": "/admin/users", "methods": ["GET"], "handler": self.admin_users},
         # ], before_request=[self.br,self.br2], after_request=[self.deny_iframe])
 
+    def load_installer(self):
+        self.before_request()(self.check_installation)
+        self.after_request()(self.deny_iframe)
+        self.add_route("/", methods=["GET"])(self.home_welcome)
+        self.add_route("/install", methods=["GET"])(self.install)
+
     def check_installation(self):
-        if self.app.config.is_installed():
-            if request.path == "/install":
-                return self.redirect("/")
-            return None
+        request = self.get_request()
 
         if request.path == "/":
             return None
@@ -140,9 +139,6 @@ class BaseRoutes(WebRouter):
         return self.render_template("admin_settings.html")
 
     def home(self): 
-        if not self.app.config.is_installed():
-            return self.render_template("/home_welcome.html")
-        
         self.app.event_listener.notify_event("hi")
 
         home_page = self.app.home_page_manager.render_home_page() 
@@ -152,10 +148,8 @@ class BaseRoutes(WebRouter):
 
         return self.render_template("home.html")
 
+    def home_welcome(self):
+        return self.render_template("home_welcome.html")
+    
     def install(self):
         return self.render_template("install/install.html")
-
-    def install_submit(self):
-        form_data = request.form
-        self.install_service.install(form_data)
-        return self.redirect("/login")

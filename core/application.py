@@ -40,25 +40,41 @@ class Application:
         self.server.clear()
 
     def build(self):
-        if self.app_is_installed:
-            self.db.init_database()
-            self.user_sudo_exist = self.verify_user_sudo_exist()
+        if not self.app_is_installed:
+            self.build_installer()
+            return
+        
+        self.db.init_database()
+        self.user_sudo_exist = self.verify_user_sudo_exist()
+
+        if not self.user_sudo_exist:
+            self.app_is_installed = False
+            self.build_installer()
+            return
 
         from base.module import module as base_module
 
         base_module.init(app=self, dirname="base")
         base_module.load()
         
-        if self.app_is_installed:
-            self.module_manager.load_modules()
+        self.module_manager.load_modules()
 
         base_module._run()
 
-        if self.app_is_installed:
-            self.module_manager.run_modules()
+        self.module_manager.run_modules()
         
         self.register_route_not_found()
         
+        self.register_routers()
+
+    def build_installer(self):
+        from base.module import module as base_module
+
+        base_module.init(app=self, dirname="base")
+        base_module.load_installer()
+        base_module._run()
+
+        self.register_route_not_found()
         self.register_routers()
 
     def run(self, host="0.0.0.0", port=5000, debug=True):

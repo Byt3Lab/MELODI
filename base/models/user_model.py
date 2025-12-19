@@ -10,6 +10,7 @@ class UserModel(Model):
     password: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(String(100), unique=True)
     is_sudo: Mapped[bool] = mapped_column(default=False)
+    is_active: Mapped[bool] = mapped_column(default=True)
     first_name: Mapped[str] = mapped_column(String(100))
     last_name: Mapped[str] = mapped_column(String(100))
     created_at: Mapped[str] = mapped_column(String(50))

@@ -1,68 +1,72 @@
-import { createApp } from '/static/base/melodiJS/melodijs.js'
-import { MelodiRouter } from '/static/base/melodiJS/router.js'
-import { MelodiUI } from '/static/base/melodiUI/melodi.ui.js'
 import { RenderURLTemplate } from '/static/base/melodiJS/render_url_template.js'
-import { RenderURLAPI } from '/static/base/melodiJS/render_url_api.js'
 
-const getUrlTemplate =  new RenderURLTemplate("base")
-const getUrlAPI =  new RenderURLAPI("base")
+const getUrlTemplate = new RenderURLTemplate("base")
 
-const components = {
-    "init-app": {
-        template:{url:getUrlTemplate("install/step1")},
-        data () {
-            return {
-                db_provider:"sqlite",
-                db_user:"",
-                db_password:"",
-                db_host:"",
-                db_port:"",
-                db_name:"",
-                loading_btn:false
-            }
+export default {
+    template: { url: getUrlTemplate("install/step1") },
+    data() {
+        return {
+            db_provider: "sqlite",
+            db_user: "",
+            db_password: "",
+            db_password_confirm: "",
+            db_host: "localhost",
+            db_port: "",
+            db_name: "",
+            loading_btn: false
+        }
+    },
+    hooks: {
+        beforeMount() {
+            // Load data from store if exists
+            const config = this.$store.state.db_config;
+
+            this.db_provider = config.provider;
+            this.db_user = config.user;
+            this.db_password = config.password;
+            this.db_password_confirm = config.password; // Pre-fill confirm if loaded
+            this.db_host = config.host;
+            this.db_port = config.port;
+            this.db_name = config.name;
+        }
+    },
+    watch: {
+
+    },
+    methods: {
+        selectProvider(provider) {
+            this.db_provider = provider;
         },
-        hooks:{
-            async mounted(){
-                
+        submit(e) {
+            e.preventDefault();
+            if (!this.db_name) {
+                alert("Le nom de la base de données est requis.");
+                return;
             }
-        },
-        methods:{
-            async submit(){
 
-                this.loading_btn = true
-
-                const res = await fetch(  getUrlAPI("install"), {
-                    method:"post",
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        db_provider:this.db_provider,
-                        db_user:this.db_user,
-                        db_password:this.db_password,
-                        db_host:this.db_host,
-                        db_port:this.db_port,
-                        db_name:this.db_name
-                    })
-                })
-                const b = await res.json()
-
-                console.log(b);
-
-                setTimeout(() => {
-                    this.loading_btn = false
-                }, 500);
+            if (this.db_provider !== 'sqlite') {
+                if (!this.db_host || !this.db_user || !this.db_port || !this.db_password) {
+                    alert("Veuillez remplir tous les champs de connexion (Hôte, Port, Utilisateur, Mot de passe).");
+                    return;
+                }
+                if (this.db_password !== this.db_password_confirm) {
+                    alert("Les mots de passe de la base de données ne correspondent pas.");
+                    return;
+                }
             }
+
+            // Save to store
+            this.$store.dispatch('updateDBConfig', {
+                provider: this.db_provider,
+                host: this.db_host,
+                port: this.db_port,
+                user: this.db_user,
+                password: this.db_password,
+                name: this.db_name
+            });
+
+            // Navigate to next step
+            this.$router.push('/step2');
         }
     }
 }
-
-const options = {
-    components,
-    template:"<init-app></init-app>",
-}
-
-const app = createApp(options)
-
-app.use(MelodiUI)
-app.mount("#app")

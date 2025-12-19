@@ -1,0 +1,47 @@
+<div class="melodi-install" install>
+    <div class="install-container">
+        <div class="install-header">
+            <h1 class="install-title">Finalisation</h1>
+            <p class="-subtitle">Étape 3 sur 3 : Vérification et Installation</p>
+        </div>
+
+        <div class="install-body">
+            <div class="summary-card mb-4 p-4 rounded bg-light border">
+                <h5 class="mb-3">Configuration de la Base de Données</h5>
+                <ul class="list-unstyled text-secondary">
+                    <li><strong>Type:</strong> {{ db_config.provider }}</li>
+                    <li v-if="db_config.provider !== 'sqlite'"><strong>Hôte:</strong> {{ db_config.host }}:{{
+                        db_config.port }}</li>
+                    <li><strong>Base de données:</strong> {{ db_config.name }}</li>
+                </ul>
+
+                <h5 class="mb-3 mt-4">Compte Administrateur</h5>
+                <ul class="list-unstyled text-secondary">
+                    <li><strong>Utilisateur:</strong> {{ admin_user.username }}</li>
+                    <li><strong>Email:</strong> {{ admin_user.email }}</li>
+                    <li><strong>Nom:</strong> {{ admin_user.first_name }}</li>
+                    <li><strong>Prenom:</strong> {{ admin_user.last_name }}</li>
+                </ul>
+            </div>
+
+            <div v-if="error" class="alert alert-danger mb-4">
+                {{ error }}
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-secondary" @click="$router.push('/step2')" :disabled="loading">
+                    Retour
+                </button>
+                <button type="button" class="btn btn-primary" @click="finish" :disabled="loading">
+                    <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"
+                        aria-hidden="true"></span>
+                    <span v-if="!loading">Terminer l'installation</span>
+                    <svg v-if="!loading" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

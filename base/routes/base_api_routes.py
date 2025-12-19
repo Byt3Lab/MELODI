@@ -5,19 +5,12 @@ import os
 from pathlib import Path
 
 from core.utils import join_paths, path_exist, write_file
-
 class BaseApiRoutes(APIRouter):
     def load(self):
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
 
         self.after_request()(self.deny_iframe)
-
-        if not self.app.app_is_installed:
-            self.add_route("/install", methods=["POST"])(self.install)
-            self.add_route('/<path:path>', methods=['GET'])(self.not_found)
-            return
-
         self.add_route("/status", methods=["GET"])(self.status)
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
@@ -31,6 +24,10 @@ class BaseApiRoutes(APIRouter):
         self.add_route('/modules/<path:mod>/on', methods=['GET'])(self.on_module)
         self.add_route('/<path:path>', methods=['GET'])(self.not_found)
 
+    def load_installer(self):
+        self.after_request()(self.deny_iframe)
+        self.add_route("/install", methods=["POST"])(self.install)
+        self.add_route('/<path:path>', methods=['GET'])(self.not_found)
 
     def deny_iframe(self,response: Response) -> Response:
         response.headers['X-Frame-Options'] = 'DENY'
@@ -103,34 +100,91 @@ class BaseApiRoutes(APIRouter):
             return self.render_json(data={"message":"Contenu JSON manquant ou invalide"}, status_code=400)
 
         # 2. Extraire les variables du dictionnaire
-        db_provider = data.get('db_provider')
-        db_user = data.get('db_user')
-        db_password = data.get('db_password')
-        db_host = data.get('db_host')
-        db_port = data.get('db_port')
-        db_name = data.get('db_name')
+        db_config:dict|None = data.get('db_config', None)
+
+        if db_config is None:
+            return self.render_json(data={"message":"Configuration de la base de données manquante"}, status_code=400)
+
+         # Extraire les paramètres de configuration de la base de données   
+        db_provider = db_config.get('db_provider')
+        db_user = db_config.get('db_user')
+        db_password = db_config.get('db_password')
+        db_host = db_config.get('db_host')
+        db_port = db_config.get('db_port')
+        db_name = db_config.get('db_name')
         
-        mapping = {
-            "DB_PROVIDER": db_provider,
-            "DB_USER": db_user,
-            "DB_PASSWORD": db_password,
-            "DB_HOST": db_host,
-            "DB_PORT": db_port,
-            "DB_NAME": db_name
-        }
+        user_admin:dict|None = data.get('user_admin', None)
+        
+        if user_admin is None:
+            return self.render_json(data={"message":"Configuration de l'utilisateur administrateur manquante"}, status_code=400)    
+        
+        admin_username = user_admin.get('admin_username')
+        admin_email = user_admin.get('admin_email')
+        admin_password = user_admin.get('admin_password')
+        admin_first_name = user_admin.get('first_name')
+        admin_last_name = user_admin.get('last_name')
 
-        db_conf_path = join_paths(self.app.config.PATH_DIR_CONFIG, "db_conf.json")
+        def save_db_config():
+            mapping = {
+                "db_provider": db_provider,
+                "db_user": db_user,
+                "db_password": db_password,
+                "db_host": db_host,
+                "db_port": db_port,
+                "db_name": db_name
+            }
 
-        if not path_exist(db_conf_path):
-            write_file(db_conf_path, "")
+            db_conf_path = join_paths(self.app.config.PATH_DIR_CONFIG, "db_conf.json")
 
-        import json
+            if not path_exist(db_conf_path):
+                write_file(db_conf_path, "")
 
-        write_file(db_conf_path, json.dumps(mapping))
+            import json
 
-        install_lock_path = join_paths(self.app.config.PATH_DIR_CONFIG, "instal.lock")
-      
-        write_file(install_lock_path, "")
+            write_file(db_conf_path, json.dumps(mapping))
+            self.app.config.set_db_config(mapping)
+
+        def create_admin_user():
+            from core.utils.password import hash_password
+            from base.models.user_model import UserModel as User
+
+            try:
+                self.app.db.close_engine()
+                self.app.db.init_database()
+
+                User.metadata.create_all(self.app.db.engine)
+
+                session = self.app.db.get_session()
+
+                existing_admin = session.query(User).filter_by(is_sudo=True).first()
+
+                if existing_admin:
+                    return  # L'utilisateur administrateur existe déjà
+
+                new_admin = User(
+                    username=admin_username,
+                    email=admin_email,
+                    password=hash_password(admin_password),
+                    is_active=True,
+                    is_sudo=True,
+                    first_name=admin_first_name,
+                    last_name=admin_last_name
+                )
+                
+                with session.begin():
+                    session.add(new_admin)
+
+            except Exception as e:
+                return self.render_json(data={"message":"Erreur de connexion à la base de données: " + str(e)}, status_code=500)
+
+        def lock_installation():
+            install_lock_path = join_paths(self.app.config.PATH_DIR_CONFIG, "instal.lock")
+        
+            write_file(install_lock_path, "")
+
+        save_db_config()
+        create_admin_user()
+        lock_installation()
 
         return self.render_json(data={"message":"ok"}, status_code=200)
 

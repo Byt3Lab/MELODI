@@ -25,6 +25,25 @@ class Base(ApplicationModule):
         
         super().load()
     
+    def load_installer(self):
+        from base.routes import BaseRoutes, BaseApiRoutes
+
+        self.init_translation("fr")
+
+        self.add_404_not_found()
+
+        routes = BaseRoutes(name="base", app=self.app, module=self)
+        api_routes = BaseApiRoutes(name="base", app=self.app)
+
+        routes.module = self
+        api_routes.module = self
+
+        routes.load_installer()
+        api_routes.load_installer()
+
+        self.add_router(routes) 
+        self.add_api_router(api_routes)
+
     def add_404_not_found(self):
         PATH_DIR_BASE_MODULE = self.app.config.PATH_DIR_BASE_MODULE
         self.app.config.path_template_404_not_found = join_paths(PATH_DIR_BASE_MODULE, 'templates', 'base', '404.html')
