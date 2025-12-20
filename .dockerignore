@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+.git/
+.github/
+.VSCodeCounter/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.env

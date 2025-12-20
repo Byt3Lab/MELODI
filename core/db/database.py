@@ -18,6 +18,12 @@ class DataBase():
     def create_all(self):
         Model.metadata.create_all(self.engine) 
     
+    def execute(self, query):
+        with self.get_session() as session:
+            result = session.execute(query)
+            session.commit()
+            return result
+        
     def close_engine(self):
         if self.engine:
             self.engine.dispose()
