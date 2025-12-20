@@ -447,8 +447,10 @@
 
             <section id="installation">
                 <h2>Installation</h2>
+
+                <h3>Méthode Classique</h3>
                 <pre><code># Cloner le repo
-git clone https://github.com/votre-repo/MELODI.git
+git clone https://github.com/byt3lab/MELODI.git
 cd MELODI
 
 # Environnement virtuel
@@ -460,6 +462,13 @@ pip install -r requirements.txt
 
 # Lancer
 python main.py</code></pre>
+
+                <h3>Avec Docker</h3>
+                <pre><code># Construction et Démarrage
+docker compose up --build
+
+# Accès
+# Ouvrez http://localhost:8080</code></pre>
             </section>
 
             <section id="architecture">

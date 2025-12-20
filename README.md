@@ -43,6 +43,16 @@ pip install -r requirements.txt
 python main.py
 ```
 
+### Docker
+
+1. **Construction et Démarrage**
+```bash
+docker compose up --build
+```
+
+2. **Accès**
+L'application sera accessible à l'adresse [http://localhost:8080](http://localhost:8080).
+
 ## 📂 Structure du Projet
 
 - `core/` : Le cœur du framework (Router, ModuleManager, DB, etc.)
