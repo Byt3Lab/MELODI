@@ -287,36 +287,105 @@ var MelodiRouter = /** @class */ (function () {
                     }
                     console.log('RouterView mounted. Depth:', depth);
                     var currentComponent = null;
+                    var currentWrapper = null;
                     // Create an effect that runs whenever matched routes change
                     app.reactivity.createEffect(function () {
                         var matched = router.matched();
                         console.log('RouterView update. Depth:', depth, 'Matched:', matched);
                         var route = matched[depth];
-                        // Clear previous content
-                        container.innerHTML = '';
-                        if (currentComponent) {
-                            try {
-                                currentComponent.unmount();
+                        var transitionName = route ? route.transition : null;
+                        // Function to mount new component
+                        var mountNew = function (wrapper) {
+                            if (route) {
+                                try {
+                                    var comp = new Component(route.component);
+                                    comp.mount(wrapper, app);
+                                    return comp;
+                                }
+                                catch (e) {
+                                    console.error('Error mounting route component:', e);
+                                    wrapper.innerHTML = '<div>Error loading component</div>';
+                                    return null;
+                                }
                             }
-                            catch (e) {
-                                console.error('Error unmounting component:', e);
+                            return null;
+                        };
+                        if (transitionName) {
+                            // --- Transition Logic ---
+                            // 1. Prepare new component
+                            var newWrapper_1 = document.createElement('div');
+                            newWrapper_1.className = "route-wrapper";
+                            // Add enter classes
+                            newWrapper_1.classList.add("".concat(transitionName, "-enter-from"));
+                            newWrapper_1.classList.add("".concat(transitionName, "-enter-active"));
+                            container.appendChild(newWrapper_1);
+                            var newComp = mountNew(newWrapper_1);
+                            // 2. Handle old component (Leave)
+                            if (currentWrapper) {
+                                var oldWrapper_1 = currentWrapper;
+                                var oldComp_1 = currentComponent;
+                                oldWrapper_1.classList.add("".concat(transitionName, "-leave-from"));
+                                oldWrapper_1.classList.add("".concat(transitionName, "-leave-active"));
+                                // Force reflow
+                                void oldWrapper_1.offsetWidth;
+                                // Next frame
+                                requestAnimationFrame(function () {
+                                    oldWrapper_1.classList.remove("".concat(transitionName, "-leave-from"));
+                                    oldWrapper_1.classList.add("".concat(transitionName, "-leave-to"));
+                                });
+                                // Cleanup after transition
+                                var onTransitionEnd = function () {
+                                    if (oldWrapper_1.parentNode === container) {
+                                        container.removeChild(oldWrapper_1);
+                                    }
+                                    if (oldComp_1) {
+                                        try {
+                                            oldComp_1.unmount();
+                                        }
+                                        catch (e) { }
+                                    }
+                                };
+                                // Fallback timeout
+                                setTimeout(onTransitionEnd, 500); // Default fallback
+                                oldWrapper_1.addEventListener('transitionend', onTransitionEnd, { once: true });
                             }
-                            currentComponent = null;
-                        }
-                        if (route) {
-                            // Mount new component
-                            try {
-                                var comp = new Component(route.component);
-                                comp.mount(container, app);
-                                currentComponent = comp;
-                            }
-                            catch (e) {
-                                console.error('Error mounting route component:', e);
-                                container.innerHTML = '<div>Error loading component</div>';
-                            }
+                            // 3. Handle new component (Enter)
+                            // Force reflow
+                            void newWrapper_1.offsetWidth;
+                            requestAnimationFrame(function () {
+                                newWrapper_1.classList.remove("".concat(transitionName, "-enter-from"));
+                                newWrapper_1.classList.add("".concat(transitionName, "-enter-to"));
+                                var onEnterEnd = function () {
+                                    newWrapper_1.classList.remove("".concat(transitionName, "-enter-active"));
+                                    newWrapper_1.classList.remove("".concat(transitionName, "-enter-to"));
+                                };
+                                setTimeout(onEnterEnd, 500);
+                                newWrapper_1.addEventListener('transitionend', onEnterEnd, { once: true });
+                            });
+                            currentComponent = newComp;
+                            currentWrapper = newWrapper_1;
                         }
                         else {
-                            // If no route matched at this depth, render nothing
+                            // --- No Transition (Instant) ---
+                            // Clear previous content
+                            container.innerHTML = '';
+                            if (currentComponent) {
+                                try {
+                                    currentComponent.unmount();
+                                }
+                                catch (e) {
+                                    console.error('Error unmounting component:', e);
+                                }
+                                currentComponent = null;
+                            }
+                            currentWrapper = null;
+                            if (route) {
+                                var wrapper = document.createElement('div');
+                                wrapper.className = 'route-wrapper';
+                                container.appendChild(wrapper);
+                                currentComponent = mountNew(wrapper);
+                                currentWrapper = wrapper;
+                            }
                         }
                     });
                 }

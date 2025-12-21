@@ -3,6 +3,7 @@ export interface RouteDef {
     path: string;
     component: ComponentDef;
     children?: RouteDef[];
+    transition?: string;
 }
 export declare class MelodiRouter implements Plugin {
     routes: RouteDef[];

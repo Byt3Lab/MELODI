@@ -61,11 +61,11 @@ const store = new MelodiStore({
 
 // 3. Initialize Router
 const routes = [
-    { path: '/', component: Step1 },
-    { path: '/step2', component: Step2 },
-    { path: '/step3', component: Step3 },
-    { path: '/finish', component: Finish },
-    { path: '/:pathMatch(.*)*', component: Step1 }
+    { path: '/', component: Step1, transition: 'fade' },
+    { path: '/step2', component: Step2, transition: 'fade' },
+    { path: '/step3', component: Step3, transition: 'fade' },
+    { path: '/finish', component: Finish, transition: 'fade' },
+    { path: '/:pathMatch(.*)*', component: Step1, transition: 'fade' }
 ]
 
 const router = new MelodiRouter({

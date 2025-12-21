@@ -10,3 +10,5 @@ class Repository:
         self.module = module
         self.db = self.module.app.db
         
+    def get_session(self):
+        return self.db.get_session()

@@ -46,11 +46,13 @@ class Application:
         
         self.db.init_database()
         self.user_sudo_exist = self.verify_user_sudo_exist()
-
+        
         if not self.user_sudo_exist:
             self.app_is_installed = False
             self.build_installer()
             return
+        
+        self.user_sudo_exist = True
 
         from base.module import module as base_module
 
@@ -108,12 +110,13 @@ class Application:
         self.api_router.add_route("/<path:path>")(api_route_not_found)
 
     def verify_user_sudo_exist(self):
-        from base.models import UserModel as User
-        
-        User.metadata.create_all(self.db.engine)
+        try:
+            res = self.db.execute_sql("SELECT user_id from users WHERE is_sudo = true LIMIT 1;")
 
-        sudo_user = self.db.get_session().query(User).filter_by(is_sudo=True).first()
-        
-        if sudo_user:
-            return True
+            if res.first():
+                return True
+        except Exception as e:
+            print("Database connection error:", e)
+            return False
+
         return False

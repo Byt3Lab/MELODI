@@ -1,6 +1,7 @@
-def gen__id_by_uuid4():
+def gen_id_by_uuid4(prefix: str = "") -> str:
     from uuid import uuid4
-    return uuid4()
+    id = prefix + str(uuid4())
+    return id
 
 def gen_id_by_hash(nom: str) -> str:
     import hashlib

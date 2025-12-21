@@ -6,9 +6,9 @@ if TYPE_CHECKING:
     from ..module.module import Module
 
 class Response:
-    def __init__(self, data=None, code=200, message=""):
+    def __init__(self, data=None, status_code=200, message=""):
         self.data = data
-        self.code = code
+        self.status_code = status_code
         self.message = message    
 
 class Service:
@@ -16,5 +16,5 @@ class Service:
         self.module = module
         self.app = self.module.app
         
-    def response(self, data=None, code=200, message=""):
-        return Response(data,code,message)
+    def response(self, data=None, status_code=200, message=""):
+        return Response(data,status_code,message)
