@@ -10,5 +10,6 @@ pip install qrcode[pil]
 pip install pyzbar
 pip install psycopg2-binary
 pip install pymysql
+pip install cryptography
 
 pip freeze > requirements.txt

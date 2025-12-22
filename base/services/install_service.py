@@ -81,12 +81,18 @@ class InstallService(Service):
         db_config = data.get('db_config', {})
         admin_user = data.get('admin_user', {})
 
+        if db_config.get("provider", "") == "sqlite":
+            # Pour SQLite, certains champs peuvent être vides
+            required_db_fields = ['provider', 'name']
+
         for field in required_db_fields:
             if field not in db_config or not db_config[field]:
+                print("missing field:", field)
                 return False
 
         for field in required_admin_fields:
             if field not in admin_user or not admin_user[field]:
+                print("missing field:", field)
                 return False
 
         if db_config.get("provider", "") not in ['sqlite', 'postgresql', 'mysql']:

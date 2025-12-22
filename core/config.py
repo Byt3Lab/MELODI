@@ -17,9 +17,6 @@ class Config:
     path_template_404_not_found: str = ""
     infos_org = {}
 
-
-    # // postgresql://user:password@host:port/dbname
-
     def __init__(self):
         self.db_config = self.load_db_config()
         self.DB_PROVIDER = self.db_config.get("db_provider", "sqlite")
@@ -63,10 +60,18 @@ class Config:
         self.infos_org = data
 
     def get_db_url(self):
+        lib=""
+
         if self.DB_PROVIDER == "sqlite":
             sqlite_path_dir = join_paths(self.PATH_DIR_RACINE, "sqlite")
 
             create_dir_if_not_exist(sqlite_path_dir)
 
             return f"sqlite:///sqlite/{self.DB_NAME}.db"
-        return f"{self.DB_PROVIDER}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+
+        if self.DB_PROVIDER == "postgresql":
+            lib= "+psycopg2"
+        elif self.DB_PROVIDER == "mysql":
+            lib= "+pymysql"
+
+        return f"{self.DB_PROVIDER+lib}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

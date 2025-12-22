@@ -14,7 +14,7 @@ class DataBase():
 
     def init_database(self):
         url = self.app.config.get_db_url()
-        self.engine = create_engine(url, echo=False)
+        self.engine = create_engine(url)
 
     def create_all(self, model:Model|list[Model]):
         if isinstance(model, list):
