@@ -6,7 +6,7 @@ from datetime import datetime
 class UserModel(Model):
     __tablename__ = "users"
 
-    user_id: Mapped[str] = mapped_column(primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(100), primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True)
     password: Mapped[str] = mapped_column(String(255))
     email: Mapped[str] = mapped_column(String(100), unique=True)

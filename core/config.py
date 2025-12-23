@@ -19,23 +19,23 @@ class Config:
 
     def __init__(self):
         self.db_config = self.load_db_config()
-        self.DB_PROVIDER = self.db_config.get("db_provider", "sqlite")
-        self.DB_USER = self.db_config.get("db_user", "user")
-        self.DB_PASSWORD = self.db_config.get("db_password", "password")
-        self.DB_HOST = self.db_config.get("db_host", "localhost")
-        self.DB_PORT = self.db_config.get("db_port", "5432")
-        self.DB_NAME = self.db_config.get("db_name", "melodi_db")
+        self.DB_PROVIDER = self.db_config.get("db_provider") or "postgresql"
+        self.DB_USER = self.db_config.get("db_user") or "postgres"
+        self.DB_PASSWORD = self.db_config.get("db_password") or "password"
+        self.DB_HOST = self.db_config.get("db_host") or "localhost"
+        self.DB_PORT = self.db_config.get("db_port") or "5432"
+        self.DB_NAME = self.db_config.get("db_name") or "melodi_db"
         
         self.load_infos_org()
 
     def set_db_config(self, config:dict):
         self.db_config = config
-        self.DB_PROVIDER = config.get("db_provider", self.DB_PROVIDER)
-        self.DB_USER = config.get("db_user", self.DB_USER)
-        self.DB_PASSWORD = config.get("db_password", self.DB_PASSWORD)
-        self.DB_HOST = config.get("db_host", self.DB_HOST)
-        self.DB_PORT = config.get("db_port", self.DB_PORT)
-        self.DB_NAME = config.get("db_name", self.DB_NAME)
+        self.DB_PROVIDER = config.get("db_provider") or self.DB_PROVIDER
+        self.DB_USER = config.get("db_user") or self.DB_USER
+        self.DB_PASSWORD = config.get("db_password") or self.DB_PASSWORD
+        self.DB_HOST = config.get("db_host") or self.DB_HOST
+        self.DB_PORT = config.get("db_port") or self.DB_PORT
+        self.DB_NAME = config.get("db_name") or self.DB_NAME
         
 
     def load_db_config(self):
@@ -60,18 +60,8 @@ class Config:
         self.infos_org = data
 
     def get_db_url(self):
-        lib=""
+        # Seul PostgreSQL est supporté
+        provider = "postgresql"
+        lib = "+psycopg2"
 
-        if self.DB_PROVIDER == "sqlite":
-            sqlite_path_dir = join_paths(self.PATH_DIR_RACINE, "sqlite")
-
-            create_dir_if_not_exist(sqlite_path_dir)
-
-            return f"sqlite:///sqlite/{self.DB_NAME}.db"
-
-        if self.DB_PROVIDER == "postgresql":
-            lib= "+psycopg2"
-        elif self.DB_PROVIDER == "mysql":
-            lib= "+pymysql"
-
-        return f"{self.DB_PROVIDER+lib}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"{provider}{lib}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

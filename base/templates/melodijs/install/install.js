@@ -26,9 +26,9 @@ const store = new MelodiStore({
 
         return {
             db_config: {
-                provider: stateSave?.db_config?.provider || 'sqlite',
+                provider: stateSave?.db_config?.provider || 'postgresql',
                 host: stateSave?.db_config?.host || 'localhost',
-                port: stateSave?.db_config?.port || '',
+                port: stateSave?.db_config?.port || '5432',
                 user: stateSave?.db_config?.user || '',
                 password: stateSave?.db_config?.password || '',
                 name: stateSave?.db_config?.name || ''

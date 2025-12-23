@@ -34,6 +34,16 @@ class InstallService(Service):
         if not self.validate_form_data(data):
             return self.response(data={"message":"Données de formulaire manquantes ou invalides"}, status_code=400)
         
+        # Mettre à jour la config AVANT d'initialiser la base de données
+        self.app.config.set_db_config({
+            "db_provider": self.db_provider,
+            "db_user": self.db_user,
+            "db_password": self.db_password,
+            "db_host": self.db_host,
+            "db_port": self.db_port,
+            "db_name": self.db_name
+        })
+        
         try:
             self._init_database()
         except Exception as e:
@@ -81,10 +91,6 @@ class InstallService(Service):
         db_config = data.get('db_config', {})
         admin_user = data.get('admin_user', {})
 
-        if db_config.get("provider", "") == "sqlite":
-            # Pour SQLite, certains champs peuvent être vides
-            required_db_fields = ['provider', 'name']
-
         for field in required_db_fields:
             if field not in db_config or not db_config[field]:
                 print("missing field:", field)
@@ -95,7 +101,7 @@ class InstallService(Service):
                 print("missing field:", field)
                 return False
 
-        if db_config.get("provider", "") not in ['sqlite', 'postgresql', 'mysql']:
+        if db_config.get("provider", "") != 'postgresql':
             return False
         
         if len(admin_user.get("password", "")) < 4:
