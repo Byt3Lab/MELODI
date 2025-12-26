@@ -49,26 +49,102 @@ class Router:
             return self.router.register_blueprint(bp)
         return decorator
 
+    def _process_route(self, route: dict, path_prefix: str = "", inherited_before: None|list[function] = None, inherited_after: None|list[function] = None):
+        """
+        Recursively process a route and its children.
+        
+        Args:
+            route: Route dictionary with path, methods, handler, and optional children
+            path_prefix: Parent path to prepend to current route path
+            inherited_before: Before request middleware inherited from parent routes
+            inherited_after: After request middleware inherited from parent routes
+        """
+        # Extract route properties
+        path = route.get("path", "")
+        methods = route.get("methods", None)
+        handler = route.get("handler")
+        route_before = route.get("before_request", None)
+        route_after = route.get("after_request", None)
+        children = route.get("children", None)
+        
+        # Build full path by combining prefix with current path
+        full_path = path_prefix + path
+        
+        # Merge inherited middleware with route-specific middleware
+        # Inherited middleware runs first, then route-specific middleware
+        combined_before = []
+        if inherited_before and isinstance(inherited_before, list):
+            combined_before.extend(inherited_before)
+        if route_before and isinstance(route_before, list):
+            combined_before.extend(route_before)
+        
+        combined_after = []
+        if inherited_after and isinstance(inherited_after, list):
+            combined_after.extend(inherited_after)
+        if route_after and isinstance(route_after, list):
+            combined_after.extend(route_after)
+        
+        # Convert empty lists to None for add_route compatibility
+        final_before = combined_before if len(combined_before) > 0 else None
+        final_after = combined_after if len(combined_after) > 0 else None
+        
+        # Register the route with combined middleware
+        if handler:
+            self.add_route(full_path, methods=methods, before_request=final_before, after_request=final_after)(handler)
+        
+        # Recursively process children if they exist
+        if children and isinstance(children, list):
+            for child_route in children:
+                self._process_route(
+                    child_route, 
+                    path_prefix=full_path, 
+                    inherited_before=combined_before if len(combined_before) > 0 else None,
+                    inherited_after=combined_after if len(combined_after) > 0 else None
+                )
+    
     def add_many_routes(self, routes: list[dict], before_request:None|list[function]=None, after_request:None|list[function]=None):
+        """
+        Register multiple routes, supporting nested route structures.
+        
+        Args:
+            routes: List of route dictionaries. Each route can have:
+                - path: Route path (required)
+                - methods: HTTP methods list (optional)
+                - handler: Route handler function (required)
+                - before_request: Middleware to run before handler (optional)
+                - after_request: Middleware to run after handler (optional)
+                - children: List of child routes (optional)
+            before_request: Global before request middleware applied to all routes
+            after_request: Global after request middleware applied to all routes
+        """
         use_global_before = isinstance(before_request, list) and len(before_request) > 0
         use_global_after = isinstance(after_request, list) and len(after_request) > 0
         
+        # Process each top-level route
         for route in routes:
-            path = route.get("path")
-            methods = route.get("methods", None)
-            br = route.get("before_request", None)
-            ar = route.get("after_request", None)
-            handler = route.get("handler")
-
-            if use_global_before:
-                br = br if isinstance(br, list) else []
-                br = before_request + br
+            # Merge global middleware with route-specific middleware
+            route_before = route.get("before_request", None)
+            route_after = route.get("after_request", None)
             
+            initial_before = []
+            if use_global_before:
+                initial_before.extend(before_request)
+            if route_before and isinstance(route_before, list):
+                initial_before.extend(route_before)
+            
+            initial_after = []
             if use_global_after:
-                ar = ar if isinstance(ar, list) else []
-                ar = after_request + ar
-               
-            self.add_route(path, methods=methods, before_request=br, after_request=ar)(handler)
+                initial_after.extend(after_request)
+            if route_after and isinstance(route_after, list):
+                initial_after.extend(route_after)
+            
+            # Create a new route dict with merged middleware for processing
+            route_copy = route.copy()
+            route_copy["before_request"] = initial_before if len(initial_before) > 0 else None
+            route_copy["after_request"] = initial_after if len(initial_after) > 0 else None
+            
+            # Process the route and its children recursively
+            self._process_route(route_copy)
     
     def before_request(self):
         def decorator(f):

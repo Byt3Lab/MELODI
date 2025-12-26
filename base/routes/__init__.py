@@ -1,2 +1,2 @@
-from .base_api_routes import BaseApiRoutes
-from .base_routes import BaseRoutes
+from .api_routes import BaseApiRoutes
+from .routes import BaseRoutes

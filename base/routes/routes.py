@@ -10,27 +10,83 @@ class BaseRoutes(WebRouter):
 
         self.before_request()(self.check_maintenance)
         self.after_request()(self.deny_iframe)
+        
         self.add_route("/", methods=["GET"])(self.home)
-        self.add_route("/login", methods=["GET"])(self.login)
-        self.add_route("/register", methods=["GET"])(self.register)
-        self.add_route("/logout", methods=["GET"])(self.logout)
-        self.add_route("/admin", methods=["GET"])(self.admin_dashboard)
-        self.add_route('/admin/users', methods=['GET'])(self.admin_users)
-        self.add_route('/admin/profile', methods=['GET'])(self.profile)
-        self.add_route('/admin/settings/widgets', methods=['GET'])(self.settings_widgets)
-        self.add_route('/admin/settings/home_page', methods=['GET'])(self.settings_home_page)   
-        self.add_route('/admin/settings/home_page/<path:home_page>/on', methods=['GET'])(self.settings_home_page_on)
-        self.add_route('/admin/settings/home_page_clear', methods=['GET'])(self.settings_home_page_clear)
-        self.add_route('/admin/modules', methods=['GET'])(self.admin_modules)
-        self.add_route('/admin/modules/<path:mod>/off', methods=['GET'])(self.off_module)
-        self.add_route('/admin/settings', methods=['GET'])(self.admin_settings)
-        self.add_route('/admin/modules/<path:mod>/on', methods=['GET'])(self.on_module)
-        self.add_route('/admin/logs', methods=['GET'])(self.logs)
 
-        # self.add_many_routes([
-        #     {"path": "/admin", "methods": ["GET"], "handler": self.admin_dashboard},
-        #     {"path": "/admin/users", "methods": ["GET"], "handler": self.admin_users},
-        # ], before_request=[self.br,self.br2], after_request=[self.deny_iframe])
+        self.add_many_routes([
+            {"path": "/login", "methods": ["GET"], "handler": self.login},
+            {"path": "/register", "methods": ["GET"], "handler": self.register},
+        ], before_request=[self.is_not_auth])
+
+        self.add_many_routes([
+            {
+                "path": "/logout", 
+                "methods": ["GET"], 
+                "handler": self.logout
+            },
+            {
+                "path": "/admin",
+                "methods": ["GET"],
+                "handler": self.admin_dashboard,
+                "children": [
+                    {
+                        "path": "/users",
+                        "methods": ["GET"],
+                        "handler": self.admin_users
+                    },
+                    {
+                        "path": "/profile",
+                        "methods": ["GET"],
+                        "handler": self.profile
+                    },
+                    {
+                        "path": "/settings",
+                        "methods": ["GET"],
+                        "handler": self.admin_settings,
+                        "children": [
+                            {
+                                "path": "/widgets",
+                                "methods": ["GET"],
+                                "handler": self.settings_widgets
+                            },
+                            {
+                                "path": "/home_page",
+                                "methods": ["GET"],
+                                "handler": self.settings_home_page
+                            },
+                            {
+                                "path": "/home_page/<path:home_page>/on",
+                                "methods": ["GET"],
+                                "handler": self.settings_home_page_on
+                            },
+                            {
+                                "path": "/home_page_clear",
+                                "methods": ["GET"],
+                                "handler": self.settings_home_page_clear
+                            }
+                        ]
+                    },
+                    {
+                        "path": "/modules",
+                        "methods": ["GET"],
+                        "handler": self.admin_modules,
+                        "children": [
+                            {
+                                "path": "/<path:mod>/off",
+                                "methods": ["GET"],
+                                "handler": self.off_module
+                            },
+                            {
+                                "path": "/<path:mod>/on",
+                                "methods": ["GET"],
+                                "handler": self.on_module
+                            }
+                        ]
+                    },
+                    {"path": "/logs", "methods": ["GET"], "handler": self.logs}
+                ]
+            }
+        ], before_request=[self.is_auth])
 
     def load_installer(self):
         self.before_request()(self.check_installation)
@@ -52,7 +108,19 @@ class BaseRoutes(WebRouter):
     def check_maintenance(self):
         if not self.app.config.allow_request:
             return "Service Unavailable for maintenance", 503
-    
+
+    def is_auth(self):
+        user = self.get_session("user_id")
+
+        if not user:
+            return self.redirect("/login")  
+
+    def is_not_auth(self):
+        user = self.get_session("user_id")
+
+        if user:
+            return self.redirect("/admin")
+          
     def br(self):
         def sr(ctx:RequestContext):
             ctx.data["hello"] = "hello wordl"

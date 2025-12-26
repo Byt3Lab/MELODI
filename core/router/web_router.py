@@ -46,7 +46,7 @@ class WebRouter(Router):
             template_string = read_file(path_file=path_file)
         return self.render_template_string(template_string, **context)
     
-    def get_session(self, key:str):
+    def get_session(self, key:str|None=None):
         from flask import session
 
         try:
@@ -54,7 +54,7 @@ class WebRouter(Router):
                 return session.get(key)
             return session
         except:
-            return None
+            return session
         
     def set_session(self, key:str, value):
         from flask import session
