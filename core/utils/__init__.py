@@ -65,7 +65,6 @@ def get_current_position():
         print(f"Error fetching location: {e}")
         return None
 
-from core.storage.storage   import  Storage
 from .timer_manager import TimerManager   
 from .event_listener import EventListener   
 from .translation import Translation 
