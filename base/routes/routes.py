@@ -19,68 +19,23 @@ class BaseRoutes(WebRouter):
         ], before_request=[self.is_not_auth])
 
         self.add_many_routes([
-            {
-                "path": "/logout", 
-                "methods": ["GET"], 
-                "handler": self.logout
-            },
-            {
-                "path": "/admin",
-                "methods": ["GET"],
-                "handler": self.admin_dashboard,
+            {"path": "/logout", "methods": ["GET"], "handler": self.logout},
+            {"path": "/admin", "methods": ["GET"], "handler": self.admin_dashboard,
                 "children": [
-                    {
-                        "path": "/users",
-                        "methods": ["GET"],
-                        "handler": self.admin_users
-                    },
-                    {
-                        "path": "/profile",
-                        "methods": ["GET"],
-                        "handler": self.profile
-                    },
-                    {
-                        "path": "/settings",
-                        "methods": ["GET"],
-                        "handler": self.admin_settings,
+                    {"path": "/users", "methods": ["GET"], "handler": self.admin_users},
+                    {"path": "/profile", "methods": ["GET"], "handler": self.profile},
+                    {"path": "/settings", "methods": ["GET"], "handler": self.admin_settings,
                         "children": [
-                            {
-                                "path": "/widgets",
-                                "methods": ["GET"],
-                                "handler": self.settings_widgets
-                            },
-                            {
-                                "path": "/home_page",
-                                "methods": ["GET"],
-                                "handler": self.settings_home_page
-                            },
-                            {
-                                "path": "/home_page/<path:home_page>/on",
-                                "methods": ["GET"],
-                                "handler": self.settings_home_page_on
-                            },
-                            {
-                                "path": "/home_page_clear",
-                                "methods": ["GET"],
-                                "handler": self.settings_home_page_clear
-                            }
+                            {"path": "/widgets", "methods": ["GET"], "handler": self.settings_widgets},
+                            {"path": "/home_page", "methods": ["GET"], "handler": self.settings_home_page},
+                            {"path": "/home_page/<path:home_page>/on", "methods": ["GET"], "handler": self.settings_home_page_on},
+                            {"path": "/home_page_clear", "methods": ["GET"], "handler": self.settings_home_page_clear}
                         ]
                     },
-                    {
-                        "path": "/modules",
-                        "methods": ["GET"],
-                        "handler": self.admin_modules,
+                    {"path": "/modules", "methods": ["GET"], "handler": self.admin_modules,
                         "children": [
-                            {
-                                "path": "/<path:mod>/off",
-                                "methods": ["GET"],
-                                "handler": self.off_module
-                            },
-                            {
-                                "path": "/<path:mod>/on",
-                                "methods": ["GET"],
-                                "handler": self.on_module
-                            }
+                            {"path": "/<path:mod>/off", "methods": ["GET"], "handler": self.off_module},
+                            {"path": "/<path:mod>/on", "methods": ["GET"], "handler": self.on_module}
                         ]
                     },
                     {"path": "/logs", "methods": ["GET"], "handler": self.logs}

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from flask import Blueprint
 
@@ -215,6 +215,19 @@ class Router:
     def get_current_request_json(self) -> dict:
         from flask import request
         return request.get_json()   
+    
+    def get_my_middlewares(self) -> dict[str, Any]|None:
+        if self.module is None:
+            return None
+        return self.module.get_my_middlewares()
+    
+    def get_my_middleware(self, middleware:str) -> Any|None:
+        if self.module is None:
+            return None
+        return self.module.get_my_middleware(middleware=middleware)
+    
+    def get_middleware(self, module_name:str, middleware:str) -> Any|None:
+        return self.module.get_middleware(module_name=module_name, middleware=middleware)
     
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         return self.module.translate(filename, keys, lang)

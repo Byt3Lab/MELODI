@@ -1,12 +1,14 @@
 from core.router import WebRouter, APIRouter
-from core.utils import TimerManager, EventListener, Storage, create_dir_if_not_exist, join_paths, path_exist, read_file
+from core.utils import TimerManager, EventListener, create_dir_if_not_exist, join_paths, path_exist, read_file
 from core.component import HomePageManager, MenuItemManager, WidgetManager
 from core.module import ModuleManager
 from core.adapters.flask_adapter import FlaskAdapter
 from core.service import ServiceManager
 from core.db import DataBase
 from core.config import Config
-
+from core.utils.middleware_manager import middleware_manager
+from core.storage import Storage
+from core.cache import Cache
 class Application:
     def __init__(self):
         self.server = FlaskAdapter()
@@ -24,6 +26,7 @@ class Application:
         self.widget_manager = WidgetManager(app=self)
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
+        self.middleware_manager = middleware_manager()
         self.storage = Storage(app=self)
         self.app_is_installed = self.config.is_installed()
         self.user_sudo_exist = False

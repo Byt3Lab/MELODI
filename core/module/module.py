@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from core.router import WebRouter
 from core.router import APIRouter
 from core.utils import join_paths, path_exist, Translation
@@ -116,6 +116,18 @@ class Module:
 
     def register_home_page(self, home_page, infos):
         self.app.home_page_manager.register(name_module=self.dirname, home_page=home_page, infos=infos)
+
+    def register_middlewares(self, middlewares:dict):
+        self.app.middleware_manager.register_middlewares(module_name=self.dirname, middleware=middlewares)
+        
+    def get_my_middlewares(self) -> dict[str, Any]|None:
+        return self.app.middleware_manager.get_module_middlewares(module_name=self.dirname)
+    
+    def get_my_middleware(self, middleware:str) -> Any|None:
+        return self.get_middleware(module_name=self.dirname, middleware=middleware)
+    
+    def get_middleware(self, module_name:str, middleware:str) -> Any|None:
+        return self.app.middleware_manager.get_middleware(module_name=module_name, middleware=middleware)
 
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         if self.translation == None:
