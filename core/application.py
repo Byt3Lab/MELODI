@@ -6,7 +6,7 @@ from core.adapters.flask_adapter import FlaskAdapter
 from core.service import ServiceManager
 from core.db import DataBase
 from core.config import Config
-from core.storage import Storage
+from core.file_management import Storage
 from core.cache import Cache
 class Application:
     def __init__(self):
