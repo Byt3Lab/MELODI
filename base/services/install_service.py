@@ -177,3 +177,6 @@ class InstallService(Service):
         install_lock_path = join_paths(self.app.config.PATH_DIR_CONFIG, "instal.lock")
     
         write_file(install_lock_path, "")
+
+        self.app.timer_manager.set_timeout(self.app.restart, 3000)
+

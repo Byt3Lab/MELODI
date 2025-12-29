@@ -53,6 +53,9 @@ class Config:
     def is_installed(self):
         return path_exist(join_paths(self.PATH_DIR_CONFIG, "instal.lock"))
 
+    def is_production(self):
+        return os.environ.get("MELODI_ENV", "dev") == "prod"
+
     def save_infos_org(self, data):
         path = join_paths(self.PATH_DIR_CONFIG, "infos_org.json")
         with open(path, "w") as f:

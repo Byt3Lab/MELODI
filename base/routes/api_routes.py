@@ -90,7 +90,6 @@ class BaseApiRoutes(APIRouter):
 
         return self.render_json(data)
 
-    
     def status(self):
         return self.render_json(data={"status": "Admin API is working!"}, status_code=200)
 

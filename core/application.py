@@ -26,16 +26,29 @@ class Application:
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
         self.middleware_manager = MiddlewareManager()
-        self.storage = Storage(app=self)
+        # self.storage = Storage(app=self)
         self.app_is_installed = self.config.is_installed()
         self.user_sudo_exist = False
         self.cache = Cache()
         
     def restart(self):
-        self.server = FlaskAdapter()
+        import sys
+        import os
+        print("Restarting application...")
+        
+        if self.db:
+            self.db.close_engine()
+            
         self.stop()
-        self.init()
-        self.build()
+        
+        if self.config.is_production():
+            import signal
+            print("Sending SIGHUP to parent process for restart...")
+            os.kill(os.getppid(), signal.SIGHUP)
+            return
+
+        python = sys.executable
+        os.execl(python, python, *sys.argv)
 
     def stop(self):
         self.server.clear()
