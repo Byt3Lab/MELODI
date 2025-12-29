@@ -66,5 +66,6 @@ def get_current_position():
         return None
 
 from .timer_manager import TimerManager   
-from .event_listener import EventListener   
+from .event_listener import EventListener  
+from .middleware_manager import MiddlewareManager 
 from .translation import Translation 

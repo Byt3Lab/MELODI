@@ -11,9 +11,12 @@ class BaseApiRoutes(APIRouter):
         self.widget_service = WidgetService(module=self.module)
 
         self.after_request()(self.deny_iframe)
+
         self.add_route("/status", methods=["GET"])(self.status)
+        
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
+
         self.add_route("/logout", methods=["GET"])(self.logout)
         self.add_route('/users', methods=['GET'])(self.admin_users)
         self.add_route('/profile', methods=['GET'])(self.profile)

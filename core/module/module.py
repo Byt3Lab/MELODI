@@ -118,16 +118,27 @@ class Module:
         self.app.home_page_manager.register(name_module=self.dirname, home_page=home_page, infos=infos)
 
     def register_middlewares(self, middlewares:dict):
-        self.app.middleware_manager.register_middlewares(module_name=self.dirname, middleware=middlewares)
+        self.app.middleware_manager.register_middlewares(module_name=self.dirname, middlewares=middlewares)
         
-    def get_my_middlewares(self) -> dict[str, Any]|None:
-        return self.app.middleware_manager.get_module_middlewares(module_name=self.dirname)
+    def get_middlewares(self, module_name:str|None=None) -> dict[str, Any]|None:
+        if module_name is None:
+            module_name = self.dirname
+        return self.app.middleware_manager.get_module_middlewares(module_name=module_name)
     
-    def get_my_middleware(self, middleware:str) -> Any|None:
-        return self.get_middleware(module_name=self.dirname, middleware=middleware)
-    
-    def get_middleware(self, module_name:str, middleware:str) -> Any|None:
+    def get_middleware(self, middleware:str, module_name:str|None=None) -> Any|None:
+        if module_name is None:
+            module_name = self.dirname
         return self.app.middleware_manager.get_middleware(module_name=module_name, middleware=middleware)
+
+    def add_event_listener(self, event_name:str, listener:Any, module_name:str|None=None):
+        if module_name is None:
+            module_name = self.dirname
+        self.app.event_listener.add_event_listener(module_name, event_name, listener)
+
+    def notify_event(self, event_name:str, data:Any=None, module_name:str|None=None):
+        if module_name is None:
+            module_name = self.dirname
+        self.app.event_listener.notify_event(module_name, event_name, data)
 
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         if self.translation == None:

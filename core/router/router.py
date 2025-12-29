@@ -216,17 +216,10 @@ class Router:
         from flask import request
         return request.get_json()   
     
-    def get_my_middlewares(self) -> dict[str, Any]|None:
-        if self.module is None:
-            return None
-        return self.module.get_my_middlewares()
+    def get_middlewares(self, module_name:str|None=None) -> dict[str, Any]|None:
+        return self.module.get_middlewares(module_name)
     
-    def get_my_middleware(self, middleware:str) -> Any|None:
-        if self.module is None:
-            return None
-        return self.module.get_my_middleware(middleware=middleware)
-    
-    def get_middleware(self, module_name:str, middleware:str) -> Any|None:
+    def get_middleware(self, middleware:str, module_name:str|None=None) -> Any|None:
         return self.module.get_middleware(module_name=module_name, middleware=middleware)
     
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):

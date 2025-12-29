@@ -1,7 +1,6 @@
 from typing import Any
 
-
-class middleware_manager:
+class MiddlewareManager:
     def __init__(self):
         self.middlewares:dict[str,dict[str, Any]] = {}
     

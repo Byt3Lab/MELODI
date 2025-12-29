@@ -16,7 +16,7 @@ class BaseRoutes(WebRouter):
         self.add_many_routes([
             {"path": "/login", "methods": ["GET"], "handler": self.login},
             {"path": "/register", "methods": ["GET"], "handler": self.register},
-        ], before_request=[self.is_not_auth])
+        ], before_request=[self.user_is_not_auth])
 
         self.add_many_routes([
             {"path": "/logout", "methods": ["GET"], "handler": self.logout},
@@ -41,7 +41,7 @@ class BaseRoutes(WebRouter):
                     {"path": "/logs", "methods": ["GET"], "handler": self.logs}
                 ]
             }
-        ], before_request=[self.is_auth])
+        ], before_request=[self.user_is_auth])
 
     def load_installer(self):
         self.before_request()(self.check_installation)
@@ -64,17 +64,11 @@ class BaseRoutes(WebRouter):
         if not self.app.config.allow_request:
             return "Service Unavailable for maintenance", 503
 
-    def is_auth(self):
-        user = self.get_session("user_id")
+    def user_is_auth(self):
+        return self.get_middleware("user_is_auth")(self)
 
-        if not user:
-            return self.redirect("/login")  
-
-    def is_not_auth(self):
-        user = self.get_session("user_id")
-
-        if user:
-            return self.redirect("/admin")
+    def user_is_not_auth(self):
+        return self.get_middleware("user_is_not_auth")(self)
           
     def br(self):
         def sr(ctx:RequestContext):
@@ -162,8 +156,6 @@ class BaseRoutes(WebRouter):
         return self.render_template("admin_settings.html")
 
     def home(self): 
-        self.app.event_listener.notify_event("hi")
-
         home_page = self.app.home_page_manager.render_home_page() 
         
         if home_page: 

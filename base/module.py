@@ -8,8 +8,16 @@ class Base(ApplicationModule):
         self.init_translation("fr")
 
         self.add_404_not_found()
-        self.register_widget("base")(self.base_widget)
-        self.register_widget("base2")(self.base_widget)
+
+        self.register_widget("base_widget", self.base_widget)
+
+        self.register_middlewares({
+            "user_is_auth": self.user_is_auth_middleware,
+            "user_is_not_auth": self.user_is_not_auth_middleware,
+        })
+
+        r = self.get_middleware("example_middleware", "base")
+        print(f"Example Middleware: {r}")
 
         routes = BaseRoutes(name="base", app=self.app, module=self)
         api_routes = BaseApiRoutes(name="base", app=self.app)
@@ -50,6 +58,22 @@ class Base(ApplicationModule):
         
     def base_widget(self):
         return "<div><h3>Base Widget</h3><p>This is a sample widget from the Base module.</p></div>"
+    
+    def user_is_auth_middleware(self,self_router):
+        this = self_router
+
+        user = this.get_session("user_id")
+
+        if not user:
+            return this.redirect("/login")  
+
+    def user_is_not_auth_middleware(self, self_router):
+        this = self_router
+
+        user = this.get_session("user_id")
+
+        if user:
+            return this.redirect("/admin")
     
 module = Base(
     name="base", 

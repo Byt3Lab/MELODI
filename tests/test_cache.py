@@ -19,12 +19,12 @@ sys.modules['sqlalchemy.ext'] = MagicMock()
 sys.modules['sqlalchemy.ext.declarative'] = MagicMock()
 # Also mock core.storage.storage if needed, but werkzeug should be enough if that's the only error
 
-from core.cache.cache import Cache, InMemoryCache, FileCache, RedisCache
+from core.cache import Cache
 
 class TestCacheService(unittest.TestCase):
 
     def test_in_memory_cache(self):
-        print("\nTesting InMemoryCache...")
+        print("\nTesting MemoryCache...")
         cache = Cache(backend="memory")
         
         # Test Set/Get
@@ -51,7 +51,7 @@ class TestCacheService(unittest.TestCase):
         cache.clear()
         self.assertIsNone(cache.get("a"))
         self.assertIsNone(cache.get("b"))
-        print("InMemoryCache tests passed.")
+        print("MemoryCache tests passed.")
 
     def test_file_cache(self):
         print("\nTesting FileCache...")
