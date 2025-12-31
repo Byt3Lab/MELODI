@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable
 from core.router import WebRouter
 from core.router import APIRouter
 from core.utils import join_paths, path_exist, Translation
@@ -117,20 +117,20 @@ class Module:
     def register_home_page(self, home_page, infos):
         self.app.home_page_manager.register(name_module=self.dirname, home_page=home_page, infos=infos)
 
-    def register_middlewares(self, middlewares:dict):
+    def register_middlewares(self, middlewares:dict[str, Callable]):
         self.app.middleware_manager.register_middlewares(module_name=self.dirname, middlewares=middlewares)
         
-    def get_middlewares(self, module_name:str|None=None) -> dict[str, Any]|None:
+    def get_middlewares(self, module_name:str|None=None) -> dict[str, Callable]|None:
         if module_name is None:
             module_name = self.dirname
         return self.app.middleware_manager.get_module_middlewares(module_name=module_name)
     
-    def get_middleware(self, middleware:str, module_name:str|None=None) -> Any|None:
+    def get_middleware(self, middleware:str, module_name:str|None=None) -> Callable|None:
         if module_name is None:
             module_name = self.dirname
         return self.app.middleware_manager.get_middleware(module_name=module_name, middleware=middleware)
 
-    def add_event_listener(self, event_name:str, listener:Any, module_name:str|None=None):
+    def add_event_listener(self, event_name:str, listener:Callable, module_name:str|None=None):
         if module_name is None:
             module_name = self.dirname
         self.app.event_listener.add_event_listener(module_name, event_name, listener)

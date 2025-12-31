@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
-
-from flask import Blueprint
+from functools import wraps
+from typing import TYPE_CHECKING, Any, Callable
+import uuid
+from flask import Blueprint, make_response
 
 if TYPE_CHECKING:
     from core import Application
@@ -21,34 +22,41 @@ class Router:
 
         self.router = Blueprint(name,import_name, template_folder=self.template_folder)
 
-    def add_route(self, path: str, methods=None, before_request:None|list[function]=None, after_request:None|list[function]=None):
-        def decorator(f):
-            def create_bp():
-                bp = Blueprint(self.router.name+"_"+f.__name__+"_mw", self.router.import_name)
-                return bp
+    def add_route(self, path: str, methods: None|list[str] = None, before_request: None|list[Callable] = None, after_request: None|list[Callable] = None):
+        def decorator(f: Callable):
+            @wraps(f)
+            def wrapper(*args, **kwargs):
+                # 1. Exécution des middlewares 'before_request'
+                if isinstance(before_request, list):
+                    for callback in before_request:
+                        response = callback(self_router=self, request=self.get_request())
+                        # Si un before_request retourne une valeur, Flask interrompt 
+                        # la suite et affiche cette valeur (comportement standard)
+                        if response is not None:
+                            return response
 
-            bp = None
-            use_before = isinstance(before_request, list) and len(before_request) > 0
-            use_after = isinstance(after_request, list) and len(after_request) > 0
-            use_bp = use_before or use_after
+                # 2. Appel de la fonction de vue originale
+                response = f(*args, **kwargs)
+                
+                # Conversion en objet réponse Flask pour le traitement 'after_request'
+                response = make_response(response)
 
-            if not use_bp:
-                return self.router.route(path, methods=methods)(f)
-        
-            bp = create_bp()
+                # 3. Exécution des middlewares 'after_request'
+                if isinstance(after_request, list):
+                    for callback in after_request:
+                        response = callback(response, self_router=self, request=self.get_request())
+                
+                return response
 
-            if use_before:
-                for bmw in before_request:
-                    bp.before_request(bmw)
-
-            if use_after:
-                for amw in after_request:
-                    bp.after_request(amw)
+            # On enregistre le wrapper sur le routeur principal au lieu de f
+            # On utilise l'ID de l'objet pour garantir l'unicité dans Flask
+            wrapper.__name__ = f"{f.__name__}_{uuid.uuid4().hex}"
+            self.router.route(path, methods=methods)(wrapper)
             
-            bp.route(path, methods=methods)(f)
-            return self.router.register_blueprint(bp)
+            # On retourne le wrapper pour conserver la chaîne de décoration
+            return wrapper
         return decorator
-
+    
     def _process_route(self, route: dict, path_prefix: str = "", inherited_before: None|list[function] = None, inherited_after: None|list[function] = None):
         """
         Recursively process a route and its children.
@@ -219,7 +227,7 @@ class Router:
     def get_middlewares(self, module_name:str|None=None) -> dict[str, Any]|None:
         return self.module.get_middlewares(module_name)
     
-    def get_middleware(self, middleware:str, module_name:str|None=None) -> Any|None:
+    def get_middleware(self, middleware:str, module_name:str|None=None) -> Callable|None:
         return self.module.get_middleware(module_name=module_name, middleware=middleware)
     
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):

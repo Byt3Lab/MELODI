@@ -17,6 +17,9 @@ class BaseApiRoutes(APIRouter):
         self.add_route("/login", methods=["GET"])(self.login)
         self.add_route("/register", methods=["GET"])(self.register)
 
+        self.add_many_routes([
+            {"path":""}
+        ])
         self.add_route("/logout", methods=["GET"])(self.logout)
         self.add_route('/users', methods=['GET'])(self.admin_users)
         self.add_route('/profile', methods=['GET'])(self.profile)

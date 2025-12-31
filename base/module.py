@@ -59,7 +59,7 @@ class Base(ApplicationModule):
     def base_widget(self):
         return "<div><h3>Base Widget</h3><p>This is a sample widget from the Base module.</p></div>"
     
-    def user_is_auth_middleware(self,self_router):
+    def user_is_auth_middleware(self,self_router, request=None):
         this = self_router
 
         user = this.get_session("user_id")
@@ -67,7 +67,7 @@ class Base(ApplicationModule):
         if not user:
             return this.redirect("/login")  
 
-    def user_is_not_auth_middleware(self, self_router):
+    def user_is_not_auth_middleware(self, self_router, request=None):
         this = self_router
 
         user = this.get_session("user_id")

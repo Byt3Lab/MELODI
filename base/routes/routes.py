@@ -16,7 +16,7 @@ class BaseRoutes(WebRouter):
         self.add_many_routes([
             {"path": "/login", "methods": ["GET"], "handler": self.login},
             {"path": "/register", "methods": ["GET"], "handler": self.register},
-        ], before_request=[self.user_is_not_auth])
+        ], before_request=[self.user_is_not_auth()])
 
         self.add_many_routes([
             {"path": "/logout", "methods": ["GET"], "handler": self.logout},
@@ -41,7 +41,7 @@ class BaseRoutes(WebRouter):
                     {"path": "/logs", "methods": ["GET"], "handler": self.logs}
                 ]
             }
-        ], before_request=[self.user_is_auth])
+        ], before_request=[self.user_is_auth()])
 
     def load_installer(self):
         self.before_request()(self.check_installation)
@@ -65,10 +65,10 @@ class BaseRoutes(WebRouter):
             return "Service Unavailable for maintenance", 503
 
     def user_is_auth(self):
-        return self.get_middleware("user_is_auth")(self)
+        return self.get_middleware("user_is_auth")
 
     def user_is_not_auth(self):
-        return self.get_middleware("user_is_not_auth")(self)
+        return self.get_middleware("user_is_not_auth")
           
     def br(self):
         def sr(ctx:RequestContext):
