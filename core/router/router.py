@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from core import Application
     from core.module import Module
     from .request_context import RequestContext
+    from core.utils import Middleware
 
 class Router:
     def __init__(self, app:Application, name:str, module:Module|None = None):
@@ -50,7 +51,7 @@ class Router:
 
             # On enregistre le wrapper sur le routeur principal au lieu de f
             # On utilise l'ID de l'objet pour garantir l'unicité dans Flask
-            wrapper.__name__ = f"{f.__name__}_{uuid.uuid4().hex}"
+            wrapper.__name__ = f"{f.__name__}_{uuid.uuid4().hex}_{uuid.uuid4().hex}"
             self.router.route(path, methods=methods)(wrapper)
             
             # On retourne le wrapper pour conserver la chaîne de décoration
@@ -199,31 +200,7 @@ class Router:
     def url_for(self, endpoint: str, **values):
         from flask import url_for
         return url_for(endpoint, **values)
-    
-    def abort(self, code: int, description: str = None):
-        from flask import abort
-        return abort(code, description=description)
-    
-    def get_current_request_path(self) -> str:
-        from flask import request
-        return request.path
-    
-    def get_current_request_method(self) -> str:
-        from flask import request
-        return request.method   
-    
-    def get_current_request_args(self) -> dict:
-        from flask import request
-        return request.args.to_dict()
-    
-    def get_current_request_form(self) -> dict:
-        from flask import request
-        return request.form.to_dict()
-    
-    def get_current_request_json(self) -> dict:
-        from flask import request
-        return request.get_json()   
-    
+   
     def get_middlewares(self, module_name:str|None=None) -> dict[str, Any]|None:
         return self.module.get_middlewares(module_name)
     

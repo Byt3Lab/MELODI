@@ -69,3 +69,4 @@ from .timer_manager import TimerManager
 from .event_listener import EventListener  
 from .middleware_manager import MiddlewareManager 
 from .translation import Translation 
+from .middleware import Middleware
