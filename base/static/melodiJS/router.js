@@ -249,6 +249,10 @@ var MelodiRouter = /** @class */ (function () {
         for (var i = 0; i < patternParts.length; i++) {
             var patternPart = patternParts[i];
             var pathPart = pathParts[i];
+            if (patternPart === '*') {
+                params['pathMatch'] = '/' + pathParts.slice(i).join('/');
+                return params;
+            }
             if (patternPart.startsWith(':')) {
                 var paramName = patternPart.slice(1);
                 if (pathPart === undefined)
