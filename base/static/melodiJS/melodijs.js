@@ -1102,6 +1102,10 @@ var Component = /** @class */ (function () {
                         _this._postMountEffects = [];
                         effects.forEach(function (fn) { return fn(); });
                     }
+                    // Mount nested components in newly inserted content
+                    if (currentEl && currentEl.nodeType === 1) {
+                        _this._mountComponentsIn(currentEl);
+                    }
                 }
                 else {
                     // No branch active
@@ -1171,10 +1175,20 @@ var Component = /** @class */ (function () {
                             if (children.length > 0) {
                                 itemMap.set(index, { element: children[0], item: item, index: index });
                             }
+                            // Mount nested components in each child
+                            children.forEach(function (child) {
+                                if (child.nodeType === 1) {
+                                    _this._mountComponentsIn(child);
+                                }
+                            });
                         }
                         else {
                             parent.insertBefore(processed, anchor);
                             itemMap.set(index, { element: processed, item: item, index: index });
+                            // Mount nested components in newly inserted element
+                            if (processed.nodeType === 1) {
+                                _this._mountComponentsIn(processed);
+                            }
                         }
                     };
                     if (Array.isArray(list)) {
@@ -1297,6 +1311,10 @@ var Component = /** @class */ (function () {
                                 previousElement_1 = processed;
                             }
                             itemMap.set(key, { element: elementToTrack, item: newData.item, index: newData.index });
+                            // Mount nested components in newly created element
+                            if (elementToTrack && elementToTrack.nodeType === 1) {
+                                _this._mountComponentsIn(elementToTrack);
+                            }
                         }
                     });
                 }
@@ -1513,6 +1531,129 @@ var Component = /** @class */ (function () {
                         finally { if (e_7) throw e_7.error; }
                         return [7 /*endfinally*/];
                     case 16: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Mount nested components within a specific DOM node.
+     * This is called after v-for or v-if dynamically inserts new nodes.
+     */
+    Component.prototype._mountComponentsIn = function (node) {
+        return __awaiter(this, void 0, void 0, function () {
+            var globalComponents, localComponents, allComponents, tags, tags_3, tags_3_1, tag, compDef, comp, e_8, nodes, nodes_2, nodes_2_1, childNode, parent_2, skip, t, compDef, comp, e_9, e_10_1, e_11_1;
+            var e_11, _a, e_10, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        if (!this.app || !node)
+                            return [2 /*return*/];
+                        globalComponents = this.app.components || {};
+                        localComponents = this.components || {};
+                        allComponents = __assign(__assign({}, globalComponents), localComponents);
+                        tags = Object.keys(allComponents);
+                        _c.label = 1;
+                    case 1:
+                        _c.trys.push([1, 18, 19, 20]);
+                        tags_3 = __values(tags), tags_3_1 = tags_3.next();
+                        _c.label = 2;
+                    case 2:
+                        if (!!tags_3_1.done) return [3 /*break*/, 17];
+                        tag = tags_3_1.value;
+                        if (!(node.tagName && node.tagName.toLowerCase() === tag)) return [3 /*break*/, 6];
+                        if (!!node.__melodijs_mounted) return [3 /*break*/, 6];
+                        compDef = allComponents[tag];
+                        comp = new Component(compDef);
+                        try {
+                            comp._parent = this;
+                        }
+                        catch (e) { }
+                        _c.label = 3;
+                    case 3:
+                        _c.trys.push([3, 5, , 6]);
+                        return [4 /*yield*/, comp.mount(node, this.app)];
+                    case 4:
+                        _c.sent();
+                        node.__melodijs_mounted = true;
+                        return [3 /*break*/, 6];
+                    case 5:
+                        e_8 = _c.sent();
+                        console.error('Error mounting component:', tag, e_8);
+                        return [3 /*break*/, 6];
+                    case 6:
+                        nodes = Array.from(node.querySelectorAll(tag));
+                        _c.label = 7;
+                    case 7:
+                        _c.trys.push([7, 14, 15, 16]);
+                        nodes_2 = (e_10 = void 0, __values(nodes)), nodes_2_1 = nodes_2.next();
+                        _c.label = 8;
+                    case 8:
+                        if (!!nodes_2_1.done) return [3 /*break*/, 13];
+                        childNode = nodes_2_1.value;
+                        if (childNode.__melodijs_mounted)
+                            return [3 /*break*/, 12];
+                        parent_2 = childNode.parentElement;
+                        skip = false;
+                        while (parent_2 && parent_2 !== node) {
+                            t = parent_2.tagName && parent_2.tagName.toLowerCase();
+                            if (t && tags.indexOf(t) !== -1) {
+                                // Found a custom element parent - skip only if NOT mounted yet
+                                if (!parent_2.__melodijs_mounted) {
+                                    skip = true;
+                                    break;
+                                }
+                            }
+                            parent_2 = parent_2.parentElement;
+                        }
+                        if (skip)
+                            return [3 /*break*/, 12];
+                        compDef = allComponents[tag];
+                        comp = new Component(compDef);
+                        try {
+                            comp._parent = this;
+                        }
+                        catch (e) { }
+                        _c.label = 9;
+                    case 9:
+                        _c.trys.push([9, 11, , 12]);
+                        return [4 /*yield*/, comp.mount(childNode, this.app)];
+                    case 10:
+                        _c.sent();
+                        childNode.__melodijs_mounted = true;
+                        return [3 /*break*/, 12];
+                    case 11:
+                        e_9 = _c.sent();
+                        console.error('Error mounting nested component:', tag, e_9);
+                        return [3 /*break*/, 12];
+                    case 12:
+                        nodes_2_1 = nodes_2.next();
+                        return [3 /*break*/, 8];
+                    case 13: return [3 /*break*/, 16];
+                    case 14:
+                        e_10_1 = _c.sent();
+                        e_10 = { error: e_10_1 };
+                        return [3 /*break*/, 16];
+                    case 15:
+                        try {
+                            if (nodes_2_1 && !nodes_2_1.done && (_b = nodes_2.return)) _b.call(nodes_2);
+                        }
+                        finally { if (e_10) throw e_10.error; }
+                        return [7 /*endfinally*/];
+                    case 16:
+                        tags_3_1 = tags_3.next();
+                        return [3 /*break*/, 2];
+                    case 17: return [3 /*break*/, 20];
+                    case 18:
+                        e_11_1 = _c.sent();
+                        e_11 = { error: e_11_1 };
+                        return [3 /*break*/, 20];
+                    case 19:
+                        try {
+                            if (tags_3_1 && !tags_3_1.done && (_a = tags_3.return)) _a.call(tags_3);
+                        }
+                        finally { if (e_11) throw e_11.error; }
+                        return [7 /*endfinally*/];
+                    case 20: return [2 /*return*/];
                 }
             });
         });

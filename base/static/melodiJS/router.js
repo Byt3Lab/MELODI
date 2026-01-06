@@ -41,6 +41,7 @@ var MelodiRouter = /** @class */ (function () {
     function MelodiRouter(options) {
         this.beforeEachHook = null;
         this.routes = options.routes;
+        this.mode = options.mode || 'hash'; // Default to hash mode
         this.currentRoute = null;
         this.setRoute = null;
         this.params = null;
@@ -68,10 +69,17 @@ var MelodiRouter = /** @class */ (function () {
         this.setQuery = writeQuery;
         this.matched = readMatched;
         this.setMatched = writeMatched;
-        // Listen to hash changes
-        window.addEventListener('hashchange', function () {
-            _this._handleRouteChange();
-        });
+        // Listen to route changes based on mode
+        if (this.mode === 'history') {
+            window.addEventListener('popstate', function () {
+                _this._handleRouteChange();
+            });
+        }
+        else {
+            window.addEventListener('hashchange', function () {
+                _this._handleRouteChange();
+            });
+        }
         // Initial route
         this._handleRouteChange();
         // Register global components
@@ -95,16 +103,25 @@ var MelodiRouter = /** @class */ (function () {
         };
     };
     MelodiRouter.prototype._getCurrentPath = function () {
+        if (this.mode === 'history') {
+            return window.location.pathname || '/';
+        }
         var hash = window.location.hash.slice(1);
         return hash.split('?')[0] || '/';
     };
     MelodiRouter.prototype._getCurrentQuery = function () {
-        var hash = window.location.hash.slice(1);
-        var queryPart = hash.split('?')[1];
-        if (!queryPart)
+        var queryString;
+        if (this.mode === 'history') {
+            queryString = window.location.search.slice(1); // Remove leading '?'
+        }
+        else {
+            var hash = window.location.hash.slice(1);
+            queryString = hash.split('?')[1] || '';
+        }
+        if (!queryString)
             return {};
         var query = {};
-        queryPart.split('&').forEach(function (pair) {
+        queryString.split('&').forEach(function (pair) {
             var _a = __read(pair.split('='), 2), key = _a[0], value = _a[1];
             if (key)
                 query[decodeURIComponent(key)] = decodeURIComponent(value || '');
@@ -112,7 +129,23 @@ var MelodiRouter = /** @class */ (function () {
         return query;
     };
     MelodiRouter.prototype.push = function (path) {
-        window.location.hash = path;
+        if (this.mode === 'history') {
+            window.history.pushState({}, '', path);
+            this._handleRouteChange();
+        }
+        else {
+            window.location.hash = path;
+        }
+    };
+    MelodiRouter.prototype.replace = function (path) {
+        if (this.mode === 'history') {
+            window.history.replaceState({}, '', path);
+            this._handleRouteChange();
+        }
+        else {
+            var url = window.location.href.split('#')[0];
+            window.location.replace(url + '#' + path);
+        }
     };
     MelodiRouter.prototype._handleRouteChange = function () {
         var _this = this;
@@ -248,12 +281,19 @@ var MelodiRouter = /** @class */ (function () {
             template: '<a :href="href" @click="navigate"><slot></slot></a>',
             computed: {
                 href: function () {
+                    if (router.mode === 'history') {
+                        return this.to;
+                    }
                     return '#' + this.to;
                 }
             },
             methods: {
                 navigate: function (e) {
-                    // Default behavior of anchor with hash is fine
+                    if (router.mode === 'history') {
+                        e.preventDefault();
+                        router.push(this.to);
+                    }
+                    // In hash mode, default browser behavior handles navigation
                 }
             }
         };
