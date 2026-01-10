@@ -1,5 +1,4 @@
-from core.router import APIRouter
-
-class UserApiRoutes(APIRouter):
+from core.router import BasicAPIRouter
+class UserApiRoutes(BasicAPIRouter):
     def load(self):
         pass

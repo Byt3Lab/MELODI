@@ -1,44 +1,40 @@
-from flask import Response
 from core.router import APIRouter
 from base.services import HomePageService, WidgetService, InstallService
-import os
-from pathlib import Path
-
-from core.utils import join_paths, path_exist, write_file
 class BaseApiRoutes(APIRouter):
     def load(self):
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
 
-        self.after_request()(self.deny_iframe)
+        self.before_request()(self.get_middleware("check_maintenance"))
+        self.after_request()(self.get_middleware("deny_iframe"))
 
-        self.add_route("/status", methods=["GET"])(self.status)
-        
-        self.add_route("/login", methods=["GET"])(self.login)
-        self.add_route("/register", methods=["GET"])(self.register)
+        routes = [
+            {"path": "/status", "methods": ["GET"], "handler": self.status},
+            {"path": "/login", "methods": ["GET"], "handler": self.login},
+            {"path": "/register", "methods": ["GET"], "handler": self.register},
+            {"path": "/logout", "methods": ["GET"], "handler": self.logout},
+            {"path": "/users", "methods": ["GET"], "handler": self.admin_users},
+            {"path": "/profile", "methods": ["GET"], "handler": self.profile},
+            {"path": "/settings/home_page/<path:home_page>/on", "methods": ["GET"], "handler": self.settings_home_page_on},
+            {"path": "/settings/home_page_clear", "methods": ["GET"], "handler": self.settings_home_page_clear},
+            {"path": "/modules", "methods": ["GET"], "handler": self.admin_modules},
+            {"path": "/modules/<path:mod>/off", "methods": ["GET"], "handler": self.off_module},
+            {"path": "/modules/<path:mod>/on", "methods": ["GET"], "handler": self.on_module},
+            {"path": "/<path:path>", "methods": ["GET"], "handler": self.not_found},
+        ]
 
-        self.add_many_routes([
-            {"path":""}
-        ])
-        self.add_route("/logout", methods=["GET"])(self.logout)
-        self.add_route('/users', methods=['GET'])(self.admin_users)
-        self.add_route('/profile', methods=['GET'])(self.profile)
-        self.add_route('/settings/home_page/<path:home_page>/on', methods=['GET'])(self.settings_home_page_on)
-        self.add_route('/settings/home_page_clear', methods=['GET'])(self.settings_home_page_clear)
-        self.add_route('/modules', methods=['GET'])(self.admin_modules)
-        self.add_route('/modules/<path:mod>/off', methods=['GET'])(self.off_module)
-        self.add_route('/modules/<path:mod>/on', methods=['GET'])(self.on_module)
-        self.add_route('/<path:path>', methods=['GET'])(self.not_found)
+        self.add_many_routes(routes)
 
     def load_installer(self):
-        self.after_request()(self.deny_iframe)
-        self.add_route("/install", methods=["POST"])(self.install)
-        self.add_route('/<path:path>', methods=['GET'])(self.not_found)
+        self.before_request()(self.get_middleware("check_maintenance"))
+        self.after_request()(self.get_middleware("deny_iframe"))
+        installer_routes = [
+            {"path": "/install", "methods": ["POST"], "handler": self.install},
+            {"path": "/<path:path>", "methods": ["GET"], "handler": self.not_found},
+        ]
 
-    def deny_iframe(self,response: Response) -> Response:
-        response.headers['X-Frame-Options'] = 'DENY'
-        return response
-     
+        self.add_many_routes(installer_routes)
+
     def login(self):
         data = {"p":"login"}
 

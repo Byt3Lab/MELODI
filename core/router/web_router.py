@@ -94,3 +94,14 @@ class WebRouter(Router):
         except:
             # log
             return response
+        
+class BasicWebRouter:
+    def __init__(self, router:WebRouter):
+        self.router = router
+        self.routes = []
+
+    def load(self):
+        pass
+
+    def get_routes(self):
+        return self.routes

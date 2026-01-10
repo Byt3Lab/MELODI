@@ -1,3 +1,4 @@
+from flask import Response
 from core.module import ApplicationModule
 from core.utils import join_paths
 
@@ -14,10 +15,9 @@ class Base(ApplicationModule):
         self.register_middlewares({
             "user_is_auth": self.user_is_auth_middleware,
             "user_is_not_auth": self.user_is_not_auth_middleware,
+            "deny_iframe": self.deny_iframe_middelware,
+            "check_maintenance": self.check_maintenance_middleware
         })
-
-        r = self.get_middleware("example_middleware", "base")
-        print(f"Example Middleware: {r}")
 
         routes = BaseRoutes(name="base", app=self.app, module=self)
         api_routes = BaseApiRoutes(name="base", app=self.app)
@@ -74,7 +74,15 @@ class Base(ApplicationModule):
 
         if user:
             return this.redirect("/admin")
+        
+    def deny_iframe_middelware(self,response: Response) -> Response:
+        response.headers['X-Frame-Options'] = 'DENY'
+        return response
     
+    def check_maintenance_middleware(self):
+        if not self.app.config.allow_request:
+            return "Service Unavailable for maintenance", 503
+
 module = Base(
     name="base", 
     router_name="base", 

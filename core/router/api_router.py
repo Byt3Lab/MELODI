@@ -17,3 +17,14 @@ class APIRouter(Router):
             response = jsonify(data)
             response.status_code = 500
             return response
+        
+class BasicAPIRouter:
+    def __init__(self, router:APIRouter):
+        self.router = router
+        self.routes = []
+
+    def load(self):
+        pass
+    
+    def get_routes(self):
+        return self.routes

@@ -1,22 +1,20 @@
-from core.router import WebRouter, RequestContext
+from core.router import WebRouter
 from base.services import HomePageService, WidgetService, InstallService
-from flask import Response, request
-
 class BaseRoutes(WebRouter):
     def load (self):
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
 
-        self.before_request()(self.check_maintenance)
-        self.after_request()(self.deny_iframe)
+        self.before_request()(self.get_middleware("check_maintenance"))
+        self.after_request()(self.get_middleware("deny_iframe"))
         
         self.add_route("/", methods=["GET"])(self.home)
 
         self.add_many_routes([
             {"path": "/login", "methods": ["GET"], "handler": self.login},
             {"path": "/register", "methods": ["GET"], "handler": self.register},
-        ], before_request=[self.user_is_not_auth()])
+        ], before_request=[self.get_middleware("user_is_not_auth")])
 
         self.add_many_routes([
             {"path": "/logout", "methods": ["GET"], "handler": self.logout},
@@ -41,11 +39,11 @@ class BaseRoutes(WebRouter):
                     {"path": "/logs", "methods": ["GET"], "handler": self.logs}
                 ]
             }
-        ], before_request=[self.user_is_auth()])
+        ], before_request=[self.get_middleware("user_is_auth")])
 
     def load_installer(self):
-        self.before_request()(self.check_installation)
-        self.after_request()(self.deny_iframe)
+        self.before_request()(self.get_middleware("check_maintenance"))
+        self.after_request()(self.get_middleware("deny_iframe"))
         self.add_route("/", methods=["GET"])(self.home_welcome)
         self.add_route("/install", methods=["GET"])(self.install)
 
@@ -59,31 +57,6 @@ class BaseRoutes(WebRouter):
             return None
         
         return self.redirect("/install")
-        
-    def check_maintenance(self):
-        if not self.app.config.allow_request:
-            return "Service Unavailable for maintenance", 503
-
-    def user_is_auth(self):
-        return self.get_middleware("user_is_auth")
-
-    def user_is_not_auth(self):
-        return self.get_middleware("user_is_not_auth")
-          
-    def br(self):
-        def sr(ctx:RequestContext):
-            ctx.data["hello"] = "hello wordl"
-            return ctx
-        
-        self.set_request_context(callback=sr)
-
-    def br2(self):
-        ctx = self.get_request_context()
-        print(ctx.data["hello"])
-
-    def deny_iframe(self,response: Response) -> Response:
-        response.headers['X-Frame-Options'] = 'DENY'
-        return response
 
     def login(self):
         return self.render_template("login.html")

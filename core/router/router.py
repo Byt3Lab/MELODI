@@ -9,8 +9,6 @@ if TYPE_CHECKING:
     from core import Application
     from core.module import Module
     from .request_context import RequestContext
-    from core.utils import Middleware
-
 class Router:
     def __init__(self, app:Application, name:str, module:Module|None = None):
         self.app = app
