@@ -4,20 +4,8 @@ from core.utils import join_paths
 
 class Base(ApplicationModule):
     def load(self):
+        self.init_load()
         from base.routes import BaseRoutes, BaseApiRoutes
-
-        self.init_translation("fr")
-
-        self.add_404_not_found()
-
-        self.register_widget("base_widget", self.base_widget)
-
-        self.register_middlewares({
-            "user_is_auth": self.user_is_auth_middleware,
-            "user_is_not_auth": self.user_is_not_auth_middleware,
-            "deny_iframe": self.deny_iframe_middelware,
-            "check_maintenance": self.check_maintenance_middleware
-        })
 
         routes = BaseRoutes(name="base", app=self.app, module=self)
         api_routes = BaseApiRoutes(name="base", app=self.app)
@@ -34,11 +22,9 @@ class Base(ApplicationModule):
         super().load()
     
     def load_installer(self):
+        self.init_load()
+
         from base.routes import BaseRoutes, BaseApiRoutes
-
-        self.init_translation("fr")
-
-        self.add_404_not_found()
 
         routes = BaseRoutes(name="base", app=self.app, module=self)
         api_routes = BaseApiRoutes(name="base", app=self.app)
@@ -51,6 +37,20 @@ class Base(ApplicationModule):
 
         self.add_router(routes) 
         self.add_api_router(api_routes)
+
+    def init_load(self):
+        self.init_translation("fr")
+
+        self.add_404_not_found()
+
+        self.register_widget("base_widget", self.base_widget)
+
+        self.register_middlewares({
+            "user_is_auth": self.user_is_auth_middleware,
+            "user_is_not_auth": self.user_is_not_auth_middleware,
+            "deny_iframe": self.deny_iframe_middelware,
+            "check_maintenance": self.check_maintenance_middleware
+        })
 
     def add_404_not_found(self):
         PATH_DIR_BASE_MODULE = self.app.config.PATH_DIR_BASE_MODULE

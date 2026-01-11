@@ -2,9 +2,15 @@ from core.router import WebRouter
 from base.services import HomePageService, WidgetService, InstallService
 class BaseRoutes(WebRouter):
     def load (self):
+        from base.services import UserService
+
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
+        user_service = UserService(module=self.module)
+        
+        res = user_service.list_users()
+        print(res)
 
         self.before_request()(self.get_middleware("check_maintenance"))
         self.after_request()(self.get_middleware("deny_iframe"))

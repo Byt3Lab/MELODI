@@ -125,9 +125,9 @@ class Application:
 
     def verify_user_sudo_exist(self):
         try:
-            res = self.db.execute_sql("SELECT user_id from users WHERE is_sudo = true LIMIT 1;")
-
-            if res.first():
+            res = self.db.execute("SELECT user_id from users WHERE is_sudo = true LIMIT 1;")
+                
+            if len(res) > 0:
                 return True
         except Exception as e:
             print("Database connection error:", e)

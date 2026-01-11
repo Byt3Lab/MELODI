@@ -3,5 +3,6 @@ from core.service import Service
 
 class UserService(Service):
     def list_users(self):
-        data = UserRepository.get_all_users()
-        return self.response(data=data)
+        data = UserRepository(self.module).get_all_users()
+        print(data)
+        # return self.response(data=data)

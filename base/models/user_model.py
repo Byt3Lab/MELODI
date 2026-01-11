@@ -18,4 +18,4 @@ class UserModel(Model):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, onupdate=datetime.now)
     
     def __repr__(self):
-        return f"<UserModel(id={self.id}, username={self.username}, email={self.email}, is_sudo={self.is_sudo})>"
+        return f"<UserModel(id={self.user_id}, username={self.username}, email={self.email}, is_sudo={self.is_sudo})>"

@@ -2,7 +2,7 @@ from __future__ import annotations
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 from .model import Model
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from core.application import Application
@@ -30,14 +30,18 @@ class DataBase():
         else:
             model.metadata.drop_all(self.engine)
 
-    def execute(self, query):
+    def execute(self, query: str | Any, params: dict = None, query_type: str = "read"):
+        if isinstance(query, str):
+            query = text(query)
+            
         with self.get_session() as session:
-            result = session.execute(query)
+            result = session.execute(query, params or {})
+            
+            if query_type == "read":
+                return [dict(row._mapping) for row in result]
+            
             session.commit()
             return result
-        
-    def execute_sql(self, sql:str):
-        return self.execute(text(sql))
         
     def close_engine(self):
         if self.engine:
