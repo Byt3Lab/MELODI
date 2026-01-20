@@ -3,6 +3,7 @@ import importlib.util
 import json
 import os
 import sys
+import asyncio
 from typing import TYPE_CHECKING
 from core.utils import join_paths, path_exist, read_file
 from .module import Module
@@ -70,7 +71,7 @@ class ModuleManager:
         
         return module
 
-    def load_modules(self):
+    async def load_modules(self):
         """Charge dynamiquement tous les modules présents dans `path_modules`.
 
         Chaque sous-dossier ou fichier doit exposer une variable `module` qui est
@@ -81,9 +82,9 @@ class ModuleManager:
         # parcourir les éléments du dossier modules
 
         for current_module_dirname in self.list_modules_installs:
-            self._load_module(current_module_dirname)
+            await self._load_module(current_module_dirname)
 
-    def _load_module(self, name_module):
+    async def _load_module(self, name_module):
         if self.isLoad(name_module):
             return
         
@@ -100,13 +101,6 @@ class ModuleManager:
         if not path_exist(path_file_to_current_module_py):
             # skip directories without python module.py in dir of current_module_dirname
             return
-
-        # # VENDORING : Add vendor directory to sys.path
-        # path_vendor = join_paths(path_dir_to_current_module, "vendor")
-        # if path_exist(path_vendor):
-        #     if path_vendor not in sys.path:
-        #         sys.path.insert(0, path_vendor)
-
 
         module_name_space = f"modules.{name_module}.module"
 
@@ -150,7 +144,7 @@ class ModuleManager:
                 return
             
             try:
-                self._load_module(name)
+                await self._load_module(name)
             except:
                 # self.off_module(name_module)
                 return
@@ -158,7 +152,11 @@ class ModuleManager:
         # appeler la méthode load() si disponible
         try:
             module_instance.init(app=self.app, dirname=name_module)
-            module_instance.load()
+            # Check if load is async
+            if asyncio.iscoroutinefunction(module_instance.load):
+                await module_instance.load()
+            else:
+                module_instance.load()
         except Exception as e:
             print(f"Erreur pendant module.load() pour {name_module}: {e}")
 
@@ -185,7 +183,7 @@ class ModuleManager:
     def isInstall(self, name_module):
         return name_module in self.list_modules_installs
 
-    def on_module(self, name_module):
+    async def on_module(self, name_module):
         if self.isOn(name_module):
             return True
         
@@ -221,14 +219,14 @@ class ModuleManager:
             if name == "base":
                 continue
             
-            if not self.on_module(name) == True:
+            if not await self.on_module(name) == True:
                 return False
 
         self.modules_on.append(name_module)
         self.set_file_modules_on()
         return True
 
-    def off_module(self, name_module):
+    async def off_module(self, name_module):
         if not self.isOn(name_module):
             return
 
@@ -255,7 +253,7 @@ class ModuleManager:
             except:
                 return False
             
-            self.off_module(name)
+            await self.off_module(name)
 
         return True
 

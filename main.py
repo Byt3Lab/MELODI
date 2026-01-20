@@ -1,7 +1,9 @@
 from core import Application as Melodi
+import asyncio
 
 app = Melodi()
-app.build()
+
+asyncio.run(app.build())
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

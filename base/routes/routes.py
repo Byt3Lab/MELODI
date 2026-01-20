@@ -1,7 +1,7 @@
 from core.router import WebRouter
 from base.services import HomePageService, WidgetService, InstallService
 class BaseRoutes(WebRouter):
-    def load (self):
+    async def load (self):
         from base.services import UserService
 
         self.home_page_service = HomePageService(module=self.module)
@@ -9,7 +9,7 @@ class BaseRoutes(WebRouter):
         self.install_service = InstallService(module=self.module)
         user_service = UserService(module=self.module)
         
-        res = user_service.list_users()
+        res = await user_service.list_users()
         print(res)
 
         self.before_request()(self.get_middleware("check_maintenance"))
@@ -64,19 +64,19 @@ class BaseRoutes(WebRouter):
         
         return self.redirect("/install")
 
-    def login(self):
+    async def login(self):
         return self.render_template("login.html")
     
-    def register(self):
+    async def register(self):
         return self.render_template("register.html")
     
-    def logout(self):
+    async def logout(self):
         return self.render_template("logout.html")
     
-    def logs(self):
+    async def logs(self):
         return self.render_template("admin_logs.html")
 
-    def admin_dashboard(self):
+    async def admin_dashboard(self):
         widgets=self.app.widget_manager.list_widgets()
 
         for key,w in widgets.items():
@@ -89,61 +89,60 @@ class BaseRoutes(WebRouter):
                 if isinstance(wid, str):
                     i["widget"] = wid
 
-
         return self.render_template("admin_dashboard.html",widgets=widgets)
 
-    def admin_users(self):
+    async def admin_users(self):
         return self.render_template("admin_users.html")
 
-    def profile(self):
+    async def profile(self):
         return self.render_template("profile.html")
 
-    def settings_widgets(self):
+    async def settings_widgets(self):
         widgets = self.app.widget_manager.list_widgets()
         return self.render_template("admin_widgets.html", widgets=widgets)
 
-    def settings_home_page(self):
+    async def settings_home_page(self):
             home_page_on = self.app.home_page_manager.home_page_on
             home_pages = self.app.home_page_manager.list_home_pages()
             home_pages_len = len(home_pages)
             return self.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
 
-    def settings_home_page_on(self, home_page):
+    async def settings_home_page_on(self, home_page):
         self.home_page_service.on(home_page)
         return self.redirect("/admin/settings/home_page")
     
-    def settings_home_page_clear(self):
+    async def settings_home_page_clear(self):
         self.home_page_service.clear()
         return self.redirect("/admin/settings/home_page")
 
-    def admin_modules(self):
+    async def admin_modules(self):
         modules = self.app.module_manager.list_modules()
         modules_len= len(modules)
         return self.render_template("admin_modules.html",modules=modules, modules_len=modules_len)
 
-    def on_module(self,mod:str):
-        self.app.module_manager.on_module(mod)
+    async def on_module(self,mod:str):
+        await self.app.module_manager.on_module(mod)
         self.app.restart()
         return self.redirect("/admin/modules")
 
-    def off_module(self, mod:str):
-        self.app.module_manager.off_module(mod)
+    async def off_module(self, mod:str):
+        await self.app.module_manager.off_module(mod)
         self.app.restart()
         return self.redirect("/admin/modules")
     
-    def admin_settings(self):
+    async def admin_settings(self):
         return self.render_template("admin_settings.html")
 
-    def home(self): 
-        home_page = self.app.home_page_manager.render_home_page() 
+    async def home(self): 
+        home_page = await self.app.home_page_manager.render_home_page() 
         
         if home_page: 
             return home_page
 
         return self.render_template("home.html")
 
-    def home_welcome(self):
+    async def home_welcome(self):
         return self.render_template("home_welcome.html")
     
-    def install(self):
+    async def install(self):
         return self.render_template("install/install.html")

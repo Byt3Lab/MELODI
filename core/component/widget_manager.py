@@ -52,12 +52,15 @@ class WidgetManager:
         except:
             return None
     
-    def render(self, name_module:str, name_widget: str):
+    async def render(self, name_module:str, name_widget: str):
         try:
             widget = self.get(name_module, name_widget)
 
             if callable(widget):
-                return widget()
+                res = widget()
+                if hasattr(res, '__await__'):
+                    res = await res
+                return res
 
             if isinstance(widget, str):
                 return widget

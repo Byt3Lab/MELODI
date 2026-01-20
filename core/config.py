@@ -65,6 +65,6 @@ class Config:
     def get_db_url(self):
         # Seul PostgreSQL est supporté
         provider = "postgresql"
-        lib = "+psycopg2"
+        lib = "+asyncpg"
 
         return f"{provider}{lib}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"

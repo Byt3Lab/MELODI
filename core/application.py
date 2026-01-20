@@ -53,17 +53,17 @@ class Application:
     def stop(self):
         self.server.clear()
 
-    def build(self):
+    async def build(self):
         if not self.app_is_installed:
-            self.build_installer()
+            await self.build_installer()
             return
         
         self.db.init_database()
-        self.user_sudo_exist = self.verify_user_sudo_exist()
+        self.user_sudo_exist = await self.verify_user_sudo_exist()
         
         if not self.user_sudo_exist:
             self.app_is_installed = False
-            self.build_installer()
+            await self.build_installer()
             return
         
         self.user_sudo_exist = True
@@ -71,9 +71,9 @@ class Application:
         from base.module import module as base_module
 
         base_module.init(app=self, dirname="base")
-        base_module.load()
+        await base_module.load()
         
-        self.module_manager.load_modules()
+        await self.module_manager.load_modules()
 
         base_module._run()
 
@@ -83,11 +83,11 @@ class Application:
         
         self.register_routers()
 
-    def build_installer(self):
+    async def build_installer(self):
         from base.module import module as base_module
 
         base_module.init(app=self, dirname="base")
-        base_module.load_installer()
+        await base_module.load_installer()
         base_module._run()
 
         self.register_route_not_found()
@@ -123,9 +123,9 @@ class Application:
         self.api_router.add_route("/")(api_route_not_found)
         self.api_router.add_route("/<path:path>")(api_route_not_found)
 
-    def verify_user_sudo_exist(self):
+    async def verify_user_sudo_exist(self):
         try:
-            res = self.db.execute("SELECT user_id from users WHERE is_sudo = true LIMIT 1;")
+            res = await self.db.execute("SELECT user_id from users WHERE is_sudo = true LIMIT 1;")
                 
             if len(res) > 0:
                 return True

@@ -13,5 +13,5 @@ class Repository:
     def get_session(self):
         return self.db.get_session()
 
-    def execute(self, query: str | Any, params: dict = None, query_type: str = "read"):
-        return self.db.execute(query, params, query_type)
+    async def execute(self, query: str | Any, params: dict = None, query_type: str = "read"):
+        return await self.db.execute(query, params, query_type)

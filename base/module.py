@@ -3,7 +3,7 @@ from core.module import ApplicationModule
 from core.utils import join_paths
 
 class Base(ApplicationModule):
-    def load(self):
+    async def load(self):
         self.init_load()
         from base.routes import BaseRoutes, BaseApiRoutes
 
@@ -13,7 +13,7 @@ class Base(ApplicationModule):
         routes.module = self
         api_routes.module = self
 
-        routes.load()
+        await routes.load()
         api_routes.load()
 
         self.add_router(routes) 
@@ -21,7 +21,7 @@ class Base(ApplicationModule):
         
         super().load()
     
-    def load_installer(self):
+    async def load_installer(self):
         self.init_load()
 
         from base.routes import BaseRoutes, BaseApiRoutes

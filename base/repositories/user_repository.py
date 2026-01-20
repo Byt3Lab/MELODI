@@ -1,77 +1,99 @@
 from core.db import Repository
 from base.models import UserModel
+from sqlalchemy import select, func
 
 class UserRepository(Repository):
-    def get_all_users (self, filter:None|dict=None, limit: int = 30, offset: int = 0, count: bool = False):
-        with self.get_session() as session:
-            q = session.query(UserModel)
+    async def get_all_users(self, filter:None|dict=None, limit: int = 30, offset: int = 0, count: bool = False):
+        async with self.get_session() as session:
+            if count:
+                stmt = select(func.count()).select_from(UserModel)
+                result = await session.execute(stmt)
+                return result.scalar()
+            
+            stmt = select(UserModel)
             if filter:
                 pass  # Implement filtering logic here
+            
+            stmt = stmt.limit(limit).offset(offset)
+            result = await session.execute(stmt)
+            return result.scalars().all()
 
-            if count:
-                return q.count()
-            return q.limit(limit).offset(offset).all()
-
-    def create_user(self, user_data: dict):
-        with self.get_session() as session:
+    async def create_user(self, user_data: dict):
+        async with self.get_session() as session:
             user = UserModel(**user_data)
             session.add(user)
-            session.commit()
+            await session.commit()
             return user
     
-    def get_user_by_username(self, username: str):
-        with self.get_session() as session:
-            return session.query(UserModel).filter_by(username=username).first()
+    async def get_user_by_username(self, username: str):
+        async with self.get_session() as session:
+            stmt = select(UserModel).filter_by(username=username)
+            result = await session.execute(stmt)
+            return result.scalars().first()
         
-    def get_user_by_email(self, email: str):
-        with self.get_session() as session:
-            return session.query(UserModel).filter_by(email=email).first()
+    async def get_user_by_email(self, email: str):
+        async with self.get_session() as session:
+            stmt = select(UserModel).filter_by(email=email)
+            result = await session.execute(stmt)
+            return result.scalars().first()
     
-    def get_user_by_id(self, user_id: str):
-        with self.get_session() as session:
-            return session.query(UserModel).filter_by(user_id=user_id).first()
+    async def get_user_by_id(self, user_id: str):
+        async with self.get_session() as session:
+            stmt = select(UserModel).filter_by(user_id=user_id)
+            result = await session.execute(stmt)
+            return result.scalars().first()
         
-    def delete_user(self, user_id: str):
-        with self.get_session() as session:
-            user = session.query(UserModel).filter_by(user_id=user_id).first()
+    async def delete_user(self, user_id: str):
+        async with self.get_session() as session:
+            stmt = select(UserModel).filter_by(user_id=user_id)
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+            
             if user:
-                session.delete(user)
-                session.commit()
+                await session.delete(user)
+                await session.commit()
                 return True
             return False
         
-    def update_user(self, user_id: str, update_data: dict):
-        with self.get_session() as session:
-            user = session.query(UserModel).filter_by(user_id=user_id).first()
+    async def update_user(self, user_id: str, update_data: dict):
+        async with self.get_session() as session:
+            stmt = select(UserModel).filter_by(user_id=user_id)
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+            
             if user:
                 for key, value in update_data.items():
                     setattr(user, key, value)
-                session.commit()
+                await session.commit()
                 return user
             return None
         
-    def activate_user(self, user_id: str):
-        return self.update_user(user_id, {"is_active": True})
+    async def activate_user(self, user_id: str):
+        return await self.update_user(user_id, {"is_active": True})
     
-    def deactivate_user(self, user_id: str):
-        return self.update_user(user_id, {"is_active": False})
+    async def deactivate_user(self, user_id: str):
+        return await self.update_user(user_id, {"is_active": False})
     
-    def set_user_sudo(self, user_id: str, is_sudo: bool):
-        return self.update_user(user_id, {"is_sudo": is_sudo})
+    async def set_user_sudo(self, user_id: str, is_sudo: bool):
+        return await self.update_user(user_id, {"is_sudo": is_sudo})
     
-    def count_users(self, filter:None|dict=None):
-        return self.get_all_users(filter=filter, count=True)
+    async def count_users(self, filter:None|dict=None):
+        return await self.get_all_users(filter=filter, count=True)
     
-    def search_users(self, query: str, limit: int = 30, offset: int = 0):
-        with self.get_session() as session:
-            q = session.query(UserModel).filter(
+    async def search_users(self, query: str, limit: int = 30, offset: int = 0):
+        async with self.get_session() as session:
+            stmt = select(UserModel).filter(
                 (UserModel.username.ilike(f"%{query}%")) |
                 (UserModel.email.ilike(f"%{query}%")) |
                 (UserModel.first_name.ilike(f"%{query}%")) |
                 (UserModel.last_name.ilike(f"%{query}%"))
-            )
-            return q.limit(limit).offset(offset).all()
+            ).limit(limit).offset(offset)
+            
+            result = await session.execute(stmt)
+            return result.scalars().all()
         
-    def user_sudo_exists(self):
-        with self.get_session() as session:
-            return session.query(UserModel).filter_by(is_sudo=True).first() is not None
+    async def user_sudo_exists(self):
+        async with self.get_session() as session:
+            stmt = select(UserModel).filter_by(is_sudo=True)
+            result = await session.execute(stmt)
+            return result.scalars().first() is not None

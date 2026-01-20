@@ -21,12 +21,14 @@ class HomePageManager:
             return
         self.home_page_on = read_file(path_file=path).strip()
         
-    def render_home_page(self):
+    async def render_home_page(self):
         try:
             res = self.home_pages[self.home_page_on]["home_page"]
 
             if callable(res):
                 res = res()
+                if hasattr(res, '__await__'):
+                    res = await res
 
             if isinstance(res, str):
                 return res

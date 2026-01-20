@@ -2,7 +2,7 @@ from core.service import Service
 from base.repositories import UserRepository
 from core.utils import join_paths, path_exist, write_file
 class InstallService(Service):
-    def install(self, data:None|dict):
+    async def install(self, data:None|dict):
         if data is None:
             return self.response(data={"message":"Contenu JSON manquant ou invalide"}, status_code=400)
 
@@ -45,17 +45,17 @@ class InstallService(Service):
         })
         
         try:
-            self._init_database()
+            await self._init_database()
         except Exception as e:
             return self.response(data={"message":"Erreur de connexion à la base de données: " + str(e)}, status_code=500)
 
         try:
-            self.app.db.execute_sql("SELECT 1")
+            await self.app.db.execute("SELECT 1")
         except Exception as e:
             return self.response(data={"message":"Erreur de connexion à la base de données: " + str(e)}, status_code=500)
         
         try:
-            self._create_all_base_tables()
+            await self._create_all_base_tables()
         except Exception as e:
             return self.response(data={"message":"Erreur lors de la création des tables de base: " + str(e)}, status_code=500)  
 
@@ -66,6 +66,10 @@ class InstallService(Service):
         
         try:
             user_exist = self.app.verify_user_sudo_exist()
+            # verify_user_sudo_exist might be async now? I need to check core/application.py
+            if hasattr(user_exist, '__await__'):
+                user_exist = await user_exist
+
             if user_exist:
                 self._lock_installation()
                 return self.response(data={"message":"Un utilisateur administrateur existe déjà. Installation annulée."}, status_code=400)  
@@ -73,7 +77,7 @@ class InstallService(Service):
             return self.response(data={"message":"Erreur lors de la vérification de l'utilisateur administrateur: " + str(e)}, status_code=500)
         
         try:
-            self._create_admin_user()
+            await self._create_admin_user()
         except Exception as e:
             return self.response(data={"message":"Erreur lors de la création de l'utilisateur administrateur: " + str(e)}, status_code=500)
         
@@ -135,16 +139,16 @@ class InstallService(Service):
         write_file(db_conf_path, json.dumps(mapping))
         self.app.config.set_db_config(mapping)
 
-    def _init_database(self):
-        self.app.db.close_engine()
+    async def _init_database(self):
+        await self.app.db.close_engine()
         self.app.db.init_database()
 
-    def _create_admin_user(self):
+    async def _create_admin_user(self):
         from core.utils.password import hash_password
 
         user_repo = UserRepository(module=self.module)
 
-        existing_admin = user_repo.user_sudo_exists()
+        existing_admin = await user_repo.user_sudo_exists()
 
         if existing_admin:
             raise Exception("Un utilisateur administrateur existe déjà.")
@@ -165,13 +169,13 @@ class InstallService(Service):
             "last_name": self.admin_last_name
         }
         
-        user_repo.create_user(new_admin)
+        await user_repo.create_user(new_admin)
 
-    def _create_all_base_tables(self):
+    async def _create_all_base_tables(self):
         from core.db import Model
         import base.models  # Importer pour enregistrer le modèle
 
-        self.app.db.create_all(Model)
+        await self.app.db.create_all(Model)
 
     def _lock_installation(self):
         install_lock_path = join_paths(self.app.config.PATH_DIR_CONFIG, "instal.lock")

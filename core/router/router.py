@@ -3,6 +3,8 @@ from __future__ import annotations
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable
 import uuid
+import asyncio
+import inspect
 from flask import Blueprint, make_response
 
 if TYPE_CHECKING:
@@ -23,29 +25,60 @@ class Router:
 
     def add_route(self, path: str, methods: None|list[str] = None, before_request: None|list[Callable] = None, after_request: None|list[Callable] = None):
         def decorator(f: Callable):
-            @wraps(f)
-            def wrapper(*args, **kwargs):
-                # 1. Exécution des middlewares 'before_request'
-                if isinstance(before_request, list):
-                    for callback in before_request:
-                        response = callback(self_router=self, request=self.get_request())
-                        # Si un before_request retourne une valeur, Flask interrompt 
-                        # la suite et affiche cette valeur (comportement standard)
-                        if response is not None:
-                            return response
+            if asyncio.iscoroutinefunction(f):
+                @wraps(f)
+                async def wrapper(*args, **kwargs):
+                    # 1. Exécution des middlewares 'before_request'
+                    if isinstance(before_request, list):
+                        for callback in before_request:
+                            if asyncio.iscoroutinefunction(callback):
+                                response = await callback(self_router=self, request=self.get_request())
+                            else:
+                                response = callback(self_router=self, request=self.get_request())
+                            
+                            if response is not None:
+                                return response
 
-                # 2. Appel de la fonction de vue originale
-                response = f(*args, **kwargs)
-                
-                # Conversion en objet réponse Flask pour le traitement 'after_request'
-                response = make_response(response)
+                    # 2. Appel de la fonction de vue originale
+                    response = await f(*args, **kwargs)
+                    
+                    # Conversion en objet réponse Flask pour le traitement 'after_request'
+                    response = make_response(response)
 
-                # 3. Exécution des middlewares 'after_request'
-                if isinstance(after_request, list):
-                    for callback in after_request:
-                        response = callback(response, self_router=self, request=self.get_request())
-                
-                return response
+                    # 3. Exécution des middlewares 'after_request'
+                    if isinstance(after_request, list):
+                        for callback in after_request:
+                            if asyncio.iscoroutinefunction(callback):
+                                response = await callback(response, self_router=self, request=self.get_request())
+                            else:
+                                response = callback(response, self_router=self, request=self.get_request())
+                    
+                    return response
+            else:
+                @wraps(f)
+                def wrapper(*args, **kwargs):
+                    # 1. Exécution des middlewares 'before_request'
+                    if isinstance(before_request, list):
+                        for callback in before_request:
+                            # For sync wrapper, we assume middlewares are sync or we can't await them easily
+                            # If a middleware is async, this will fail or return coroutine. 
+                            # Ideally middlewares for sync routes should be sync.
+                            response = callback(self_router=self, request=self.get_request())
+                            if response is not None:
+                                return response
+
+                    # 2. Appel de la fonction de vue originale
+                    response = f(*args, **kwargs)
+                    
+                    # Conversion en objet réponse Flask pour le traitement 'after_request'
+                    response = make_response(response)
+
+                    # 3. Exécution des middlewares 'after_request'
+                    if isinstance(after_request, list):
+                        for callback in after_request:
+                            response = callback(response, self_router=self, request=self.get_request())
+                    
+                    return response
 
             # On enregistre le wrapper sur le routeur principal au lieu de f
             # On utilise l'ID de l'objet pour garantir l'unicité dans Flask
