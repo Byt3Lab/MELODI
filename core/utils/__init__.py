@@ -70,3 +70,4 @@ from .event_listener import EventListener
 from .middleware_manager import MiddlewareManager 
 from .translation import Translation 
 from .middleware import Middleware
+from .run_sync import run_sync
