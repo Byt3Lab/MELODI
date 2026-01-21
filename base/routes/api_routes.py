@@ -1,5 +1,6 @@
 from core.router import APIRouter
 from base.services import HomePageService, WidgetService, InstallService
+
 class BaseApiRoutes(APIRouter):
     def load(self):
         self.home_page_service = HomePageService(module=self.module)
@@ -10,6 +11,16 @@ class BaseApiRoutes(APIRouter):
 
         routes = [
             {"path": "/status", "methods": ["GET"], "handler": self.status},
+            {"path": "/test_async", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async2", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async3", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async4", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async5", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async6", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async7", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async8", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async9", "methods": ["GET"], "handler": self.test_async},
+            {"path": "/test_async10", "methods": ["GET"], "handler": self.test_async},
             {"path": "/login", "methods": ["GET"], "handler": self.login},
             {"path": "/register", "methods": ["GET"], "handler": self.register},
             {"path": "/logout", "methods": ["GET"], "handler": self.logout},
@@ -107,3 +118,14 @@ class BaseApiRoutes(APIRouter):
         data = {"end_point_not_found":path}
 
         return self.render_json(data,status_code=404) 
+
+    async def test_async(self):
+        import asyncio
+        import time
+
+        start = time.time()
+        print(f"Début de la requête à {start}")
+        await asyncio.sleep(3)  # Pause asynchrone de 5 secondes
+        end = time.time()
+        print(f"Fin de la requête à {end}")
+        return self.render_json({"start": start, "end": end, "duration": end - start})
