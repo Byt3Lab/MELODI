@@ -104,7 +104,7 @@ class Application:
         self.server.add_router(self.api_router.get_router(), url_prefix="/api")
 
     def register_route_not_found(self):
-        def route_not_found(path):
+        async def route_not_found(path):
             if not self.app_is_installed:
                 return self.router.redirect("/")
 
@@ -113,15 +113,15 @@ class Application:
                 return self.router.render_template_string(read_file(self.config.path_template_404_not_found), path=path, hide_header=True, hide_footer=True), 404
             return self.router.render_template_string(f"route : {path} not found 404"), 404
 
-        def api_route_not_found(path):
+        async def api_route_not_found_path(path):
             return self.api_router.render_json({"error": "route not found", "path": path}), 404
 
-        def api_route_not_found():
-            return self.api_router.render_json({"error": "route not found", "path": "/  "}), 404
+        async def api_route_not_found_root():
+            return self.api_router.render_json({"error": "route not found", "path": "/"}), 404
 
         self.router.add_route("/<path:path>")(route_not_found)
-        self.api_router.add_route("/")(api_route_not_found)
-        self.api_router.add_route("/<path:path>")(api_route_not_found)
+        self.api_router.add_route("/")(api_route_not_found_root)
+        self.api_router.add_route("/<path:path>")(api_route_not_found_path)
 
     async def verify_user_sudo_exist(self):
         try:
