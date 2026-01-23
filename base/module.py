@@ -1,4 +1,4 @@
-from flask import Response
+from quart import Response
 from core.module import ApplicationModule
 from core.utils import join_paths
 

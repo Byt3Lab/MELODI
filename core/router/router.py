@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable
 import uuid
 import asyncio
 import inspect
-from flask import Blueprint, make_response
+from quart import Blueprint, make_response
 
 if TYPE_CHECKING:
     from core import Application
@@ -41,9 +41,6 @@ class Router:
 
                     # 2. Appel de la fonction de vue originale
                     response = await f(*args, **kwargs)
-                    
-                    # Conversion en objet réponse Flask pour le traitement 'after_request'
-                    response = make_response(response)
 
                     # 3. Exécution des middlewares 'after_request'
                     if isinstance(after_request, list):
@@ -197,11 +194,11 @@ class Router:
         return decorator
     
     def get_request():
-        from flask import request
+        from quart import request
         return request
     
     def make_response(self, content, status_code=200, headers=None):
-        from flask import make_response
+        from quart import make_response
         response = make_response(content, status_code)
         if headers:
             for key, value in headers.items():
@@ -215,7 +212,7 @@ class Router:
         return self.app.server.get_request_context()
     
     def get_request(self):
-        from flask import request
+        from quart import request
         return request
     
     def get_router(self):
@@ -225,11 +222,11 @@ class Router:
         self.router.register_blueprint(router.get_router(), url_prefix=url_prefix)
 
     def redirect(self, location: str, code: int = 302):
-        from flask import redirect
+        from quart import redirect
         return redirect(location, code=code)
     
     def url_for(self, endpoint: str, **values):
-        from flask import url_for
+        from quart import url_for
         return url_for(endpoint, **values)
    
     def get_middlewares(self, module_name:str|None=None) -> dict[str, Any]|None:

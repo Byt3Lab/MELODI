@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import session, redirect, url_for, g
+from quart import session, redirect, url_for, g
 from base.models.user_model import UserModel
 from core.db import DataBase
 
@@ -49,7 +49,7 @@ def load_logged_in_user():
         # I might need to import the 'app' instance if it's a singleton or available globally, but it's passed around.
         # Flask's 'current_app' might help if the app is pushed to context.
         
-        from flask import current_app
+        from quart import current_app
         # This might be tricky if 'db' is not attached to current_app.
         # In core/application.py: self.server.app = Flask(...) -> self.server.app is the flask app.
         # The Application instance 'self' has 'db'.

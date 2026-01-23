@@ -1,5 +1,5 @@
 from .router import Router
-from flask import jsonify
+from quart import jsonify
 
 class APIRouter(Router):
     def render_json(self, data: dict = {}, status_code: int = 200):

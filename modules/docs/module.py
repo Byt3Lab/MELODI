@@ -1,7 +1,7 @@
 from core.module import ApplicationModule
 import markdown
 import os
-from flask import abort, render_template
+from quart import abort, render_template
 
 class MelodiDocs(ApplicationModule):
     def load(self):

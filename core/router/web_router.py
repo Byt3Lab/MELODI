@@ -2,7 +2,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
-from flask import Response
+from quart import Response
 
 from .router import Router
 from core.utils import path_exist, read_file
@@ -23,31 +23,31 @@ class WebRouter(Router):
         
         super().__init__(app=app, name=name, module=module)
     
-    def render_template(self, template_name: str, **context):
-        from flask import render_template
+    async def render_template(self, template_name: str, **context):
+        from quart import render_template
         
         if not self.dirname_module  == "":
             template_name = self.dirname_module +"/"+ template_name
 
-        return render_template(template_name, **context)
+        return await render_template(template_name, **context)
     
-    def render_template_(self, template_name: str, **context):
-        from flask import render_template
+    async def render_template_(self, template_name: str, **context):
+        from quart import render_template
 
-        return render_template(template_name, **context)
+        return await render_template(template_name, **context)
     
-    def render_template_string(self, template_string: str, **context):
-        from flask import render_template_string
-        return render_template_string(template_string, **context)
+    async def render_template_string(self, template_string: str, **context):
+        from quart import render_template_string
+        return await render_template_string(template_string, **context)
     
-    def render_template_from_file(self, path_file: str, **context):
+    async def render_template_from_file(self, path_file: str, **context):
         template_string = ""
         if path_exist(path_file):
             template_string = read_file(path_file=path_file)
-        return self.render_template_string(template_string, **context)
+        return await self.render_template_string(template_string, **context)
     
     def get_session(self, key:str|None=None):
-        from flask import session
+        from quart import session
 
         try:
             if isinstance(key, str):
@@ -57,7 +57,7 @@ class WebRouter(Router):
             return session
         
     def set_session(self, key:str, value):
-        from flask import session
+        from quart import session
 
         try:
             session[key] = value
@@ -66,7 +66,7 @@ class WebRouter(Router):
             return False
     
     def get_cookie(self, key:str):
-        from flask import request
+        from quart import request
 
         return request.cookies.get(key)
 

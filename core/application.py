@@ -2,7 +2,7 @@ from core.router import WebRouter, APIRouter
 from core.utils import TimerManager, EventListener, MiddlewareManager, path_exist, read_file
 from core.component import HomePageManager, MenuItemManager, WidgetManager
 from core.module import ModuleManager
-from core.adapters.flask_adapter import FlaskAdapter
+from core.adapters.quart_adapter import QuartAdapter
 from core.service import ServiceManager
 from core.db import DataBase
 from core.config import Config
@@ -10,7 +10,7 @@ from core.file_management import Storage
 from core.cache import Cache
 class Application:
     def __init__(self):
-        self.server = FlaskAdapter()
+        self.server = QuartAdapter()
         self.init()
 
     def init(self):
@@ -110,8 +110,8 @@ class Application:
 
             path_file_not_found = self.config.path_template_404_not_found
             if path_exist(path_file_not_found):
-                return self.router.render_template_string(read_file(self.config.path_template_404_not_found), path=path, hide_header=True, hide_footer=True), 404
-            return self.router.render_template_string(f"route : {path} not found 404"), 404
+                return await self.router.render_template_string(read_file(self.config.path_template_404_not_found), path=path, hide_header=True, hide_footer=True), 404
+            return await self.router.render_template_string(f"route : {path} not found 404"), 404
 
         async def api_route_not_found_path(path):
             return self.api_router.render_json({"error": "route not found", "path": path}), 404

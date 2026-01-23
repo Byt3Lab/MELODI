@@ -65,16 +65,16 @@ class BaseRoutes(WebRouter):
         return self.redirect("/install")
 
     async def login(self):
-        return self.render_template("login.html")
+        return await self.render_template("login.html")
     
     async def register(self):
-        return self.render_template("register.html")
+        return await self.render_template("register.html")
     
     async def logout(self):
-        return self.render_template("logout.html")
+        return await self.render_template("logout.html")
     
     async def logs(self):
-        return self.render_template("admin_logs.html")
+        return await self.render_template("admin_logs.html")
 
     async def admin_dashboard(self):
         widgets=self.app.widget_manager.list_widgets()
@@ -89,23 +89,23 @@ class BaseRoutes(WebRouter):
                 if isinstance(wid, str):
                     i["widget"] = wid
 
-        return self.render_template("admin_dashboard.html",widgets=widgets)
+        return await self.render_template("admin_dashboard.html",widgets=widgets)
 
     async def admin_users(self):
-        return self.render_template("admin_users.html")
+        return await self.render_template("admin_users.html")
 
     async def profile(self):
-        return self.render_template("profile.html")
+        return await self.render_template("profile.html")
 
     async def settings_widgets(self):
         widgets = self.app.widget_manager.list_widgets()
-        return self.render_template("admin_widgets.html", widgets=widgets)
+        return await self.render_template("admin_widgets.html", widgets=widgets)
 
     async def settings_home_page(self):
             home_page_on = self.app.home_page_manager.home_page_on
             home_pages = self.app.home_page_manager.list_home_pages()
             home_pages_len = len(home_pages)
-            return self.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
+            return await self.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
 
     async def settings_home_page_on(self, home_page):
         self.home_page_service.on(home_page)
@@ -118,7 +118,7 @@ class BaseRoutes(WebRouter):
     async def admin_modules(self):
         modules = self.app.module_manager.list_modules()
         modules_len= len(modules)
-        return self.render_template("admin_modules.html",modules=modules, modules_len=modules_len)
+        return await self.render_template("admin_modules.html",modules=modules, modules_len=modules_len)
 
     async def on_module(self,mod:str):
         await self.app.module_manager.on_module(mod)
@@ -131,7 +131,7 @@ class BaseRoutes(WebRouter):
         return self.redirect("/admin/modules")
     
     async def admin_settings(self):
-        return self.render_template("admin_settings.html")
+        return await self.render_template("admin_settings.html")
 
     async def home(self): 
         home_page = await self.app.home_page_manager.render_home_page() 
@@ -139,10 +139,10 @@ class BaseRoutes(WebRouter):
         if home_page: 
             return home_page
 
-        return self.render_template("home.html")
+        return await self.render_template("home.html")
 
     async def home_welcome(self):
-        return self.render_template("home_welcome.html")
+        return await self.render_template("home_welcome.html")
     
     async def install(self):
-        return self.render_template("install/install.html")
+        return await self.render_template("install/install.html")
