@@ -26,7 +26,7 @@ COPY . /app/
 EXPOSE 8080
 
 # Define environment variable
-ENV FLASK_APP=main.py
+ENV QUART_APP=main.py
 
 # Run app.py when the container launches
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "main:app"]
+CMD ["hypercorn", "-w", "4", "-b", "0.0.0.0:8080", "main:app"]

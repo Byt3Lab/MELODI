@@ -78,14 +78,14 @@ class BaseApiRoutes(APIRouter):
         return self.render_json(data)
     
     async def on_module(self,mod:str):
-        self.app.module_manager.on_module(mod)
+        await self.app.module_manager.on_module(mod)
 
         data = {"module":mod}
 
         return self.render_json(data)
 
     async def off_module(self, mod:str):
-        self.app.module_manager.off_module(mod)
+        await self.app.module_manager.off_module(mod)
         
         data = {mod}
 
@@ -97,11 +97,11 @@ class BaseApiRoutes(APIRouter):
     async def install(self):
         req = self.get_request()
 
-        data = req.get_json()
+        data = await req.get_json()
 
         install_service = InstallService(self)
 
-        res = install_service.install(data)
+        res = await install_service.install(data)
 
         return self.render_json(data=res.data, status_code=res.status_code)
         

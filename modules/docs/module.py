@@ -9,10 +9,10 @@ class MelodiDocs(ApplicationModule):
         self.router.add_route("/docs/", methods=["GET"])(self.index)
         self.router.add_route("/docs/<path:page>", methods=["GET"])(self.show_page)
 
-    def index(self):
-        return self.show_page('index')
+    async def index(self):
+        return await self.show_page('index')
 
-    def show_page(self, page):
+    async def show_page(self, page):
         # Construct path to markdown file
         base_path = os.path.dirname(os.path.abspath(__file__))
         content_path = os.path.join(base_path, 'content', f'{page}.md')
@@ -26,7 +26,7 @@ class MelodiDocs(ApplicationModule):
         html = markdown.markdown(text, extensions=['fenced_code', 'tables'])
         
         # Use self.router.render_template which handles the module prefix
-        return self.router.render_template('page.html', content=html)
+        return await self.router.render_template('page.html', content=html)
 
 module = MelodiDocs(
     name="melodi docs", router_name="melodi_docs"

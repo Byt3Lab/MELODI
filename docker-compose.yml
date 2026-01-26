@@ -6,6 +6,6 @@ services:
     volumes:
       - .:/app
     environment:
-      - FLASK_ENV=production
+      - QUART_ENV=production
     env_file:
       - .env
