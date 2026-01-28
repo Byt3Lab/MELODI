@@ -59,8 +59,7 @@ class Base(ApplicationModule):
         user = this.get_session("user_id")
 
         if not user:
-            # return this.redirect("/login") 
-           pass 
+            return this.redirect("/login") 
 
     def user_is_not_auth_middleware(self, self_router, request=None):
         this = self_router
@@ -68,8 +67,7 @@ class Base(ApplicationModule):
         user = this.get_session("user_id")
 
         if user:
-            # return this.redirect("/admin")
-            pass
+            return this.redirect("/admin")
         
     def deny_iframe_middelware(self,response: Response) -> Response:
         response.headers['X-Frame-Options'] = 'DENY'

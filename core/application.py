@@ -32,41 +32,40 @@ class Application:
         self.cache = Cache()
         
     async def restart(self):
-        # import sys
-        # import os
-        # import asyncio
-        # print("Restarting application...")
+        import sys
+        import os
+        import asyncio
+        print("Restarting application...")
         
-        # if self.db:
-        #     await self.db.close_engine()
+        if self.db:
+            await self.db.close_engine()
             
-        # self.stop()
+        self.stop()
         
-        # if self.config.is_production():
-        #     import signal
-        #     print("Sending SIGHUP to parent process for restart...")
-        #     os.kill(os.getppid(), signal.SIGHUP)
-        #     return
+        if self.config.is_production():
+            import signal
+            print("Sending SIGHUP to parent process for restart...")
+            os.kill(os.getppid(), signal.SIGHUP)
+            return
 
-        # # Give a moment for resources to be released
-        # await asyncio.sleep(0.5)
+        # Give a moment for resources to be released
+        await asyncio.sleep(0.5)
 
-        # # Close all open file descriptors except stdin, stdout, stderr
-        # # to ensure the listening socket is not inherited by the new process.
-        # import resource
-        # max_fd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
-        # if max_fd == resource.RLIM_INFINITY:
-        #     max_fd = 1024
+        # Close all open file descriptors except stdin, stdout, stderr
+        # to ensure the listening socket is not inherited by the new process.
+        import resource
+        max_fd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+        if max_fd == resource.RLIM_INFINITY:
+            max_fd = 1024
         
-        # for fd in range(3, max_fd):
-        #     try:
-        #         os.close(fd)
-        #     except OSError:
-        #         pass
+        for fd in range(3, max_fd):
+            try:
+                os.close(fd)
+            except OSError:
+                pass
 
-        # python = sys.executable
-        # os.execl(python, python, *sys.argv)
-        pass
+        python = sys.executable
+        os.execl(python, python, *sys.argv)
     
     def stop(self):
         self.server.clear()

@@ -22,6 +22,7 @@ class BaseApiRoutes(APIRouter):
             {"path": "/modules", "methods": ["GET"], "handler": self.admin_modules},
             {"path": "/modules/<path:mod>/off", "methods": ["GET"], "handler": self.off_module},
             {"path": "/modules/<path:mod>/on", "methods": ["GET"], "handler": self.on_module},
+            {"path": "/restart_server", "methods": ["GET"], "handler": self.restart_server},
             {"path": "/<path:path>", "methods": ["GET"], "handler": self.not_found},
         ]
 
@@ -109,6 +110,11 @@ class BaseApiRoutes(APIRouter):
         data = {"end_point_not_found":path}
 
         return self.render_json(data,status_code=404) 
+
+    async def restart_server(self):
+        await self.app.restart()
+        data = {"status": "Server restarted"}
+        return self.render_json(data=data)
 
     async def test_async(self):
         import asyncio

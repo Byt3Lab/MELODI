@@ -133,12 +133,10 @@ class BaseRoutes(WebRouter):
 
     async def on_module(self,mod:str):
         await self.app.module_manager.on_module(mod)
-        await self.app.restart()
         return self.redirect("/admin/modules")
 
     async def off_module(self, mod:str):
         await self.app.module_manager.off_module(mod)
-        await self.app.restart()
         return self.redirect("/admin/modules")
     
     async def admin_settings(self):
