@@ -77,19 +77,20 @@ class BaseRoutes(WebRouter):
         return await self.render_template("admin_logs.html")
 
     async def admin_dashboard(self):
-        widgets=self.app.widget_manager.list_widgets()
+        widgets = self.app.widget_manager.list_widgets()
+        rendered_widgets = {}
 
-        for key,w in widgets.items():
-            for key,i in w.items():
-                wid = i["widget"]
+        for mod, mod_widgets in widgets.items():
+            rendered_widgets[mod] = {}
+            for name, widget_info in mod_widgets.items():
+                # Use WidgetManager.render to get the actual content (handles callables and coroutines)
+                content = await self.app.widget_manager.render(mod, name)
+                rendered_widgets[mod][name] = {
+                    "widget": content,
+                    "infos": widget_info.get("infos")
+                }
 
-                if callable(wid):
-                    i["widget"] = wid()
-                    continue
-                if isinstance(wid, str):
-                    i["widget"] = wid
-
-        return await self.render_template("admin_dashboard.html",widgets=widgets)
+        return await self.render_template("admin_dashboard.html", widgets=rendered_widgets)
 
     async def admin_users(self):
         return await self.render_template("admin_users.html")
@@ -99,7 +100,17 @@ class BaseRoutes(WebRouter):
 
     async def settings_widgets(self):
         widgets = self.app.widget_manager.list_widgets()
-        return await self.render_template("admin_widgets.html", widgets=widgets)
+        rendered_widgets = {}
+
+        for mod, mod_widgets in widgets.items():
+            rendered_widgets[mod] = {}
+            for name, widget_info in mod_widgets.items():
+                content = await self.app.widget_manager.render(mod, name)
+                rendered_widgets[mod][name] = {
+                    "widget": content,
+                    "infos": widget_info.get("infos")
+                }
+        return await self.render_template("admin_widgets.html", widgets=rendered_widgets)
 
     async def settings_home_page(self):
             home_page_on = self.app.home_page_manager.home_page_on
@@ -122,12 +133,12 @@ class BaseRoutes(WebRouter):
 
     async def on_module(self,mod:str):
         await self.app.module_manager.on_module(mod)
-        self.app.restart()
+        await self.app.restart()
         return self.redirect("/admin/modules")
 
     async def off_module(self, mod:str):
         await self.app.module_manager.off_module(mod)
-        self.app.restart()
+        await self.app.restart()
         return self.redirect("/admin/modules")
     
     async def admin_settings(self):

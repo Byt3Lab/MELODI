@@ -26,7 +26,7 @@ class WidgetManager:
         if not name_module in self.widgets:
             self.widgets[name_module] = {}
 
-        self.widgets[name_module][name_widget] = {"widget":widget, "infos":widget}
+        self.widgets[name_module][name_widget] = {"widget":widget, "infos":infos}
 
     def remove(self, name_module:str, name_widget: str):
         try:

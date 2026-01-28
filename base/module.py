@@ -8,10 +8,7 @@ class Base(ApplicationModule):
         from base.routes import BaseRoutes, BaseApiRoutes
 
         routes = BaseRoutes(name="base", app=self.app, module=self)
-        api_routes = BaseApiRoutes(name="base", app=self.app)
-
-        routes.module = self
-        api_routes.module = self
+        api_routes = BaseApiRoutes(name="base", app=self.app, module=self)
 
         await routes.load()
         api_routes.load()
@@ -27,10 +24,7 @@ class Base(ApplicationModule):
         from base.routes import BaseRoutes, BaseApiRoutes
 
         routes = BaseRoutes(name="base", app=self.app, module=self)
-        api_routes = BaseApiRoutes(name="base", app=self.app)
-
-        routes.module = self
-        api_routes.module = self
+        api_routes = BaseApiRoutes(name="base", app=self.app, module=self)
 
         routes.load_installer()
         api_routes.load_installer()
@@ -65,7 +59,8 @@ class Base(ApplicationModule):
         user = this.get_session("user_id")
 
         if not user:
-            return this.redirect("/login")  
+            # return this.redirect("/login") 
+           pass 
 
     def user_is_not_auth_middleware(self, self_router, request=None):
         this = self_router
@@ -73,7 +68,8 @@ class Base(ApplicationModule):
         user = this.get_session("user_id")
 
         if user:
-            return this.redirect("/admin")
+            # return this.redirect("/admin")
+            pass
         
     def deny_iframe_middelware(self,response: Response) -> Response:
         response.headers['X-Frame-Options'] = 'DENY'

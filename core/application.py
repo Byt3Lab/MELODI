@@ -31,25 +31,43 @@ class Application:
         self.user_sudo_exist = False
         self.cache = Cache()
         
-    def restart(self):
-        import sys
-        import os
-        print("Restarting application...")
+    async def restart(self):
+        # import sys
+        # import os
+        # import asyncio
+        # print("Restarting application...")
         
-        if self.db:
-            self.db.close_engine()
+        # if self.db:
+        #     await self.db.close_engine()
             
-        self.stop()
+        # self.stop()
         
-        if self.config.is_production():
-            import signal
-            print("Sending SIGHUP to parent process for restart...")
-            os.kill(os.getppid(), signal.SIGHUP)
-            return
+        # if self.config.is_production():
+        #     import signal
+        #     print("Sending SIGHUP to parent process for restart...")
+        #     os.kill(os.getppid(), signal.SIGHUP)
+        #     return
 
-        python = sys.executable
-        os.execl(python, python, *sys.argv)
+        # # Give a moment for resources to be released
+        # await asyncio.sleep(0.5)
 
+        # # Close all open file descriptors except stdin, stdout, stderr
+        # # to ensure the listening socket is not inherited by the new process.
+        # import resource
+        # max_fd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+        # if max_fd == resource.RLIM_INFINITY:
+        #     max_fd = 1024
+        
+        # for fd in range(3, max_fd):
+        #     try:
+        #         os.close(fd)
+        #     except OSError:
+        #         pass
+
+        # python = sys.executable
+        # os.execl(python, python, *sys.argv)
+        pass
+    
     def stop(self):
         self.server.clear()
 
