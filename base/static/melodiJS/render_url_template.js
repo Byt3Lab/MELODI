@@ -6,7 +6,7 @@ class RenderURLTemplate {
     }
 
     getURLTemplate(template){
-        return "/static_templates_melodijs/"+this.module+"/"+template+".html"
+        return "/melodijs/"+this.module+"/"+template+".html"
     }
 }
 

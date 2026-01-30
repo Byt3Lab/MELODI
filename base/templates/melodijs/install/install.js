@@ -2,10 +2,10 @@ import { createApp } from '/static/base/melodiJS/melodijs.js'
 import { MelodiRouter } from '/static/base/melodiJS/router.js'
 import { MelodiStore } from '/static/base/melodiJS/store.js'
 import { MelodiUI } from '/static/base/melodiUI/melodi.ui.js'
-import Step1 from '/static_templates_melodijs/base/install/step1.js'
-import Step2 from '/static_templates_melodijs/base/install/step2.js'
-import Step3 from '/static_templates_melodijs/base/install/step3.js'
-import Finish from '/static_templates_melodijs/base/install/finish.js'
+import Step1 from '/melodijs/base/install/step1.js'
+import Step2 from '/melodijs/base/install/step2.js'
+import Step3 from '/melodijs/base/install/step3.js'
+import Finish from '/melodijs/base/install/finish.js'
 
 // 2. Initialize Store
 function saveState(state) {

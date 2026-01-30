@@ -31,8 +31,6 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='base/bootstrap-5/css/bootstrap.min.css') }}">
 
-  <script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.min.js') }}"></script>
-
   <script src="{{ url_for('static', filename='base/htmx/htmx.min.js') }}"></script>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='base/base.css') }}">
@@ -62,6 +60,7 @@
   {% block header %}{% endblock %}
   {% block content %}{% endblock %}
   {% block footer %}{% endblock %}
-</body>
 
+  <script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.min.js') }}"></script>
+</body>
 </html>

@@ -31,8 +31,8 @@ class QuartAdapter(WebServerInterface):
         self.send_from_directory(name, path_directory, prefix_path)
 
     def serve_static_templates_melodijs_directory(self, name: str, path_directory: str, prefix_path: str):
-        prefix_path = f'static_templates_melodijs/{prefix_path}'
-        name = "static_templates_melodijs_" + name
+        prefix_path = f'melodijs/{prefix_path}'
+        name = "_melodijs_" + name
         self.send_from_directory(name, path_directory, prefix_path)
     
     def serve_template(self, template_name: str, **context):
