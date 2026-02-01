@@ -1,7 +1,7 @@
 import os
 import pathlib
 import json
-from core.utils import create_dir_if_not_exist, path_exist, read_file, join_paths
+from core.utils import create_dir_if_not_exist, path_exist, read_file, join_paths, read_file, write_file
 # from doteenv import load_dotenv
 
 # load_dotenv()
@@ -16,6 +16,7 @@ class Config:
     allow_request = True
     path_template_404_not_found: str = ""
     infos_org = {}
+    secret_key = "default_secret_key"
 
     def __init__(self):
         self.db_config = self.load_db_config()
@@ -27,6 +28,16 @@ class Config:
         self.DB_NAME = self.db_config.get("db_name") or "melodi_db"
         
         self.load_infos_org()
+        self.load_secret_key()
+        self.ensure_storage_directories()
+
+    def load_secret_key(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "secret_key.txt")
+        if path_exist(path):
+            self.secret_key = read_file(path_file=path).strip()
+        else:
+            self.secret_key = os.urandom(24).hex()
+            write_file(path_file=path, content=self.secret_key)
 
     def set_db_config(self, config:dict):
         self.db_config = config
@@ -36,7 +47,6 @@ class Config:
         self.DB_HOST = config.get("db_host") or self.DB_HOST
         self.DB_PORT = config.get("db_port") or self.DB_PORT
         self.DB_NAME = config.get("db_name") or self.DB_NAME
-        
 
     def load_db_config(self):
         path = join_paths(self.PATH_DIR_CONFIG, "db_conf.json")
@@ -68,3 +78,9 @@ class Config:
         lib = "+asyncpg"
 
         return f"{provider}{lib}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    
+    def ensure_storage_directories(self):
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE)
+        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "uploads"))
+        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "logs"))
+        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "cache"))

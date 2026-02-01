@@ -64,6 +64,24 @@ class WebRouter(Router):
             return True
         except:
             return False
+        
+    def delete_session(self, key:str):
+        from quart import session
+
+        try:
+            session.pop(key, None)
+            return True
+        except:
+            return False
+        
+    def clear_session(self):
+        from quart import session
+
+        try:
+            session.clear()
+            return True
+        except:
+            return False    
     
     def get_cookie(self, key:str):
         from quart import request
@@ -94,14 +112,3 @@ class WebRouter(Router):
         except:
             # log
             return response
-        
-class BasicWebRouter:
-    def __init__(self, router:WebRouter):
-        self.router = router
-        self.routes = []
-
-    def load(self):
-        pass
-
-    def get_routes(self):
-        return self.routes

@@ -31,6 +31,8 @@ class Application:
         self.user_sudo_exist = False
         self.cache = Cache()
         
+        self.server.app.secret_key = self.config.secret_key
+        
     async def restart(self):
         import sys
         import os

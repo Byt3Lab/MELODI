@@ -14,7 +14,7 @@ class Response:
 class Service:
     def __init__(self, module:Module):
         self.module = module
-        self.app = self.module.app
+        self.app =  module.app
         
     def response(self, data=None, status_code=200, message=""):
         return Response(data,status_code,message)

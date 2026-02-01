@@ -6,6 +6,7 @@ from core.router import RequestContext
 class QuartAdapter(WebServerInterface):
     def __init__(self):
         self.app = Quart(__name__, template_folder='.')
+        self.app.secret_key = ''  # Set a secret key for session management
 
     def add_route(self, path: str, handler, methods=None):
         self.app.route(path, methods=methods or ["GET"])(handler)

@@ -1,57 +1,58 @@
 from core.router import WebRouter
 from base.services import HomePageService, WidgetService, InstallService
+from .base_controller import BaseController
 class BaseRoutes(WebRouter):
     async def load (self):
-        from base.services import UserService
-
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
-        user_service = UserService(module=self.module)
         
-        res = await user_service.list_users()
-        print(res)
+        base_controller = BaseController(router=self)
+        base_controller.load()
 
         self.before_request()(self.get_middleware("check_maintenance"))
         self.after_request()(self.get_middleware("deny_iframe"))
         
-        self.add_route("/", methods=["GET"])(self.home)
+        self.add_route("/", methods=["GET"])(base_controller.home)
 
         self.add_many_routes([
-            {"path": "/login", "methods": ["GET"], "handler": self.login},
-            {"path": "/register", "methods": ["GET"], "handler": self.register},
+            {"path": "/login", "methods": ["GET", 'post'], "handler": base_controller.login},
+            {"path": "/register", "methods": ["GET"], "handler": base_controller.register},
         ], before_request=[self.get_middleware("user_is_not_auth")])
 
         self.add_many_routes([
-            {"path": "/logout", "methods": ["GET"], "handler": self.logout},
-            {"path": "/admin", "methods": ["GET"], "handler": self.admin_dashboard,
+            {"path": "/logout", "methods": ["GET"], "handler": base_controller.logout},
+            {"path": "/admin", "methods": ["GET"], "handler": base_controller.admin_dashboard,
                 "children": [
-                    {"path": "/users", "methods": ["GET"], "handler": self.admin_users},
-                    {"path": "/profile", "methods": ["GET"], "handler": self.profile},
-                    {"path": "/settings", "methods": ["GET"], "handler": self.admin_settings,
+                    {"path": "/users", "methods": ["GET"], "handler": base_controller.admin_users},
+                    {"path": "/profile", "methods": ["GET"], "handler": base_controller.profile},
+                    {"path": "/settings", "methods": ["GET"], "handler": base_controller.admin_settings,
                         "children": [
-                            {"path": "/widgets", "methods": ["GET"], "handler": self.settings_widgets},
-                            {"path": "/home_page", "methods": ["GET"], "handler": self.settings_home_page},
-                            {"path": "/home_page/<path:home_page>/on", "methods": ["GET"], "handler": self.settings_home_page_on},
-                            {"path": "/home_page_clear", "methods": ["GET"], "handler": self.settings_home_page_clear}
+                            {"path": "/widgets", "methods": ["GET"], "handler": base_controller.settings_widgets},
+                            {"path": "/home_page", "methods": ["GET"], "handler": base_controller.settings_home_page},
+                            {"path": "/home_page/<path:home_page>/on", "methods": ["GET"], "handler": base_controller.settings_home_page_on},
+                            {"path": "/home_page_clear", "methods": ["GET"], "handler": base_controller.settings_home_page_clear}
                         ]
                     },
-                    {"path": "/modules", "methods": ["GET"], "handler": self.admin_modules,
+                    {"path": "/modules", "methods": ["GET"], "handler": base_controller.admin_modules,
                         "children": [
-                            {"path": "/<path:mod>/off", "methods": ["GET"], "handler": self.off_module},
-                            {"path": "/<path:mod>/on", "methods": ["GET"], "handler": self.on_module}
+                            {"path": "/<path:mod>/off", "methods": ["GET"], "handler": base_controller.off_module},
+                            {"path": "/<path:mod>/on", "methods": ["GET"], "handler": base_controller.on_module}
                         ]
                     },
-                    {"path": "/logs", "methods": ["GET"], "handler": self.logs}
+                    {"path": "/logs", "methods": ["GET"], "handler": base_controller.logs}
                 ]
             }
         ], before_request=[self.get_middleware("user_is_auth")])
 
     def load_installer(self):
+        base_controller = BaseController(router=self)
+        base_controller.load()
+
         self.before_request()(self.get_middleware("check_maintenance"))
         self.after_request()(self.get_middleware("deny_iframe"))
-        self.add_route("/", methods=["GET"])(self.home_welcome)
-        self.add_route("/install", methods=["GET"])(self.install)
+        self.add_route("/", methods=["GET"])(base_controller.home_welcome)
+        self.add_route("/install", methods=["GET"])(base_controller.install)
 
     def check_installation(self):
         request = self.get_request()
@@ -63,95 +64,3 @@ class BaseRoutes(WebRouter):
             return None
         
         return self.redirect("/install")
-
-    async def login(self):
-        return await self.render_template("login.html")
-    
-    async def register(self):
-        return await self.render_template("register.html")
-    
-    async def logout(self):
-        return await self.render_template("logout.html")
-    
-    async def logs(self):
-        return await self.render_template("admin_logs.html")
-
-    async def admin_dashboard(self):
-        widgets = self.app.widget_manager.list_widgets()
-        rendered_widgets = {}
-
-        for mod, mod_widgets in widgets.items():
-            rendered_widgets[mod] = {}
-            for name, widget_info in mod_widgets.items():
-                # Use WidgetManager.render to get the actual content (handles callables and coroutines)
-                content = await self.app.widget_manager.render(mod, name)
-                rendered_widgets[mod][name] = {
-                    "widget": content,
-                    "infos": widget_info.get("infos")
-                }
-
-        return await self.render_template("admin_dashboard.html", widgets=rendered_widgets)
-
-    async def admin_users(self):
-        return await self.render_template("admin_users.html")
-
-    async def profile(self):
-        return await self.render_template("profile.html")
-
-    async def settings_widgets(self):
-        widgets = self.app.widget_manager.list_widgets()
-        rendered_widgets = {}
-
-        for mod, mod_widgets in widgets.items():
-            rendered_widgets[mod] = {}
-            for name, widget_info in mod_widgets.items():
-                content = await self.app.widget_manager.render(mod, name)
-                rendered_widgets[mod][name] = {
-                    "widget": content,
-                    "infos": widget_info.get("infos")
-                }
-        return await self.render_template("admin_widgets.html", widgets=rendered_widgets)
-
-    async def settings_home_page(self):
-            home_page_on = self.app.home_page_manager.home_page_on
-            home_pages = self.app.home_page_manager.list_home_pages()
-            home_pages_len = len(home_pages)
-            return await self.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
-
-    async def settings_home_page_on(self, home_page):
-        self.home_page_service.on(home_page)
-        return self.redirect("/admin/settings/home_page")
-    
-    async def settings_home_page_clear(self):
-        self.home_page_service.clear()
-        return self.redirect("/admin/settings/home_page")
-
-    async def admin_modules(self):
-        modules = self.app.module_manager.list_modules()
-        modules_len= len(modules)
-        return await self.render_template("admin_modules.html",modules=modules, modules_len=modules_len)
-
-    async def on_module(self,mod:str):
-        await self.app.module_manager.on_module(mod)
-        return self.redirect("/admin/modules")
-
-    async def off_module(self, mod:str):
-        await self.app.module_manager.off_module(mod)
-        return self.redirect("/admin/modules")
-    
-    async def admin_settings(self):
-        return await self.render_template("admin_settings.html")
-
-    async def home(self): 
-        home_page = await self.app.home_page_manager.render_home_page() 
-        
-        if home_page: 
-            return home_page
-
-        return await self.render_template("home.html")
-
-    async def home_welcome(self):
-        return await self.render_template("home_welcome.html")
-    
-    async def install(self):
-        return await self.render_template("install/install.html")
