@@ -26,7 +26,7 @@ class BaseApiRoutes(APIRouter):
             {"path": "/<path:path>", "methods": ["GET"], "handler": self.not_found},
         ]
 
-        self.add_many_routes(routes)
+        self.add_many_routes(routes, before_request=[self.get_middleware("api_user_is_auth")])
 
     def load_installer(self):
         self.before_request()(self.get_middleware("check_maintenance"))

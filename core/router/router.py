@@ -4,8 +4,8 @@ from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable
 import uuid
 import asyncio
-import inspect
-from quart import Blueprint, make_response
+from quart import Blueprint, make_response, Response
+from datetime import datetime, timedelta
 
 if TYPE_CHECKING:
     from core import Application
@@ -28,14 +28,16 @@ class Router:
             if asyncio.iscoroutinefunction(f):
                 @wraps(f)
                 async def wrapper(*args, **kwargs):
+                    response = None
                     # 1. Exécution des middlewares 'before_request'
                     if isinstance(before_request, list):
                         for callback in before_request:
                             if asyncio.iscoroutinefunction(callback):
-                                response = await callback(self_router=self, request=self.get_request())
-                            else:
-                                response = callback(self_router=self, request=self.get_request())
-                            
+                                response = await callback(router=self, request=self.get_request())
+                            elif callable(callback):
+                                if response := await asyncio.to_thread(callback, router=self, request=self.get_request()):
+                                    return response
+                                # response = callback(router=self, request=self.get_request())
                             if response is not None:
                                 return response
 
@@ -46,9 +48,9 @@ class Router:
                     if isinstance(after_request, list):
                         for callback in after_request:
                             if asyncio.iscoroutinefunction(callback):
-                                response = await callback(response, self_router=self, request=self.get_request())
+                                response = await callback(response, router=self, request=self.get_request())
                             else:
-                                response = callback(response, self_router=self, request=self.get_request())
+                                response = callback(response, router=self, request=self.get_request())
                     
                     return response
             else:
@@ -60,7 +62,7 @@ class Router:
                             # For sync wrapper, we assume middlewares are sync or we can't await them easily
                             # If a middleware is async, this will fail or return coroutine. 
                             # Ideally middlewares for sync routes should be sync.
-                            response = callback(self_router=self, request=self.get_request())
+                            response = callback(router=self, request=self.get_request())
                             if response is not None:
                                 return response
 
@@ -73,7 +75,7 @@ class Router:
                     # 3. Exécution des middlewares 'after_request'
                     if isinstance(after_request, list):
                         for callback in after_request:
-                            response = callback(response, self_router=self, request=self.get_request())
+                            response = callback(response, router=self, request=self.get_request())
                     
                     return response
 
@@ -237,3 +239,70 @@ class Router:
     
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         return self.module.translate(filename, keys, lang)
+    
+    def get_session(self, key:str|None=None):
+        from quart import session
+
+        try:
+            if isinstance(key, str):
+                return session.get(key)
+            return session
+        except:
+            return session
+        
+    def set_session(self, key:str, value):
+        from quart import session
+
+        try:
+            session[key] = value
+            return True
+        except:
+            return False
+        
+    def delete_session(self, key:str):
+        from quart import session
+
+        try:
+            session.pop(key, None)
+            return True
+        except:
+            return False
+        
+    def clear_session(self):
+        from quart import session
+
+        try:
+            session.clear()
+            return True
+        except:
+            return False    
+    
+    def get_cookie(self, key:str):
+        from quart import request
+
+        return request.cookies.get(key)
+
+    def set_cookie(
+            self, response: Response, key:str, value:str, 
+            max_age: timedelta | int | None = None,
+            expires: str | datetime | int | float | None = None,
+            path: str | None = "/",
+            domain: str | None = None,
+            secure: bool = False,
+            httponly: bool = False,
+            samesite: str | None = None,
+            partitioned: bool = False,
+        ):
+        
+        try:
+            return response.set_cookie(key=key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite, partitioned=partitioned)
+        except:
+            # log
+            return response
+    
+    def delete_cookie(self, response: Response, key:str):
+        try:
+            return response.delete_cookie(key=key)
+        except:
+            # log
+            return response

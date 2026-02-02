@@ -19,11 +19,9 @@ class BaseController(WebController):
             user_service = UserService(module=self.module)
             user_has_auth = await user_service.authenticate(username=username, password=password)
             
-            print(self.router.get_session("user_id"))
             if user_has_auth:
-                r = self.router.set_session("user_id", "True")
-                print("Session set:", r)
-                return self.router.redirect("/admin")
+                if self.router.set_session("user_id", "True"):
+                    return self.router.redirect("/admin")
         
         return await self.router.render_template("login.html")
     

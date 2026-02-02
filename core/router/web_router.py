@@ -1,8 +1,5 @@
 from __future__ import annotations
-from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
-
-from quart import Response
 
 from .router import Router
 from core.utils import path_exist, read_file
@@ -45,70 +42,3 @@ class WebRouter(Router):
         if path_exist(path_file):
             template_string = read_file(path_file=path_file)
         return await self.render_template_string(template_string, **context)
-    
-    def get_session(self, key:str|None=None):
-        from quart import session
-
-        try:
-            if isinstance(key, str):
-                return session.get(key)
-            return session
-        except:
-            return session
-        
-    def set_session(self, key:str, value):
-        from quart import session
-
-        try:
-            session[key] = value
-            return True
-        except:
-            return False
-        
-    def delete_session(self, key:str):
-        from quart import session
-
-        try:
-            session.pop(key, None)
-            return True
-        except:
-            return False
-        
-    def clear_session(self):
-        from quart import session
-
-        try:
-            session.clear()
-            return True
-        except:
-            return False    
-    
-    def get_cookie(self, key:str):
-        from quart import request
-
-        return request.cookies.get(key)
-
-    def set_cookie(
-            self, response: Response, key:str, value:str, 
-            max_age: timedelta | int | None = None,
-            expires: str | datetime | int | float | None = None,
-            path: str | None = "/",
-            domain: str | None = None,
-            secure: bool = False,
-            httponly: bool = False,
-            samesite: str | None = None,
-            partitioned: bool = False,
-        ):
-        
-        try:
-            return response.set_cookie(key=key, value=value, max_age=max_age, expires=expires, path=path, domain=domain, secure=secure, httponly=httponly, samesite=samesite, partitioned=partitioned)
-        except:
-            # log
-            return response
-    
-    def delete_cookie(self, response: Response, key:str):
-        try:
-            return response.delete_cookie(key=key)
-        except:
-            # log
-            return response

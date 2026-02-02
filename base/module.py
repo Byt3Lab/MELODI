@@ -1,5 +1,6 @@
 from quart import Response
 from core.module import ApplicationModule
+from core.router import WebRouter, APIRouter
 from core.utils import join_paths
 
 class Base(ApplicationModule):
@@ -42,6 +43,7 @@ class Base(ApplicationModule):
         self.register_middlewares({
             "user_is_auth": self.user_is_auth_middleware,
             "user_is_not_auth": self.user_is_not_auth_middleware,
+            "api_user_is_auth": self.api_user_is_auth_middleware,
             "deny_iframe": self.deny_iframe_middelware,
             "check_maintenance": self.check_maintenance_middleware
         })
@@ -53,16 +55,19 @@ class Base(ApplicationModule):
     def base_widget(self):
         return "<div><h3>Base Widget</h3><p>This is a sample widget from the Base module.</p></div>"
     
-    def user_is_auth_middleware(self,self_router, request=None):
-        this = self_router
-
-        user = this.get_session("user_id")
+    def user_is_auth_middleware(self,router:WebRouter, request=None):
+        user = router.get_session("user_id")
 
         if not user:
-            return this.redirect("/login") 
+            return router.redirect("/login") 
+        
+    def api_user_is_auth_middleware(self,router:APIRouter, request=None):
+        user = router.get_session("user_id")
+        if not user:
+            return router.render_json({"error": "Unauthorized"}, status_code=401) 
 
-    def user_is_not_auth_middleware(self, self_router, request=None):
-        this = self_router
+    def user_is_not_auth_middleware(self, router:WebRouter, request=None):
+        this = router
 
         user = this.get_session("user_id")
 
