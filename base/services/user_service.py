@@ -11,10 +11,10 @@ class UserService(Service):
         print("Authenticating user:", username)
         print("With password:", password)
 
-        return True
-        user = await UserRepository(self.module).get_user_by_username(username)
-
-        if user and user.check_password(password):
-            # Authentication successful
+        rep = UserRepository(self.module)
+        user = await rep.get_user_by_username(username=username)
+        
+        if user :
             return True
+
         return False

@@ -32,6 +32,8 @@ class Application:
         self.cache = Cache()
         
         self.server.app.secret_key = self.config.secret_key
+
+        self.server.app.before_serving(self.build)
         
     async def restart(self):
         import sys

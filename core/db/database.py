@@ -18,10 +18,6 @@ class DataBase():
         # Ensure the URL uses an async driver
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://")
-        elif url.startswith("mysql://"):
-            url = url.replace("mysql://", "mysql+aiomysql://")
-        elif url.startswith("sqlite://"):
-            url = url.replace("sqlite://", "sqlite+aiosqlite://")
             
         self.engine = create_async_engine(url)
 
