@@ -3,6 +3,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, DateTime
 from datetime import datetime
 
+from core.utils import run_sync
+
 class UserModel(Model):
     __tablename__ = "users"
 
@@ -19,3 +21,7 @@ class UserModel(Model):
     
     def __repr__(self):
         return f"<UserModel(id={self.user_id}, username={self.username}, email={self.email}, is_sudo={self.is_sudo})>"
+
+    async def verify_password(self, password: str) -> bool:
+        from core.utils.password import verify_password
+        return await run_sync(verify_password, password, self.password)

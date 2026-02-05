@@ -19,6 +19,8 @@ class BaseController(WebController):
             user_service = UserService(module=self.module)
             user_has_auth = await user_service.authenticate(username=username, password=password)
             
+            print(user_has_auth)
+
             if user_has_auth:
                 if self.router.set_session("user_id", "True"):
                     return self.router.redirect("/admin")

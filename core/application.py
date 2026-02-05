@@ -1,5 +1,5 @@
 from core.router import WebRouter, APIRouter
-from core.utils import TimerManager, EventListener, MiddlewareManager, path_exist, read_file
+from core.utils import TimerManager, EventListener, MiddlewareManager, path_exist, read_file, run_sync
 from core.component import HomePageManager, MenuItemManager, WidgetManager
 from core.module import ModuleManager
 from core.adapters.quart_adapter import QuartAdapter
@@ -92,13 +92,14 @@ class Application:
         from base.module import module as base_module
 
         base_module.init(app=self, dirname="base")
+        
         await base_module.load()
         
         await self.module_manager.load_modules()
 
-        base_module._run()
+        await run_sync(base_module._run)
 
-        self.module_manager.run_modules()
+        await run_sync(self.module_manager.run_modules)
         
         self.register_route_not_found()
         

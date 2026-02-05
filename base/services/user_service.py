@@ -8,13 +8,18 @@ class UserService(Service):
         # return self.response(data=data)
 
     async def authenticate (self, username: str, password: str):
-        print("Authenticating user:", username)
-        print("With password:", password)
+        payload = {}
 
         rep = UserRepository(self.module)
-        user = await rep.get_user_by_username(username=username)
+        user = await rep.get_user_by_username_or_email(username=username)
         
-        if user :
-            return True
-
+        if user and await user.verify_password(password=password) :
+            payload = {
+                "id": user.user_id,
+                "username": user.username,
+                "email": user.email,
+                "is_sudo": user.is_sudo
+            }
+            return payload
+        print("Authentication failed for user:", username)
         return False

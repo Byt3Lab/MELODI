@@ -1,6 +1,6 @@
 from core.db import Repository
 from base.models import UserModel
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 
 class UserRepository(Repository):
     async def get_all_users(self, filter:None|dict=None, limit: int = 30, offset: int = 0, count: bool = False):
@@ -42,7 +42,13 @@ class UserRepository(Repository):
             stmt = select(UserModel).filter_by(user_id=user_id)
             result = await session.execute(stmt)
             return result.scalars().first()
-        
+
+    async def get_user_by_username_or_email(self, username: str):
+        async with self.get_session() as session:
+            stmt = select(UserModel).where(or_(UserModel.username == username, UserModel.email == username))
+            result = await session.execute(stmt)
+            return result.scalars().first()
+            
     async def delete_user(self, user_id: str):
         async with self.get_session() as session:
             stmt = select(UserModel).filter_by(user_id=user_id)
