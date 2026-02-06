@@ -2,7 +2,7 @@ from quart import Response
 from core.module import ApplicationModule
 from core.router import WebRouter, APIRouter
 from core.utils import join_paths
-
+import json
 class Base(ApplicationModule):
     async def load(self):
         self.init_load()
@@ -55,24 +55,42 @@ class Base(ApplicationModule):
     def base_widget(self):
         return "<div><h3>Base Widget</h3><p>This is a sample widget from the Base module.</p></div>"
     
-    def user_is_auth_middleware(self,router:WebRouter, request=None):
-        user = router.get_session("user_id")
-
+    def user_is_auth_middleware(self,router:WebRouter):
+        user = router.get_session("user_payload")
         if not user:
             return router.redirect("/login") 
+        payload = json.loads(user)
         
-    def api_user_is_auth_middleware(self,router:APIRouter, request=None):
-        user = router.get_session("user_id")
-        if not user:
-            return router.render_json({"error": "Unauthorized"}, status_code=401) 
+    def api_user_is_auth_middleware(self,router:APIRouter):
+        is_auth = False
 
-    def user_is_not_auth_middleware(self, router:WebRouter, request=None):
-        this = router
+        user = router.get_session("user_payload")
+        if user:
+            payload = json.loads(user)
+            is_auth = True
+        
+        if not is_auth:
+            auth_header = router.get_header("Authorization")
 
-        user = this.get_session("user_id")
+            if auth_header and auth_header.startswith("Bearer "):
+                jwt_token = auth_header.split(" ")[1]
+                
+                # from core.auth.jwt_manager import JWTManager
+                # jwt_manager = JWTManager(secret_key=self.app.config.jwt_secret_key)
+                # payload = jwt_manager.decode_token(jwt_token)
+                
+                # if payload:
+                #     return
+
+            
+        if not is_auth:
+            return router.render_json({"error": "Unauthorized"}, status=401)
+
+    def user_is_not_auth_middleware(self, router:WebRouter):
+        user = router.get_session("user_payload")
 
         if user:
-            return this.redirect("/admin")
+            return router.redirect("/")
         
     def deny_iframe_middelware(self,response: Response) -> Response:
         response.headers['X-Frame-Options'] = 'DENY'
