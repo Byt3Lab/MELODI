@@ -19,10 +19,9 @@ class BaseController(WebController):
             user_service = UserService(module=self.module)
             user_has_auth = await user_service.authenticate(username=username, password=password)
             
-            print(user_has_auth)
-
             if user_has_auth:
-                if self.router.set_session("user_id", "True"):
+                import json
+                if self.router.set_session("user_payload", json.dumps(user_has_auth)):
                     return self.router.redirect("/admin")
         
         return await self.router.render_template("login.html")
@@ -31,7 +30,7 @@ class BaseController(WebController):
         return await self.router.render_template("register.html")
     
     async def logout(self):
-        self.router.delete_session("user_id")
+        self.router.delete_session("user_payload")
         return self.router.redirect("/login")
     
     async def logs(self):

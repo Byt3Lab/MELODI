@@ -15,11 +15,10 @@ class UserService(Service):
         
         if user and await user.verify_password(password=password) :
             payload = {
-                "id": user.user_id,
+                "user_id": user.user_id,
                 "username": user.username,
                 "email": user.email,
                 "is_sudo": user.is_sudo
             }
             return payload
-        print("Authentication failed for user:", username)
         return False

@@ -240,6 +240,11 @@ class Router:
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         return self.module.translate(filename, keys, lang)
     
+    def get_header(self, key:str):
+        from quart import request
+
+        return request.headers.get(key)
+    
     def get_session(self, key:str|None=None):
         from quart import session
 
