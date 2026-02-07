@@ -19,10 +19,9 @@ class BaseController(APIController):
             user_service = UserService(module=self.module)
             user_has_auth = await user_service.authenticate(username=username, password=password)
             
-            print(self.router.get_session("user_id"))
             if user_has_auth:
-                r = self.router.set_session("user_id", "True")
-                print("Session set:", r)
-                return self.router.redirect("/admin")
+                from core.utils import jwt
+                token = jwt.jwt_encode(user_has_auth, self.app.config.secret_key, algorithm="HS256")
+                return self.router.render_json({"message": "Login successful", "token": token}, status_code=200)
         
-        return await self.router.render_template("login.html")
+        return await self.router.render_json({"message": "Login page"}, status_code=404)

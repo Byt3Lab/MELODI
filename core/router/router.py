@@ -33,9 +33,9 @@ class Router:
                     if isinstance(before_request, list):
                         for callback in before_request:
                             if asyncio.iscoroutinefunction(callback):
-                                response = await callback(router=self, request=self.get_request())
+                                response = await callback(router=self)
                             elif callable(callback):
-                                if response := await asyncio.to_thread(callback, router=self, request=self.get_request()):
+                                if response := await asyncio.to_thread(callback, router=self):
                                     return response
                                 # response = callback(router=self, request=self.get_request())
                             if response is not None:

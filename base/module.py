@@ -75,14 +75,12 @@ class Base(ApplicationModule):
             if auth_header and auth_header.startswith("Bearer "):
                 jwt_token = auth_header.split(" ")[1]
                 
-                # from core.auth.jwt_manager import JWTManager
-                # jwt_manager = JWTManager(secret_key=self.app.config.jwt_secret_key)
-                # payload = jwt_manager.decode_token(jwt_token)
+                from core.utils import jwt
                 
-                # if payload:
-                #     return
-
-            
+                payload = jwt.jwt_decode(jwt_token, self.app.config.secret_key, algorithms=["HS256"])
+                if payload:
+                    is_auth = True
+                
         if not is_auth:
             return router.render_json({"error": "Unauthorized"}, status=401)
 
