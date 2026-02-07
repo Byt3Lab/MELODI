@@ -17,6 +17,7 @@ class Config:
     path_template_404_not_found: str = ""
     infos_org = {}
     secret_key = "default_secret_key"
+    jwt_secret_key = "default_secret_key"
 
     def __init__(self):
         self.db_config = self.load_db_config()
@@ -29,6 +30,7 @@ class Config:
         
         self.load_infos_org()
         self.load_secret_key()
+        self.load_jwt_secret_key()
         self.ensure_storage_directories()
 
     def load_secret_key(self):
@@ -38,6 +40,14 @@ class Config:
         else:
             self.secret_key = os.urandom(24).hex()
             write_file(path_file=path, content=self.secret_key)
+
+    def load_jwt_secret_key(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "jwt_secret_key.txt")
+        if path_exist(path):
+            self.jwt_secret_key = read_file(path_file=path).strip()
+        else:
+            self.jwt_secret_key = os.urandom(24).hex()
+            write_file(path_file=path, content=self.jwt_secret_key)
 
     def set_db_config(self, config:dict):
         self.db_config = config

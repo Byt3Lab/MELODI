@@ -307,9 +307,25 @@
     </div>
 </section>
 
-<script type="module">
-    let r = await fetch('/api/base/status', { ccredentials: 'same-origin' })
-    let data = await r.text()
+<!-- <script type="module">
+    let rl = await fetch('/api/base/login', { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: 'gaetant', password: 'root' })
+     })
+
+     let loginData = await rl.json()
+     console.log('Login Response:', loginData)
+
+    let r = await fetch('/api/base/status', { 
+        headers: {
+            'Authorization': `Bearer ${loginData.token}`
+        },
+        credentials: 'same-origin' 
+    })
+    let data = await r.json()
     console.log('API Status:', data)
-</script>
+</script> -->
 {% endblock %}

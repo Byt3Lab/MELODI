@@ -97,9 +97,9 @@ class Application:
         
         await self.module_manager.load_modules()
 
-        await run_sync(base_module._run)
+        base_module._run()
 
-        await run_sync(self.module_manager.run_modules)
+        self.module_manager.run_modules()
         
         self.register_route_not_found()
         

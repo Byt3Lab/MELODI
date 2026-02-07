@@ -9,10 +9,16 @@ class BaseApiRoutes(APIRouter):
         self.before_request()(self.get_middleware("check_maintenance"))
         self.after_request()(self.get_middleware("deny_iframe"))
 
+        from base.routes.base_api_controller import BaseAPIController
+
+        base_api_controller = BaseAPIController(router=self)
+        base_api_controller.load()
+
+        self.add_route(path="/login", methods=["POST"])(base_api_controller.login)
+
         routes = [
             {"path": "/status", "methods": ["GET"], "handler": self.status},
             {"path": "/test_async", "methods": ["GET"], "handler": self.test_async},
-            {"path": "/login", "methods": ["GET"], "handler": self.login},
             {"path": "/register", "methods": ["GET"], "handler": self.register},
             {"path": "/logout", "methods": ["GET"], "handler": self.logout},
             {"path": "/users", "methods": ["GET"], "handler": self.admin_users},

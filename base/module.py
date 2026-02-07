@@ -62,28 +62,26 @@ class Base(ApplicationModule):
         payload = json.loads(user)
         
     def api_user_is_auth_middleware(self,router:APIRouter):
-        is_auth = False
+        payload = None
 
         user = router.get_session("user_payload")
+
         if user:
             payload = json.loads(user)
-            is_auth = True
+            return None
         
-        if not is_auth:
-            auth_header = router.get_header("Authorization")
+        auth_header = router.get_header("Authorization")
 
-            if auth_header and auth_header.startswith("Bearer "):
-                jwt_token = auth_header.split(" ")[1]
-                
-                from core.utils import jwt
-                
-                payload = jwt.jwt_decode(jwt_token, self.app.config.secret_key, algorithms=["HS256"])
-                if payload:
-                    is_auth = True
-                
-        if not is_auth:
-            return router.render_json({"error": "Unauthorized"}, status=401)
-
+        if auth_header and auth_header.startswith("Bearer "):
+            jwt_token = auth_header.split(" ")[1]
+            
+            payload = router.jwt_decode(jwt_token)
+            
+            if payload:
+                return None
+            
+        return router.render_json({"error": "Unauthorized"}, status_code=401)
+        
     def user_is_not_auth_middleware(self, router:WebRouter):
         user = router.get_session("user_payload")
 
