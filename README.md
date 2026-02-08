@@ -5,9 +5,10 @@ MELODI est un ERP (progiciel de gestion) modulaire et extensible écrit en Pytho
 ## 🚀 Fonctionnalités Clés
 
 - **Architecture Modulaire** : Système de modules isolés et plugins dynamiques.
-- **Web-Ready** : Interface web intégrée basée sur Flask.
+- **Web-Ready** : Interface web intégrée basée sur **Quart** (Asynchrone).
 - **Extensible** : Ajoutez des fonctionnalités sans modifier le cœur.
 - **Base de Données** : Gestion simplifiée avec ORM intégré.
+- **Async** : Support natif de l'asynchrone (async/await) pour des performances accrues.
 - **Internationalisation** : Support multi-langues natif.
 
 ## 🛠️ Installation et Démarrage

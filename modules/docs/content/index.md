@@ -6,7 +6,7 @@ MELODI is a modular, multi-sector ERP written in Python. It is designed to be ex
 
 - **Modular Architecture**: Core functionality is minimal; everything else is a module.
 - **Plugin System**: Dynamically load plugins to extend functionality.
-- **Web Interface**: Built with Flask, providing a modern web UI.
+- **Web Interface**: Built with Quart, providing a modern asynchronous web UI.
 - **Easy to Deploy**: Runs on Linux and Windows.
 
 ## Navigation

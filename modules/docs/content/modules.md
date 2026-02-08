@@ -40,8 +40,8 @@ class MyModule(ApplicationModule):
         # Register routes
         self.router.add_route("/", methods=["GET"])(self.index)
 
-    def index(self):
-        return self.router.render_template("index.html")
+    async def index(self):
+        return await self.router.render_template("index.html")
 
 module = MyModule(
     name="my_module", router_name="my_module"

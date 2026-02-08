@@ -9,7 +9,7 @@
 The main application class.
 
 - `init()`: Initializes components.
-- `build()`: Loads modules and prepares the app.
+- `async build()`: Loads modules and prepares the app (Async).
 - `run()`: Starts the web server.
 
 ### Module
@@ -29,7 +29,7 @@ Base class for all modules.
 Handles web routes and template rendering.
 
 - `add_route(path, methods)`: Decorator to add a route.
-- `render_template(template_name, **context)`: Renders a template.
+- `async render_template(template_name, **context)`: Renders a template (Async).
 
 ## Managers
 

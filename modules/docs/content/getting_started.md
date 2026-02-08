@@ -53,16 +53,16 @@ The application will be available at `http://localhost:5001` (or the configured 
 
 ### Production
 
-For production, use a WSGI server like Gunicorn (Linux) or Waitress (Windows).
+For production, use an ASGI server like Hypercorn or Uvicorn (managed by Gunicorn).
 
-**Linux:**
+**Linux (Gunicorn with Uvicorn workers):**
 ```bash
-gunicorn -w 4 -b 0.0.0.0:8000 wsgi:app
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 main:app
 ```
 
-**Windows:**
+**Windows (Hypercorn):**
 ```powershell
-waitress-serve --listen=0.0.0.0:8000 wsgi:app
+hypercorn main:app --bind 0.0.0.0:8000
 ```
 
 ## Configuration

@@ -519,7 +519,7 @@ docker compose up --build
                     <li><strong>Load Phase</strong> : La méthode <code>load()</code> de chaque module est appelée
                         (routes, DB, services)</li>
                     <li><strong>Run Phase</strong> : <code>module_manager.run_modules()</code> active les routes</li>
-                    <li><strong>Démarrage serveur</strong> : Flask démarre et écoute les requêtes</li>
+                    <li><strong>Démarrage serveur</strong> : Quart démarre et écoute les requêtes (ASGI)</li>
                 </ol>
 
                 <div class="alert alert-warning">
@@ -555,20 +555,21 @@ def run():
 
             <section id="routers">
                 <h2>WebRouter & APIRouter</h2>
-                <p>MELODI propose deux types de routers pour séparer clairement UI et API.</p>
+                <p>MELODI propose deux types de routers pour séparer clairement UI et API. Ils sont basés sur Quart et
+                    supportent l'asynchrone.</p>
 
                 <h3>WebRouter</h3>
                 <p>Pour les routes retournant du HTML (pages web).</p>
                 <pre><code>@self.router.add_route("/clients", methods=["GET"])
-def liste_clients():
-    clients = self.app.db.select("clients")
-    return self.router.render_template("clients.html", clients=clients)</code></pre>
+async def liste_clients():
+    clients = await self.app.db.select("clients")
+    return await self.router.render_template("clients.html", clients=clients)</code></pre>
 
                 <h3>APIRouter</h3>
                 <p>Pour les routes retournant du JSON (API REST).</p>
                 <pre><code>@self.api_router.add_route("/clients", methods=["GET"])
-def api_liste_clients():
-    clients = self.app.db.select("clients")
+async def api_liste_clients():
+    clients = await self.app.db.select("clients")
     return {"status": "success", "data": clients}</code></pre>
 
                 <div class="alert alert-info">
