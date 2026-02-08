@@ -30,8 +30,9 @@
   <link rel="shortcut icon" href="/static/base/melodi.png" type="image/x-icon">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='base/bootstrap-5/css/bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.bundle.min.js') }}" defer></script>
 
-  <script src="{{ url_for('static', filename='base/htmx/htmx.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='base/htmx/htmx.min.js') }}" defer></script>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='base/base.css') }}">
   <script src="{{ url_for('static', filename='base/base.js') }}"></script>
@@ -60,7 +61,7 @@
   {% block header %}{% endblock %}
   {% block content %}{% endblock %}
   {% block footer %}{% endblock %}
-
-  <script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.min.js') }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
+
 </html>

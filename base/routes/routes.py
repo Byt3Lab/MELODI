@@ -18,7 +18,7 @@ class BaseRoutes(WebRouter):
         self.add_many_routes([
             {"path": "/login", "methods": ["GET", 'post'], "handler": base_controller.login},
             {"path": "/register", "methods": ["GET"], "handler": base_controller.register},
-        ], before_request=[self.get_middleware("user_is_not_auth")])
+        ], before_request=[self.get_middleware("guest_only")])
 
         self.add_many_routes([
             {"path": "/logout", "methods": ["GET"], "handler": base_controller.logout},
@@ -43,7 +43,7 @@ class BaseRoutes(WebRouter):
                     {"path": "/logs", "methods": ["GET"], "handler": base_controller.logs}
                 ]
             }
-        ], before_request=[self.get_middleware("user_is_auth")])
+        ], before_request=[self.get_middleware("auth_required")])
 
     def load_installer(self):
         base_controller = BaseController(router=self)

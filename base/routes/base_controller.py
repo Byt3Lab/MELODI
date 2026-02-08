@@ -4,7 +4,7 @@ from base.services import UserService
 class BaseController(WebController):
     def load(self):
         self.message = "BaseController initialized"
-        user_service = UserService(module=self.module)
+        self.user_service = UserService(module=self.module)
 
     async def login(self):
         req = self.router.get_request()  # Example of accessing session
@@ -16,8 +16,7 @@ class BaseController(WebController):
             username = form.get("username")
             password = form.get("password")
 
-            user_service = UserService(module=self.module)
-            user_has_auth = await user_service.authenticate(username=username, password=password)
+            user_has_auth = await self.user_service.authenticate(username=username, password=password)
             
             if user_has_auth:
                 import json
@@ -79,11 +78,11 @@ class BaseController(WebController):
             return await self.router.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
 
     async def settings_home_page_on(self, home_page):
-        self.home_page_service.on(home_page)
+        self.app.home_page_manager.on(home_page)
         return self.router.redirect("/admin/settings/home_page")
     
     async def settings_home_page_clear(self):
-        self.home_page_service.clear()
+        self.app.home_page_manager.clear()
         return self.router.redirect("/admin/settings/home_page")
 
     async def admin_modules(self):
@@ -104,7 +103,7 @@ class BaseController(WebController):
 
     async def home(self): 
         home_page = await self.app.home_page_manager.render_home_page() 
-        
+
         if home_page: 
             return home_page
 

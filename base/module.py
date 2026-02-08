@@ -41,9 +41,10 @@ class Base(ApplicationModule):
         self.register_widget("base_widget", self.base_widget)
 
         self.register_middlewares({
-            "user_is_auth": self.user_is_auth_middleware,
-            "user_is_not_auth": self.user_is_not_auth_middleware,
-            "api_user_is_auth": self.api_user_is_auth_middleware,
+            "auth_required": self.auth_required_middleware,
+            "guest_only": self.guest_only_middleware,
+            "api_auth_required": self.api_auth_required_middleware,
+            "api_guest_only": self.api_guest_only_middleware,
             "deny_iframe": self.deny_iframe_middelware,
             "check_maintenance": self.check_maintenance_middleware
         })
@@ -55,13 +56,20 @@ class Base(ApplicationModule):
     def base_widget(self):
         return "<div><h3>Base Widget</h3><p>This is a sample widget from the Base module.</p></div>"
     
-    def user_is_auth_middleware(self,router:WebRouter):
+    def auth_required_middleware(self,router:WebRouter):
         user = router.get_session("user_payload")
         if not user:
             return router.redirect("/login") 
         payload = json.loads(user)
-        
-    def api_user_is_auth_middleware(self,router:APIRouter):
+        router.set_scope_attr("user_payload", payload)
+
+    def guest_only_middleware(self, router:WebRouter):
+        user = router.get_session("user_payload")
+
+        if user:
+            return router.redirect("/")
+            
+    def api_auth_required_middleware(self,router:APIRouter):
         payload = None
 
         user = router.get_session("user_payload")
@@ -78,15 +86,19 @@ class Base(ApplicationModule):
             payload = router.jwt_decode(jwt_token)
             
             if payload:
+                router.set_scope_attr("user_payload", payload)
                 return None
             
         return router.render_json({"error": "Unauthorized"}, status_code=401)
         
-    def user_is_not_auth_middleware(self, router:WebRouter):
+    def api_guest_only_middleware(self, router:APIRouter):
         user = router.get_session("user_payload")
 
         if user:
-            return router.redirect("/")
+            return router.render_json({"error": "Unauthorized"}, status_code=400)
+        
+        if router.get_header("Authorization"):
+            return router.render_json({"error": "Unauthorized"}, status_code=400)
         
     def deny_iframe_middelware(self,response: Response) -> Response:
         response.headers['X-Frame-Options'] = 'DENY'

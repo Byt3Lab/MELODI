@@ -14,7 +14,7 @@ class BaseApiRoutes(APIRouter):
         base_api_controller = BaseAPIController(router=self)
         base_api_controller.load()
 
-        self.add_route(path="/login", methods=["POST"])(base_api_controller.login)
+        self.add_route(path="/login", methods=["POST"], before_request=[self.get_middleware("api_guest_only")])(base_api_controller.login)
 
         routes = [
             {"path": "/status", "methods": ["GET"], "handler": self.status},
@@ -32,7 +32,7 @@ class BaseApiRoutes(APIRouter):
             {"path": "/<path:path>", "methods": ["GET"], "handler": self.not_found},
         ]
 
-        self.add_many_routes(routes, before_request=[self.get_middleware("api_user_is_auth")])
+        self.add_many_routes(routes, before_request=[self.get_middleware("api_auth_required")])
 
     def load_installer(self):
         self.before_request()(self.get_middleware("check_maintenance"))

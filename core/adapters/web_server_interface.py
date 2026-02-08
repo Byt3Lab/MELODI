@@ -26,11 +26,7 @@ class WebServerInterface(ABC):
         pass
 
     @abstractmethod
-    def set_request_context(self, callback=None):
-        pass
-    @abstractmethod
-    def get_request_context(self):
-        pass
+    
     @abstractmethod
     def before_request(self):
         pass

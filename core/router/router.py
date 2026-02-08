@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 if TYPE_CHECKING:
     from core import Application
     from core.module import Module
-    from .request_context import RequestContext
 class Router:
     def __init__(self, app:Application, name:str, module:Module|None = None):
         self.app = app
@@ -210,13 +209,31 @@ class Router:
     def set_request_context(self,callback=None):
         self.app.server.set_request_context(callback=callback)
 
-    def get_request_context(self)-> RequestContext:
-        return self.app.server.get_request_context()
-    
     def get_request(self):
         from quart import request
         return request
     
+    def get_scope_attr(self, key: str, default = None, module_name: str | None = None):
+        """Récupère une donnée injectée dans le scope ASGI par le coeur de l'ERP."""
+
+        if module_name is None:
+            module_name = self.module.dirname   
+        
+        key = f"melodi.module.{module_name}.key.{key}"
+
+        return self.get_request().scope.get(key, default)
+    
+    def set_scope_attr(self, key:str, value, module_name:str|None=None):
+        request = self.get_request()
+
+        if module_name is None:
+            module_name = self.module.dirname
+
+        key = f"melodi.module.{module_name}.key.{key}"
+
+        if request:
+            request.scope[key] = value
+
     def get_router(self):
         return self.router
 

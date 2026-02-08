@@ -1,7 +1,6 @@
 # adapters/quart_adapter.py
-from quart import Quart, Blueprint, send_from_directory, Request, g
+from quart import Quart, Blueprint, send_from_directory, Request
 from .web_server_interface import WebServerInterface
-from core.router import RequestContext
 
 class QuartAdapter(WebServerInterface):
     def __init__(self):
@@ -55,18 +54,3 @@ class QuartAdapter(WebServerInterface):
 
     def add_error_handler(self, error_code, handler):
         pass
-
-    def set_request_context(self, callback=None):
-        ctx = self.get_request_context()    
-            
-        if not isinstance(ctx, Request):
-            g.ctx = RequestContext()
-            ctx = g.ctx
-
-        if callable(callback):
-            g.ctx = callback(ctx)
-    
-    def get_request_context(self) -> RequestContext | None: 
-        if hasattr(g, "ctx"):  
-            return g.ctx
-        return RequestContext()

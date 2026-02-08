@@ -3,7 +3,7 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"> -->
+
 <style>
     :root {
         --sidebar-width: 280px;
@@ -262,9 +262,10 @@
 {% endblock %}
 
 {% set user={} %}
+{% set theme="light" %}
+
 {% block content %}
 <div class="admin-wrapper">
-
     <!-- Mobile Sidebar (Offcanvas) -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
         <div class="offcanvas-header border-bottom border-secondary">
@@ -285,7 +286,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
                             style="font-size: 0.7rem; letter-spacing: 1px;">Gestion</div>
                     </li>
                     <li class="nav-item">
@@ -301,7 +302,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
                             style="font-size: 0.7rem; letter-spacing: 1px;">Système</div>
                     </li>
                     <li class="nav-item">
@@ -326,7 +327,7 @@
                     </div>
                     <div class="d-flex flex-column">
                         <span class="fw-medium text-white" style="font-size: 0.9rem;">{{ user.username }}</span>
-                        <span class="text-muted" style="font-size: 0.75rem;">Administrateur</span>
+                        <span class="" style="font-size: 0.75rem;">Administrateur</span>
                     </div>
                 </a>
             </div>
@@ -350,7 +351,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                    <div class="text-uppercase small fw-bold  mt-3 mb-2 px-3"
                         style="font-size: 0.7rem; letter-spacing: 1px;">Gestion</div>
                 </li>
 
@@ -368,7 +369,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <div class="text-uppercase small fw-bold text-muted mt-3 mb-2 px-3"
+                    <div class="text-uppercase small fw-bold  mt-3 mb-2 px-3"
                         style="font-size: 0.7rem; letter-spacing: 1px;">Système</div>
                 </li>
 
@@ -395,7 +396,7 @@
                 </div>
                 <div class="d-flex flex-column">
                     <span class="fw-medium text-white" style="font-size: 0.9rem;">{{ user.username }}</span>
-                    <span class="text-muted" style="font-size: 0.75rem;">Administrateur</span>
+                    <span class="" style="font-size: 0.75rem;">Administrateur</span>
                 </div>
             </a>
         </div>
@@ -437,7 +438,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
                         <li>
-                            <div class="dropdown-header">Connecté en tant que <strong>{{ user.username }}</strong></div>
+                            <div class="dropdown-header"><strong>{{ user.username }} gomsu gaetant</strong></div>
                         </li>
                         <li>
                             <hr class="dropdown-divider">
@@ -475,7 +476,4 @@
         </footer>
     </div>
 </div>
-
-<!-- Bootstrap bundle (includes Offcanvas JS) -->
-<script src="{{ url_for('static', filename='base/bootstrap-5/js/bootstrap.bundle.min.js') }}"></script>
 {% endblock %}
