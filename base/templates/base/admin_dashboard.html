@@ -4,51 +4,113 @@
 
 {% block admin_content %}
 
-<div class="container-fluid">
-
-  {% for mod in widgets %}
-
-    <!-- Section du module -->
-    <div class="mb-4">
-
-      <div class="p-3 bg-white shadow-sm rounded mb-3">
-        <h5 class="m-0">
-          <span class="text-primary">Module :</span>
-          <strong>{{ mod }}</strong>
-        </h5>
-      </div>
-
-      <div class="row g-3">
-
-        {% for name in widgets[mod] %}
-        
-          <div class="col-12 col-md-6 col-lg-4">
-            <div class="card shadow-sm h-100">
-
-              <div class="card-body">
-
-                <!-- Nom du widget -->
-                <h6 class="card-title mb-2">
-                  <strong>{{ name }}</strong>
-                </h6>
-
-                <!-- Le widget généré (safe) -->
-                <div class="widget-container mt-2">
-                  {{ widgets[mod][name]['widget'] | safe }}
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-        {% endfor %}
-
-      </div>
-
+<div class="container-fluid py-4">
+  <!-- Dashboard Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="mb-1 text-dark fw-bold">Tableau de Bord</h4>
+      <p class="text-muted mb-0 small">Aperçu général de votre application</p>
     </div>
+    <a href="/admin/settings/widgets" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+      <i class="fas fa-sliders-h me-2"></i>Personnaliser
+    </a>
+  </div>
 
-  {% endfor %}
+  <!-- Widgets Grid -->
+  <div id="dashboard-widgets-container">
+    {% for mod in widgets %}
+    {% for name in widgets[mod] %}
+    <div class="widget-item" data-widget-id="{{ mod }}::{{ name }}" style="display: none;">
+      <!-- Hidden by default, shown by JS if enabled -->
+      <div class="h-100 position-relative">
+        <!-- Module Badge (Optional, for context) -->
+        <div class="position-absolute top-0 end-0 mt-n2 me-2 z-index-1">
+          <span class="badge bg-white text-muted shadow-sm border" style="font-size: 0.65rem; opacity: 0.9;">
+            {{ mod }}
+          </span>
+        </div>
 
+        <!-- Render Widget Content -->
+        {{ widgets[mod][name]['widget'] | safe }}
+      </div>
+    </div>
+    {% endfor %}
+    {% endfor %}
+  </div>
+
+  <!-- Empty State (Hidden by default) -->
+  <div id="dashboard-empty-state" class="text-center py-5 d-none">
+    <div class="mb-3 text-muted opacity-50">
+      <i class="fas fa-th-large fa-3x"></i>
+    </div>
+    <h5 class="text-muted">Aucun widget visible</h5>
+    <p class="text-muted small mb-3">Personnalisez votre tableau de bord pour afficher des données.</p>
+    <a href="/admin/settings/widgets" class="btn btn-primary btn-sm rounded-pill">
+      Gérer les widgets
+    </a>
+  </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('dashboard-widgets-container');
+    const emptyState = document.getElementById('dashboard-empty-state');
+    const widgetItems = document.querySelectorAll('.widget-item');
+
+    // Load preferences
+    const prefs = JSON.parse(localStorage.getItem('melodi_dashboard_prefs') || '{}');
+    let visibleCount = 0;
+
+    widgetItems.forEach(item => {
+      const widgetId = item.getAttribute('data-widget-id');
+      // Default to visible if not in prefs (undefined is treated as true for new users)
+      const isVisible = prefs[widgetId] !== false;
+
+      if (isVisible) {
+        item.style.display = 'block';
+        // Add fade-in animation
+        item.style.opacity = '0';
+        item.style.animation = 'fadeIn 0.4s ease forwards';
+        visibleCount++;
+      } else {
+        item.style.removeProperty('display');
+        item.classList.add('d-none');
+      }
+    });
+
+    // Show empty state if no widgets
+    if (visibleCount === 0) {
+      container.classList.add('d-none');
+      emptyState.classList.remove('d-none');
+    }
+
+    // Save default state for all widgets if storage was empty
+    if (Object.keys(prefs).length === 0) {
+      const initialPrefs = {};
+      widgetItems.forEach(item => {
+        initialPrefs[item.getAttribute('data-widget-id')] = true;
+      });
+      localStorage.setItem('melodi_dashboard_prefs', JSON.stringify(initialPrefs));
+    }
+  });
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .widget-item {
+    transition: all 0.3s ease;
+  }
+</style>
 
 {% endblock %}
