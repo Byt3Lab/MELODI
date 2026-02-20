@@ -84,24 +84,6 @@ class Module:
     def get_api_router(self)->APIRouter:
         return self.api_router
     
-    def register_service(self, name_service:str|None=None):
-        def decorator (func):
-            name_module = self.dirname
-            ns = name_service
-
-            if callable(func):
-                if not ns:
-                    ns = func.__name__
-                    self.app.service_manager.register(name_module, ns, func)
-                    return
-                self.app.service_manager.register(name_module, ns, func)
-                return
-            
-            if ns:
-                self.app.service_manager.register(name_module, ns, func)
-
-        return  decorator
-    
     def register_widget(self, name_widget:str|None=None, infos={}):
         def decorator (func):
             if callable(func):
@@ -143,5 +125,7 @@ class Module:
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         if self.translation == None:
             return {}
-        
         return self.translation.translate(filename, keys, lang)
+    
+    def run_background_task(self, func:Callable, *args, **kwargs):
+        self.app.server.app.add_background_task(func, *args, **kwargs)

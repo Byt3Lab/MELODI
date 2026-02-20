@@ -3,11 +3,12 @@ from core.utils import TimerManager, EventListener, MiddlewareManager, path_exis
 from core.component import HomePageManager, MenuItemManager, WidgetManager
 from core.module import ModuleManager
 from core.adapters.quart_adapter import QuartAdapter
-from core.service import ServiceManager
 from core.db import DataBase
 from core.config import Config
 from core.file_management import Storage
 from core.cache import Cache
+from core.utils import HookManager
+from core.utils import ActionManager
 class Application:
     def __init__(self):
         self.server = QuartAdapter()
@@ -15,24 +16,27 @@ class Application:
 
     def init(self):
         self.config = Config()
-        self.event_listener = EventListener()
-        self.timer_manager = TimerManager()
         self.db = DataBase(self)
         self.router = WebRouter(name="main", app=self, module=None)
         self.api_router = APIRouter(app=self, name="main_api")
+        
+        self.event_listener = EventListener()
+        self.timer_manager = TimerManager()
         self.module_manager = ModuleManager(app=self)
-        self.service_manager = ServiceManager(app=self)
         self.widget_manager = WidgetManager(app=self)
         self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
+        self.hook_manager = HookManager()
+        self.action_manager = ActionManager()
         self.middleware_manager = MiddlewareManager()
+
         # self.storage = Storage(app=self)
         self.app_is_installed = self.config.is_installed()
         self.user_sudo_exist = False
         self.cache = Cache()
         
         self.server.app.secret_key = self.config.secret_key
-
+        
         self.server.app.before_serving(self.build)
         
     async def restart(self):

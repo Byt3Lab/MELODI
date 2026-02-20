@@ -114,3 +114,6 @@ class BaseController(WebController):
     
     async def install(self):
         return await self.router.render_template("install/install.html")
+
+    async def notifications(self):
+        return await self.router.render_template("admin_notifications.html")

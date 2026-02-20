@@ -328,3 +328,6 @@ class Router:
         except:
             # log
             return response
+        
+    def run_background_task(self, func:Callable, *args, **kwargs):
+        self.module.run_background_task(func, *args, **kwargs)

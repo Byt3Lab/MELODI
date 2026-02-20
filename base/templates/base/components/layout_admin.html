@@ -540,4 +540,25 @@
         }
     });
 </script>
+
+<script>
+    // Connexion au serveur
+    const socket = new WebSocket('/ws/notifications');
+
+    // ÉCOUTER : Quand le serveur envoie quelque chose
+    socket.onmessage = (event) => {
+        console.log("Reçu de Quart :", event.data);
+    };
+
+    socket.onopen = () => {
+        console.log("Connecté !");
+        socket.send("hellooo"); // ✅ OK ici
+
+        setTimeout(() => {
+            socket.send("Message après 5 secondes");
+        }, 5000);
+    };
+    
+
+</script>
 {% endblock %}

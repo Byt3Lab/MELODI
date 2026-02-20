@@ -40,10 +40,25 @@ class BaseRoutes(WebRouter):
                             {"path": "/<path:mod>/on", "methods": ["GET"], "handler": base_controller.on_module}
                         ]
                     },
+                    {"path:": "/notifications", "methods": ["GET"], "handler": base_controller.notifications},
                     {"path": "/logs", "methods": ["GET"], "handler": base_controller.logs}
                 ]
             }
-        ], before_request=[self.get_middleware("auth_required")])
+        ], before_request=[self.get_middleware("auth_required")]) # self.get_middleware("admin_only")])
+
+        from quart import websocket
+        @self.app.server.app.websocket("/ws/notifications")
+        async def admin_notifications_websocket():
+            while True:
+                try:
+                    # Keep the connection alive
+                    msg = await websocket.receive()
+                    print(f"Received message on admin notifications websocket: {msg}")
+
+                    await websocket.send("pong")
+                except Exception as e:
+                    print(f"Websocket connection closed: {e}")
+                    break  
 
     def load_installer(self):
         base_controller = BaseController(router=self)

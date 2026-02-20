@@ -46,7 +46,9 @@ class Base(ApplicationModule):
             "api_auth_required": self.api_auth_required_middleware,
             "api_guest_only": self.api_guest_only_middleware,
             "deny_iframe": self.deny_iframe_middelware,
-            "check_maintenance": self.check_maintenance_middleware
+            "check_maintenance": self.check_maintenance_middleware,
+            "admin_only": self.admin_only_middleware,
+            "api_admin_only": self.api_admin_only_middleware,
         })
 
     def add_404_not_found(self):
@@ -99,6 +101,18 @@ class Base(ApplicationModule):
         
         if router.get_header("Authorization"):
             return router.render_json({"error": "Unauthorized"}, status_code=400)
+        
+    def admin_only_middleware(self, router:WebRouter):
+        user = router.get_scope_attr("user_payload")
+
+        if not user or user.get("role") != "admin":
+            return router.redirect("/")
+
+    def api_admin_only_middleware(self, router:APIRouter):
+        user = router.get_scope_attr("user_payload")
+
+        if not user or user.get("role") != "admin":
+            return router.render_json({"error": "Unauthorized"}, status_code=403)
         
     def deny_iframe_middelware(self,response: Response) -> Response:
         response.headers['X-Frame-Options'] = 'DENY'
