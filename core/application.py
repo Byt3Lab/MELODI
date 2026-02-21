@@ -9,6 +9,8 @@ from core.file_management import Storage
 from core.cache import Cache
 from core.utils import HookManager
 from core.utils import ActionManager
+from core.websocket import WebSocketManager
+from core.email import EmailManager
 class Application:
     def __init__(self):
         self.server = QuartAdapter()
@@ -29,6 +31,8 @@ class Application:
         self.hook_manager = HookManager()
         self.action_manager = ActionManager()
         self.middleware_manager = MiddlewareManager()
+        self.websocket_manager = WebSocketManager(app=self)
+        self.email_manager = EmailManager(app=self)
 
         # self.storage = Storage(app=self)
         self.app_is_installed = self.config.is_installed()
@@ -38,7 +42,8 @@ class Application:
         self.server.app.secret_key = self.config.secret_key
         
         self.server.app.before_serving(self.build)
-        
+        self.server.app.before_serving(self.websocket_manager.start)
+
     async def restart(self):
         import sys
         import os

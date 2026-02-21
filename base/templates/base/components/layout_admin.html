@@ -543,12 +543,7 @@
 
 <script>
     // Connexion au serveur
-    const socket = new WebSocket('/ws/notifications');
-
-    // ÉCOUTER : Quand le serveur envoie quelque chose
-    socket.onmessage = (event) => {
-        console.log("Reçu de Quart :", event.data);
-    };
+    const socket = new WebSocket('ws://' + window.location.host + '/ws?token=votre_token_ici');
 
     socket.onopen = () => {
         console.log("Connecté !");
@@ -557,6 +552,11 @@
         setTimeout(() => {
             socket.send("Message après 5 secondes");
         }, 5000);
+
+         // ÉCOUTER : Quand le serveur envoie quelque chose
+        socket.onmessage = (event) => {
+            console.log("Reçu de Quart :", event.data);
+        };
     };
     
 
