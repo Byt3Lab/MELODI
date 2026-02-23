@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import asyncio
+import inspect
+import json
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Callable, Coroutine, Optional, TYPE_CHECKING
 
 from quart import Websocket
 
@@ -12,6 +15,11 @@ if TYPE_CHECKING:
     from core import Application
 
 logger = logging.getLogger(__name__)
+
+# Type alias for a WebSocket handler function.
+# It receives the parsed params dict and the connected Client,
+# and must return a JSON-serialisable value (or a coroutine that does).
+WsHandler = Callable[[dict, "Client"], Coroutine[Any, Any, Any]]
 
 
 class Client:
@@ -35,10 +43,14 @@ class WebSocketManager:
 
     BROADCAST_CHANNEL = "ws"
 
-    def __init__(self, app: "Application", provider: SocketProviderInterface, rule: str = "/ws") -> None:
+    def __init__(self, app: "Application", provider: SocketProviderInterface|None = None, rule: str = "/ws") -> None:
+        if provider is None:
+            provider = LocalProvider()
         self.app = app
         self.provider = provider
         self.rule = rule
+        # Registry: { module_name: { function_name: handler } }
+        self._registry: dict[str, dict[str, WsHandler]] = {}
 
     # ------------------------------------------------------------------
     # Connection lifecycle
@@ -85,6 +97,90 @@ class WebSocketManager:
         await self.send_to(client_id, message)
 
     # ------------------------------------------------------------------
+    # Function registry
+    # ------------------------------------------------------------------
+
+    def register_function(self, module_name: str, function_name: str, handler: WsHandler) -> None:
+        """Register *handler* under *module_name* / *function_name*.
+
+        Called by :meth:`Module.register_ws_function` — you rarely need to
+        call this directly.
+        """
+        if module_name not in self._registry:
+            self._registry[module_name] = {}
+        self._registry[module_name][function_name] = handler
+        print(f"DEBUG: WS function registered: {module_name}.{function_name}")
+        logger.debug("WS function registered: %s.%s", module_name, function_name)
+
+    # ------------------------------------------------------------------
+    # Message dispatching
+    # ------------------------------------------------------------------
+
+    async def _dispatch(self, raw: str, client: "Client") -> None:
+        """Parse *raw* JSON and call the registered handler.
+
+        Expected message format::
+
+            {
+                "id":       "<unique-message-id>",   # echoed back in the response
+                "module":   "<module_name>",
+                "function": "<function_name>",
+                "params":   { ... }                  # key-value pairs
+            }
+
+        Response format (always sent back to the calling client)::
+
+            {
+                "id":     "<same-message-id>",
+                "status": "ok" | "error",
+                "result": <handler return value>  # only on success
+                "error":  "<message>"             # only on error
+            }
+        """
+        msg_id: str | None = None
+        try:
+            payload: dict = json.loads(raw)
+            msg_id   = payload.get("id")
+            module   = payload.get("module")
+            function = payload.get("function")
+            params   = payload.get("params", {})
+
+            if not msg_id:
+                raise ValueError("Missing required field 'id'.")
+            if not module:
+                raise ValueError("Missing required field 'module'.")
+            if not function:
+                raise ValueError("Missing required field 'function'.")
+            if not isinstance(params, dict):
+                raise ValueError("Field 'params' must be a JSON object.")
+
+            module_handlers = self._registry.get(module)
+            if module_handlers is None:
+                print(f"DEBUG: WS registry keys: {list(self._registry.keys())}")
+                print(f"DEBUG: WS requested module: {module}")
+                raise LookupError(f"Module '{module}' not found in registry.")
+
+            handler = module_handlers.get(function)
+            if handler is None:
+                raise LookupError(f"Function '{function}' not registered for module '{module}'.")
+
+            if inspect.iscoroutinefunction(handler):
+                result = await handler(params, client)
+            else:
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(None, lambda: handler(params, client))
+            response = json.dumps({"id": msg_id, "status": "ok", "result": result})
+
+        except (json.JSONDecodeError, ValueError, LookupError) as exc:
+            logger.warning("WS dispatch error from %s: %s", client.id, exc)
+            response = json.dumps({"id": msg_id, "status": "error", "error": str(exc)})
+        except Exception as exc:
+            logger.exception("Unhandled WS handler error for %s", client.id)
+            response = json.dumps({"id": msg_id, "status": "error", "error": "Internal server error."})
+
+        await self.send_to(client.id, response)
+
+    # ------------------------------------------------------------------
     # Request handler
     # ------------------------------------------------------------------
 
@@ -100,7 +196,7 @@ class WebSocketManager:
             while True:
                 msg = await websocket.receive()
                 logger.debug("Received from %s: %s", client.id, msg)
-                await websocket.send("pong")
+                await self._dispatch(msg, client)
         except Exception as exc:
             logger.debug("WebSocket closed for %s: %s", client.id, exc)
         finally:

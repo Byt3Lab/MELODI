@@ -3,6 +3,7 @@
 {% block head %}
 {{ super() }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="/static/base/websocket/websocket_manager.js"></script>
 
 <style>
     :root {
@@ -460,7 +461,15 @@
                 <input type="text" class="form-control" placeholder="Rechercher...">
             </div>
 
-            <div class="ms-auto d-flex align-items-center gap-2 header-actions">
+            <div class="ms-auto d-flex align-items-center gap-3 header-actions">
+                <!-- WebSocket Status Indicator -->
+                <div id="ws-status" class="d-flex align-items-center gap-2 px-2 py-1 rounded-pill bg-light border"
+                    title="WebSocket Status">
+                    <span class="ws-dot"
+                        style="width: 8px; height: 8px; border-radius: 50%; background-color: #94a3b8; display: inline-block;"></span>
+                    <span class="ws-text small text-muted fw-medium" style="font-size: 0.7rem;">Connecting...</span>
+                </div>
+
                 <button class="btn btn-icon position-relative">
                     <i class="far fa-bell"></i>
                     <span
@@ -542,23 +551,97 @@
 </script>
 
 <script>
-    // Connexion au serveur
-    const socket = new WebSocket('ws://' + window.location.host + '/ws?token=votre_token_ici');
+    /**
+     * MELODI WebSocket Example Implementation
+     * This demonstrates how to use the global wsManager to:
+     * 1. Connect to the backend
+     * 2. Listen for connection status changes
+     * 3. Update the UI accordingly
+     */
+    (function () {
+        if (!window.wsManager) {
+            console.error("WebSocketManager not found! Make sure the script is included.");
+            return;
+        }
 
-    socket.onopen = () => {
-        console.log("Connecté !");
-        socket.send("hellooo"); // ✅ OK ici
+        const wsStatus = document.getElementById('ws-status');
+        const dot = wsStatus?.querySelector('.ws-dot');
+        const text = wsStatus?.querySelector('.ws-text');
 
-        setTimeout(() => {
-            socket.send("Message après 5 secondes");
-        }, 5000);
+        function updateStatus(status) {
+            if (!dot || !text) return;
 
-         // ÉCOUTER : Quand le serveur envoie quelque chose
-        socket.onmessage = (event) => {
-            console.log("Reçu de Quart :", event.data);
+            switch (status) {
+                case 'open':
+                    dot.style.backgroundColor = '#22c55e'; // Green
+                    text.innerText = 'Online';
+                    text.className = 'ws-text small text-success fw-medium';
+                    break;
+                case 'close':
+                    dot.style.backgroundColor = '#ef4444'; // Red
+                    text.innerText = 'Offline';
+                    text.className = 'ws-text small text-danger fw-medium';
+                    break;
+                case 'error':
+                    dot.style.backgroundColor = '#f59e0b'; // Amber
+                    text.innerText = 'Error';
+                    text.className = 'ws-text small text-warning fw-medium';
+                    break;
+                default:
+                    dot.style.backgroundColor = '#94a3b8'; // Muted
+                    text.innerText = 'Connecting...';
+                    text.className = 'ws-text small text-muted fw-medium';
+            }
+        }
+
+        // Initialize connection
+        window.wsManager.connect();
+
+        // Status Listeners
+        window.wsManager.on('open', async () => {
+            console.log("[App] WebSocket connected and ready.");
+            updateStatus('open');
+
+            // --- CONCRETE EXAMPLE ---
+            // Let's call the 'ping' function in the 'base' module
+            try {
+                const response = await window.wsManager.call('base', 'ping', {
+                    client_time: new Date().toISOString(),
+                    context: "admin_layout_init"
+                });
+                console.log("[App] RPC Ping success:", response);
+            } catch (err) {
+                console.error("[App] RPC Ping failed:", err.message);
+            }
+        });
+
+        window.wsManager.on('close', () => {
+            console.warn("[App] WebSocket connection lost.");
+            updateStatus('close');
+        });
+
+        window.wsManager.on('error', (err) => {
+            console.error("[App] WebSocket error:", err);
+            updateStatus('error');
+        });
+
+        // Example: Listen for broadcast messages
+        window.wsManager.on('message', (msg) => {
+            console.log("[App] New broadcast message:", msg);
+        });
+
+        // Developer Helper: Global helper to test RPC calls from console
+        window.testWS = async (module, func, params = {}) => {
+            console.log(`[Test] Calling ${module}.${func}...`);
+            try {
+                const result = await window.wsManager.call(module, func, params);
+                console.log("[Test] Result:", result);
+                return result;
+            } catch (e) {
+                console.error("[Test] RPC Error:", e.message);
+                throw e;
+            }
         };
-    };
-    
-
+    })();
 </script>
 {% endblock %}

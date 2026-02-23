@@ -129,3 +129,51 @@ class Module:
     
     def run_background_task(self, func:Callable, *args, **kwargs):
         self.app.server.app.add_background_task(func, *args, **kwargs)
+
+
+    # ------------------------------------------------------------------
+    # WebSocket function registry
+    # ------------------------------------------------------------------
+
+    def register_ws_function(self, function_name: str | None = None):
+        """Decorator to register an async function as a WebSocket handler.
+
+        The function will be callable by any connected client using the
+        following JSON message format::
+
+            {
+                "id":       "<unique-message-id>",
+                "module":   "<this module dirname>",
+                "function": "<function_name>",
+                "params":   { ... }
+            }
+
+        The handler signature must be::
+
+            async def my_handler(params: dict, client: Client) -> Any: ...
+
+        Example usage inside a module::
+
+            @self.register_ws_function()
+            async def get_info(params: dict, client) -> dict:
+                return {"version": "1.0"}
+
+            @self.register_ws_function("custom_name")
+            async def some_func(params: dict, client) -> str:
+                return "done"
+        """
+        def decorator(func: Callable) -> Callable:
+            name = function_name if function_name else func.__name__
+            ws_manager = getattr(self.app, "websocket_manager", None)
+            if ws_manager is None:
+                raise RuntimeError(
+                    "No WebSocket manager (app.websocket_manager) found. "
+                    "Make sure to initialise the WebSocketManager before registering WS functions."
+                )
+            if not self.dirname:
+                print(f"WARNING: Module {self.name} is registering WS function {name} with EMPTY dirname!")
+            
+            print(f"DEBUG: Module {self.name} registering WS function {name} with dirname='{self.dirname}'")
+            ws_manager.register_function(self.dirname, name, func)
+            return func
+        return decorator

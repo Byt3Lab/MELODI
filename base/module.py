@@ -5,6 +5,7 @@ from core.utils import join_paths
 import json
 class Base(ApplicationModule):
     async def load(self):
+        print(f"DEBUG: Base module load() called on instance {id(self)}")
         self.init_load()
         from base.routes import BaseRoutes, BaseApiRoutes
 
@@ -20,6 +21,7 @@ class Base(ApplicationModule):
         super().load()
     
     async def load_installer(self):
+        print(f"DEBUG: Base module load_installer() called on instance {id(self)}")
         self.init_load()
 
         from base.routes import BaseRoutes, BaseApiRoutes
@@ -39,6 +41,10 @@ class Base(ApplicationModule):
         self.add_404_not_found()
 
         self.register_widget("base_widget", self.base_widget)
+
+        @self.register_ws_function()
+        async def ping(params, client):
+            return {"message": "pong", "received": params}
 
         self.register_middlewares({
             "auth_required": self.auth_required_middleware,
