@@ -126,7 +126,7 @@ class WebSocketManager {
                 const { resolve, reject, timeout } = this._pendingCalls.get(message.id);
                 clearTimeout(timeout);
                 this._pendingCalls.delete(message.id);
-
+                
                 if (message.status === "ok") {
                     resolve(message.result);
                 } else {

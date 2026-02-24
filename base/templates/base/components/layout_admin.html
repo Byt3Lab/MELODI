@@ -626,8 +626,13 @@
         });
 
         // Example: Listen for broadcast messages
-        window.wsManager.on('message', (msg) => {
+        window.wsManager.on('broadcast', (msg) => {
             console.log("[App] New broadcast message:", msg);
+        });
+
+        // Example: Listen for direct messages (from server to specific client)
+        window.wsManager.on('direct', (msg) => {
+            console.log("[App] New direct message:", msg);
         });
 
         // Developer Helper: Global helper to test RPC calls from console

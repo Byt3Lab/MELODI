@@ -73,10 +73,22 @@ class WebSocketManager:
 
     async def broadcast(self, message: str) -> None:
         """Send *message* to **all** connected clients (all nodes in Redis mode)."""
-        await self.provider.publish(self.BROADCAST_CHANNEL, message)
+        payload = json.dumps({
+            "type": "broadcast",
+            "result": message
+        })
+        await self.provider.publish(self.BROADCAST_CHANNEL, payload)
 
     async def send_to(self, client_id: str, message: str) -> None:
         """Send *message* to a specific client identified by *client_id*."""
+        payload = json.dumps({
+            "type": "direct",
+            "result": message
+        })
+        await self.provider.publish_to(client_id, payload)
+
+    async def send_response(self, client_id: str, message: str) -> None:
+        """Send a response message to a specific client (alias for send_to)."""
         await self.provider.publish_to(client_id, message)
 
     # ------------------------------------------------------------------
@@ -178,7 +190,7 @@ class WebSocketManager:
             logger.exception("Unhandled WS handler error for %s", client.id)
             response = json.dumps({"id": msg_id, "status": "error", "error": "Internal server error."})
 
-        await self.send_to(client.id, response)
+        await self.send_response(client.id, response)
 
     # ------------------------------------------------------------------
     # Request handler

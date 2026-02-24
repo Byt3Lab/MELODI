@@ -44,6 +44,17 @@ class Base(ApplicationModule):
 
         @self.register_ws_function()
         async def ping(params, client):
+            import asyncio
+
+            await asyncio.sleep(2)
+
+            # send broadcast message to all connected clients
+            await self.app.websocket_manager.broadcast(f"Ping received from client {client.id}")
+           
+            await asyncio.sleep(2)
+
+            await self.app.websocket_manager.send_to(client.id, f"Direct response to client {client.id}")
+
             return {"message": "pong", "received": params}
 
         self.register_middlewares({
