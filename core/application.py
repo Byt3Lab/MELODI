@@ -11,6 +11,8 @@ from core.utils import HookManager
 from core.utils import ActionManager
 from core.websocket import WebSocketManager
 from core.email import EmailManager
+from core.component.registry import Registry
+
 class Application:
     def __init__(self):
         self.server = QuartAdapter()
@@ -33,6 +35,7 @@ class Application:
         self.middleware_manager = MiddlewareManager()
         self.websocket_manager = WebSocketManager(app=self)
         self.email_manager = EmailManager(app=self)
+        self.registry = Registry(app=self)
 
         # self.storage = Storage(app=self)
         self.app_is_installed = self.config.is_installed()
@@ -40,6 +43,10 @@ class Application:
         self.cache = Cache()
         
         self.server.app.secret_key = self.config.secret_key
+        
+        @self.server.app.context_processor
+        async def inject_registry():
+            return dict(registry=self.registry)
         
         self.server.app.before_serving(self.build)
         self.server.app.before_serving(self.websocket_manager.start)

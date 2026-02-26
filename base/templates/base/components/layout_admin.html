@@ -320,44 +320,20 @@
             <!-- Mobile Menu Content - Same as Desktop -->
             <div class="sidebar-menu">
                 <ul class="nav flex-column">
+                    {% for item in registry.get_zone('navigation') %}
                     <li class="nav-item">
-                        <a href="/admin" class="nav-link {% if request.path == '/admin' %}active{% endif %}">
-                            <i class="fas fa-chart-pie"></i>
-                            <span>Tableau de bord</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
+                        {% if item.type == 'header' %}
                         <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
-                            style="font-size: 0.7rem; letter-spacing: 1px;">Gestion</div>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/admin/users" class="nav-link {% if 'users' in request.path %}active{% endif %}">
-                            <i class="fas fa-users"></i>
-                            <span>Utilisateurs</span>
+                            style="font-size: 0.7rem; letter-spacing: 1px;">{{ item.label }}</div>
+                        {% else %}
+                        <a href="{{ item.url }}"
+                            class="nav-link {% if request.path == item.url or (item.url != '/admin' and item.url in request.path) %}active{% endif %}">
+                            <i class="{{ item.icon }}"></i>
+                            <span>{{ item.label }}</span>
                         </a>
+                        {% endif %}
                     </li>
-                    <li class="nav-item">
-                        <a href="/admin/modules" class="nav-link {% if 'modules' in request.path %}active{% endif %}">
-                            <i class="fas fa-cubes"></i>
-                            <span>Modules</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
-                            style="font-size: 0.7rem; letter-spacing: 1px;">Système</div>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/admin/settings" class="nav-link {% if 'settings' in request.path %}active{% endif %}">
-                            <i class="fas fa-cog"></i>
-                            <span>Paramètres</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/admin/logs" class="nav-link {% if 'logs' in request.path %}active{% endif %}">
-                            <i class="fas fa-list-alt"></i>
-                            <span>Journaux</span>
-                        </a>
-                    </li>
+                    {% endfor %}
                 </ul>
             </div>
             <div class="sidebar-footer">
@@ -384,48 +360,20 @@
 
         <div class="sidebar-menu">
             <ul class="nav flex-column">
+                {% for item in registry.get_zone('navigation') %}
                 <li class="nav-item">
-                    <a href="/admin" class="nav-link {% if request.path == '/admin' %}active{% endif %}">
-                        <i class="fas fa-chart-pie"></i>
-                        <span>Tableau de bord</span>
+                    {% if item.type == 'header' %}
+                    <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
+                        style="font-size: 0.7rem; letter-spacing: 1px;">{{ item.label }}</div>
+                    {% else %}
+                    <a href="{{ item.url }}"
+                        class="nav-link {% if request.path == item.url or (item.url != '/admin' and item.url in request.path) %}active{% endif %}">
+                        <i class="{{ item.icon }}"></i>
+                        <span>{{ item.label }}</span>
                     </a>
+                    {% endif %}
                 </li>
-
-                <li class="nav-item">
-                    <div class="text-uppercase small fw-bold  mt-3 mb-2 px-3"
-                        style="font-size: 0.7rem; letter-spacing: 1px;">Gestion</div>
-                </li>
-
-                <li class="nav-item">
-                    <a href="/admin/users" class="nav-link {% if 'users' in request.path %}active{% endif %}">
-                        <i class="fas fa-users"></i>
-                        <span>Utilisateurs</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/admin/modules" class="nav-link {% if 'modules' in request.path %}active{% endif %}">
-                        <i class="fas fa-cubes"></i>
-                        <span>Modules</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <div class="text-uppercase small fw-bold  mt-3 mb-2 px-3"
-                        style="font-size: 0.7rem; letter-spacing: 1px;">Système</div>
-                </li>
-
-                <li class="nav-item">
-                    <a href="/admin/settings" class="nav-link {% if 'settings' in request.path %}active{% endif %}">
-                        <i class="fas fa-cog"></i>
-                        <span>Paramètres</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/admin/logs" class="nav-link {% if 'logs' in request.path %}active{% endif %}">
-                        <i class="fas fa-list-alt"></i>
-                        <span>Journaux</span>
-                    </a>
-                </li>
+                {% endfor %}
             </ul>
         </div>
 
@@ -462,13 +410,10 @@
             </div>
 
             <div class="ms-auto d-flex align-items-center gap-3 header-actions">
-                <!-- WebSocket Status Indicator -->
-                <div id="ws-status" class="d-flex align-items-center gap-2 px-2 py-1 rounded-pill bg-light border"
-                    title="WebSocket Status">
-                    <span class="ws-dot"
-                        style="width: 8px; height: 8px; border-radius: 50%; background-color: #94a3b8; display: inline-block;"></span>
-                    <span class="ws-text small text-muted fw-medium" style="font-size: 0.7rem;">Connecting...</span>
-                </div>
+                <!-- Dynamically injected StatusBar items -->
+                {% for item in registry.get_zone('statusbar') %}
+                {{ item.component | safe }}
+                {% endfor %}
 
                 <button class="btn btn-icon position-relative">
                     <i class="far fa-bell"></i>

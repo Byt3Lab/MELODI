@@ -130,6 +130,55 @@ class Module:
     def run_background_task(self, func:Callable, *args, **kwargs):
         self.app.server.app.add_background_task(func, *args, **kwargs)
 
+    # ------------------------------------------------------------------
+    # Contribution Registry (Plugin-Base architecture)
+    # ------------------------------------------------------------------
+
+    def register_contribution(self, zone: str, item: dict):
+        """Registers a raw dictionary configuration to a specific zone."""
+        if hasattr(self.app, 'registry'):
+            self.app.registry.register(zone, self.dirname, item)
+            
+    def register_navigation(self, label: str, icon: str, url: str, priority: int = 0):
+        """
+        Registers a navigation item (Sidebar)
+        - label: The display name (e.g. 'Tableau de bord')
+        - icon: FontAwesome classes (e.g. 'fas fa-chart-pie')
+        - url: The route to navigate to
+        - priority: Display order (higher appears first)
+        """
+        self.register_contribution("navigation", {
+            "label": label,
+            "icon": icon,
+            "url": url,
+            "priority": priority
+        })
+
+    def register_dashboard_widget(self, title: str, component: str, dimensions: dict = None, priority: int = 0):
+        """
+        Registers a widget to be rendered on the Dashboard.
+        - title: Name of the widget
+        - component: Component identifier or HTML generator
+        - dimensions: Dict for grid sizing, e.g. {"w": 4, "h": 2}
+        - priority: Display order
+        """
+        self.register_contribution("dashboard", {
+            "title": title,
+            "component": component,
+            "dimensions": dimensions or {},
+            "priority": priority
+        })
+
+    def register_statusbar_item(self, component: str, priority: int = 0):
+        """
+        Registers an item/widget to be rendered in the top Status Bar.
+        - component: The HTML/Widget to render
+        - priority: Display order
+        """
+        self.register_contribution("statusbar", {
+            "component": component,
+            "priority": priority
+        })
 
     # ------------------------------------------------------------------
     # WebSocket function registry

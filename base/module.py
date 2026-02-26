@@ -37,10 +37,33 @@ class Base(ApplicationModule):
 
     def init_load(self):
         self.init_translation("fr")
-
         self.add_404_not_found()
 
         self.register_widget("base_widget", self.base_widget)
+        
+        # ------------------------------------------------------------------
+        # Contribution Registry: Layout Injection
+        # ------------------------------------------------------------------
+        
+        # Navigation Zone (Sidebar)
+        self.register_contribution("navigation", {"type": "link", "label": "Tableau de bord", "icon": "fas fa-chart-pie", "url": "/admin", "priority": 100})
+        
+        self.register_contribution("navigation", {"type": "header", "label": "Gestion", "priority": 90})
+        self.register_contribution("navigation", {"type": "link", "label": "Utilisateurs", "icon": "fas fa-users", "url": "/admin/users", "priority": 80})
+        self.register_contribution("navigation", {"type": "link", "label": "Modules", "icon": "fas fa-cubes", "url": "/admin/modules", "priority": 70})
+        
+        self.register_contribution("navigation", {"type": "header", "label": "Système", "priority": 60})
+        self.register_contribution("navigation", {"type": "link", "label": "Paramètres", "icon": "fas fa-cog", "url": "/admin/settings", "priority": 50})
+        self.register_contribution("navigation", {"type": "link", "label": "Journaux", "icon": "fas fa-list-alt", "url": "/admin/logs", "priority": 40})
+
+        # StatusBar Zone (Top Admin Header)
+        ws_status_html = """
+        <div id="ws-status" class="d-flex align-items-center gap-2 px-2 py-1 rounded-pill bg-light border" title="WebSocket Status">
+            <span class="ws-dot" style="width: 8px; height: 8px; border-radius: 50%; background-color: #94a3b8; display: inline-block;"></span>
+            <span class="ws-text small text-muted fw-medium" style="font-size: 0.7rem;">Connecting...</span>
+        </div>
+        """
+        self.register_statusbar_item(component=ws_status_html, priority=100)
 
         @self.register_ws_function()
         async def ping(params, client):

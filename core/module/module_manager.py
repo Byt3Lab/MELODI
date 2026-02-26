@@ -247,6 +247,10 @@ class ModuleManager:
         self.modules_on.remove(name_module)
         self.set_file_modules_on()
 
+        # Unregister the module's contributions from the Registry
+        if hasattr(self.app, 'registry'):
+            self.app.registry.unregister(name_module)
+
         for depend in depends:
             try:
                 name = self.parse_module_name(depend).get("name", "")
