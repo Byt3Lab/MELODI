@@ -75,7 +75,7 @@ class WebSocketManager:
         """Send *message* to **all** connected clients (all nodes in Redis mode)."""
         payload = json.dumps({
             "type": "broadcast",
-            "result": message
+            "data": message
         })
         await self.provider.publish(self.BROADCAST_CHANNEL, payload)
 
@@ -83,7 +83,7 @@ class WebSocketManager:
         """Send *message* to a specific client identified by *client_id*."""
         payload = json.dumps({
             "type": "direct",
-            "result": message
+            "data": message
         })
         await self.provider.publish_to(client_id, payload)
 
