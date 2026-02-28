@@ -36,20 +36,7 @@ class BaseController(WebController):
         return await self.router.render_template("admin_logs.html")
 
     async def admin_dashboard(self):
-        widgets = self.app.widget_manager.list_widgets()
-        rendered_widgets = {}
-
-        for mod, mod_widgets in widgets.items():
-            rendered_widgets[mod] = {}
-            for name, widget_info in mod_widgets.items():
-                # Use WidgetManager.render to get the actual content (handles callables and coroutines)
-                content = await self.app.widget_manager.render(mod, name)
-                rendered_widgets[mod][name] = {
-                    "widget": content,
-                    "infos": widget_info.get("infos")
-                }
-
-        return await self.router.render_template("admin_dashboard.html", widgets=rendered_widgets)
+        return await self.router.render_template("admin_dashboard.html")
 
     async def admin_users(self):
         return await self.router.render_template("admin_users.html")
@@ -58,18 +45,7 @@ class BaseController(WebController):
         return await self.router.render_template("profile.html")
 
     async def settings_widgets(self):
-        widgets = self.app.widget_manager.list_widgets()
-        rendered_widgets = {}
-
-        for mod, mod_widgets in widgets.items():
-            rendered_widgets[mod] = {}
-            for name, widget_info in mod_widgets.items():
-                content = await self.app.widget_manager.render(mod, name)
-                rendered_widgets[mod][name] = {
-                    "widget": content,
-                    "infos": widget_info.get("infos")
-                }
-        return await self.router.render_template("admin_widgets.html", widgets=rendered_widgets)
+        return await self.router.render_template("admin_widgets.html")
 
     async def settings_home_page(self):
             home_page_on = self.app.home_page_manager.home_page_on

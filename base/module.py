@@ -39,22 +39,43 @@ class Base(ApplicationModule):
         self.init_translation("fr")
         self.add_404_not_found()
 
-        self.register_widget("base_widget", self.base_widget)
+        self.register_dashboard_widget(
+            title="Base Widget",
+            component=self.base_widget,
+            dimensions={"w": 4, "h": 2},
+            priority=10
+        )
         
         # ------------------------------------------------------------------
         # Contribution Registry: Layout Injection
         # ------------------------------------------------------------------
         
-        # Navigation Zone (Sidebar)
-        self.register_contribution("navigation", {"type": "link", "label": "Tableau de bord", "icon": "fas fa-chart-pie", "url": "/admin", "priority": 100})
+        # Dashboard item
+        self.register_navigation(label="Tableau de bord", icon="fas fa-chart-pie", url="/admin", priority=100)
         
-        self.register_contribution("navigation", {"type": "header", "label": "Gestion", "priority": 90})
-        self.register_contribution("navigation", {"type": "link", "label": "Utilisateurs", "icon": "fas fa-users", "url": "/admin/users", "priority": 80})
-        self.register_contribution("navigation", {"type": "link", "label": "Modules", "icon": "fas fa-cubes", "url": "/admin/modules", "priority": 70})
+        # Gestion with Sub-menus
+        self.register_navigation(
+            label="Gestion",
+            icon="fas fa-briefcase",
+            priority=90,
+            children=[
+                {"label": "Utilisateurs", "icon": "fas fa-users", "url": "/admin/users"},
+                {"label": "Modules", "icon": "fas fa-cubes", "url": "/admin/modules"},
+                {"label": "Paramètres globaux", "icon": "fas fa-sliders-h", "url": "/admin/settings"}
+            ]
+        )
         
-        self.register_contribution("navigation", {"type": "header", "label": "Système", "priority": 60})
-        self.register_contribution("navigation", {"type": "link", "label": "Paramètres", "icon": "fas fa-cog", "url": "/admin/settings", "priority": 50})
-        self.register_contribution("navigation", {"type": "link", "label": "Journaux", "icon": "fas fa-list-alt", "url": "/admin/logs", "priority": 40})
+        # System with Permissions and Sub-menus
+        self.register_navigation(
+            label="Système",
+            icon="fas fa-cogs",
+            priority=40,
+            required_role="admin",
+            children=[
+                {"label": "Paramètres", "icon": "fas fa-cog", "url": "/admin/settings"},
+                {"label": "Journaux", "icon": "fas fa-list-alt", "url": "/admin/logs"}
+            ]
+        )
 
         # StatusBar Zone (Top Admin Header)
         ws_status_html = """

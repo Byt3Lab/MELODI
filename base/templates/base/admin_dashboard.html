@@ -17,24 +17,24 @@
   </div>
 
   <!-- Widgets Grid -->
-  <div id="dashboard-widgets-container">
-    {% for mod in widgets %}
-    {% for name in widgets[mod] %}
-    <div class="widget-item" data-widget-id="{{ mod }}::{{ name }}" style="display: none;">
-      <!-- Hidden by default, shown by JS if enabled -->
-      <div class="h-100 position-relative">
-        <!-- Module Badge (Optional, for context) -->
-        <div class="position-absolute top-0 end-0 mt-n2 me-2 z-index-1">
-          <span class="badge bg-white text-muted shadow-sm border" style="font-size: 0.65rem; opacity: 0.9;">
-            {{ mod }}
-          </span>
-        </div>
+  <div id="dashboard-widgets-conatainer" class="row g-4">
+    {% for item in registry.get_zone('dashboard') %}
+    {% if not item.get('required_role') or user.get('role') == item.get('required_role') %}
+    {% set w = item.get('dimensions', {}).get('w', 4) %}
+    {% set md_col = w * 3 %} <!-- Convert grid units (1-4) to bootstrap cols (3-12) as approximation -->
+    {% set col_class = 'col-12 col-md-6 col-lg-' ~ md_col %}
 
-        <!-- Render Widget Content -->
-        {{ widgets[mod][name]['widget'] | safe }}
+    <div class="widget-item {{ col_class }}" data-widget-id="{{ item.title | replace(' ', '_') | lower }}"
+      style="display: none;">
+      <div class="h-100 position-relative">
+        {% if item.component is callable %}
+        {{ item.component() | safe }}
+        {% else %}
+        {{ item.component | safe }}
+        {% endif %}
       </div>
     </div>
-    {% endfor %}
+    {% endif %}
     {% endfor %}
   </div>
 

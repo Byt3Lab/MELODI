@@ -1,6 +1,6 @@
 from core.router import WebRouter, APIRouter
 from core.utils import TimerManager, EventListener, MiddlewareManager, path_exist, read_file, run_sync
-from core.component import HomePageManager, MenuItemManager, WidgetManager
+from core.component import HomePageManager, Registry
 from core.module import ModuleManager
 from core.adapters.quart_adapter import QuartAdapter
 from core.db import DataBase
@@ -11,7 +11,6 @@ from core.utils import HookManager
 from core.utils import ActionManager
 from core.websocket import WebSocketManager
 from core.email import EmailManager
-from core.component.registry import Registry
 
 class Application:
     def __init__(self):
@@ -27,8 +26,6 @@ class Application:
         self.event_listener = EventListener()
         self.timer_manager = TimerManager()
         self.module_manager = ModuleManager(app=self)
-        self.widget_manager = WidgetManager(app=self)
-        self.menu_item_manager = MenuItemManager(app=self)
         self.home_page_manager = HomePageManager(app=self)
         self.hook_manager = HookManager()
         self.action_manager = ActionManager()

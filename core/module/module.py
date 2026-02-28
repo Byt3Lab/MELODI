@@ -84,17 +84,17 @@ class Module:
     def get_api_router(self)->APIRouter:
         return self.api_router
     
-    def register_widget(self, name_widget:str|None=None, infos={}):
-        def decorator (func):
-            if callable(func):
-                if not name_widget:
-                    self.app.widget_manager.register(name_module=self.dirname, name_widget= func.__name__, widget=func, infos=infos)
-                self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
-                return
+    # def register_widget(self, name_widget:str|None=None, infos={}):
+    #     def decorator (func):
+    #         if callable(func):
+    #             if not name_widget:
+    #                 self.app.widget_manager.register(name_module=self.dirname, name_widget= func.__name__, widget=func, infos=infos)
+    #             self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
+    #             return
             
-            if name_widget:
-                self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
-        return decorator
+    #         if name_widget:
+    #             self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
+    #     return decorator
 
     def register_home_page(self, home_page, infos):
         self.app.home_page_manager.register(name_module=self.dirname, home_page=home_page, infos=infos)
@@ -134,50 +134,64 @@ class Module:
     # Contribution Registry (Plugin-Base architecture)
     # ------------------------------------------------------------------
 
-    def register_contribution(self, zone: str, item: dict):
-        """Registers a raw dictionary configuration to a specific zone."""
+    def register_contribution(self, zone: str, item: dict | Callable):
+        """Registers a raw dictionary configuration or a Callable to a specific zone."""
         if hasattr(self.app, 'registry'):
             self.app.registry.register(zone, self.dirname, item)
             
-    def register_navigation(self, label: str, icon: str, url: str, priority: int = 0):
+    def register_navigation(self, label: str, icon: str | None = None, icon_url: str | None = None, url: str | None = None, priority: int = 0, required_role: str | None = None, children: list[dict] | None = None, id: str | None = None, parent_id: str | None = None):
         """
         Registers a navigation item (Sidebar)
         - label: The display name (e.g. 'Tableau de bord')
-        - icon: FontAwesome classes (e.g. 'fas fa-chart-pie')
-        - url: The route to navigate to
+        - icon: FontAwesome classes (e.g. 'fas fa-chart-pie'). Used if icon_url is not provided.
+        - icon_url: Path to an image or SVG (e.g. '/static/mod/icon.svg'). Overrides 'icon'.
+        - url: The route to navigate to (can be None if it's a parent menu with children)
         - priority: Display order (higher appears first)
+        - required_role: Permission required to view this item (e.g., 'admin')
+        - children: A list of dicts for sub-menus. Format: [{"label": "Child", "url": "/child", "icon": "..."}]
+        - id: A unique identifier for this item, used as a hook anchor by other modules (e.g., 'stock_root').
+        - parent_id: If set, this item will be injected into the 'children' of the item with matching 'id' (cross-module hook).
         """
         self.register_contribution("navigation", {
+            "id": id,
+            "parent_id": parent_id,
             "label": label,
             "icon": icon,
+            "icon_url": icon_url,
             "url": url,
-            "priority": priority
+            "priority": priority,
+            "required_role": required_role,
+            "children": children or []
         })
 
-    def register_dashboard_widget(self, title: str, component: str, dimensions: dict = None, priority: int = 0):
+    def register_dashboard_widget(self, title: str, component: str | Callable, dimensions: dict | None = None, priority: int = 0, required_role: str | None = None):
         """
         Registers a widget to be rendered on the Dashboard.
         - title: Name of the widget
-        - component: Component identifier or HTML generator
+        - component: HTML string or a Callable (function) that generates the HTML.
         - dimensions: Dict for grid sizing, e.g. {"w": 4, "h": 2}
         - priority: Display order
+        - required_role: Permission required to view this widget (e.g., 'admin')
         """
         self.register_contribution("dashboard", {
             "title": title,
             "component": component,
             "dimensions": dimensions or {},
-            "priority": priority
+            "priority": priority,
+            "required_role": required_role
         })
 
-    def register_statusbar_item(self, component: str, priority: int = 0):
+    def register_statusbar_item(self, component: str, priority: int = 0, required_role: str | None = None):
         """
         Registers an item/widget to be rendered in the top Status Bar.
         - component: The HTML/Widget to render
         - priority: Display order
+        - required_role: Permission required to view this item (e.g., 'admin')
         """
         self.register_contribution("statusbar", {
             "component": component,
-            "priority": priority
+            "priority": priority,
+            "required_role": required_role
         })
 
     # ------------------------------------------------------------------
