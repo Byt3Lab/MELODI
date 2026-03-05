@@ -194,6 +194,27 @@ class Module:
             "required_role": required_role
         })
 
+    def add_context_processor(self, func: Callable) -> Callable:
+        """Registers a context processor for Jinja2 templates.
+
+        The decorated (or passed) function must return a dict whose keys will
+        be injected into every template rendered by the application.
+
+        Can be used as a plain call or as a decorator::
+
+            # As a decorator
+            @self.add_context_processor
+            async def inject_user():
+                return {"current_user": get_current_user()}
+
+            # As a plain call
+            async def inject_settings():
+                return {"settings": load_settings()}
+            self.add_context_processor(inject_settings)
+        """
+        self.app.server.app.context_processor(func)
+        return func
+
     # ------------------------------------------------------------------
     # WebSocket function registry
     # ------------------------------------------------------------------

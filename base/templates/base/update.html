@@ -1,0 +1,699 @@
+{% extends "base/components/layout_admin.html" %}
+
+{% block title %}Mises à jour — MELODI{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    /* ── Page Update ─────────────────────────────────────────── */
+    .update-hero {
+        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+        border-radius: 1rem;
+        padding: 2rem 2.25rem;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .update-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at 80% 50%, rgba(59, 130, 246, .25) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .update-hero-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 1rem;
+        background: rgba(59, 130, 246, .2);
+        border: 1px solid rgba(59, 130, 246, .4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    .update-hero-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .update-hero-sub {
+        font-size: .9rem;
+        color: #94a3b8;
+        margin-top: .25rem;
+    }
+
+    /* Version badge */
+    .version-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        font-size: .78rem;
+        font-weight: 600;
+        padding: .3rem .75rem;
+        border-radius: 99px;
+    }
+
+    .v-current {
+        background: rgba(255, 255, 255, .08);
+        color: #94a3b8;
+    }
+
+    .v-latest {
+        background: rgba(34, 197, 94, .12);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, .25);
+    }
+
+    .v-warn {
+        background: rgba(245, 158, 11, .12);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, .25);
+    }
+
+    /* Status card */
+    .status-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .06);
+        height: 100%;
+    }
+
+    .status-card .status-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: .75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .icon-blue {
+        background: rgba(59, 130, 246, .1);
+        color: #3b82f6;
+    }
+
+    .icon-green {
+        background: rgba(34, 197, 94, .1);
+        color: #22c55e;
+    }
+
+    .icon-amber {
+        background: rgba(245, 158, 11, .1);
+        color: #f59e0b;
+    }
+
+    .icon-purple {
+        background: rgba(168, 85, 247, .1);
+        color: #a855f7;
+    }
+
+    /* Update list */
+    .update-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid #e2e8f0;
+        border-radius: .75rem;
+        background: #fff;
+        margin-bottom: .75rem;
+        transition: box-shadow .2s, border-color .2s;
+    }
+
+    .update-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .07);
+        border-color: #cbd5e1;
+    }
+
+    .update-item-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: .5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: .1rem;
+    }
+
+    .update-item-meta {
+        flex: 1;
+    }
+
+    .update-item-name {
+        font-weight: 600;
+        font-size: .95rem;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .update-item-desc {
+        font-size: .82rem;
+        color: #64748b;
+        margin-top: .2rem;
+    }
+
+    .update-item-tags {
+        margin-top: .5rem;
+        display: flex;
+        gap: .4rem;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        font-size: .7rem;
+        font-weight: 600;
+        padding: .15rem .55rem;
+        border-radius: 99px;
+    }
+
+    .tag-core {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .tag-module {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .tag-security {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .tag-perf {
+        background: #fdf4ff;
+        color: #9333ea;
+    }
+
+    /* Progress bar */
+    .update-progress {
+        display: none;
+        margin-top: .75rem;
+    }
+
+    .update-progress.visible {
+        display: block;
+    }
+
+    /* Timeline */
+    .timeline {
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    .timeline::before {
+        content: "";
+        position: absolute;
+        left: .45rem;
+        top: .5rem;
+        bottom: .5rem;
+        width: 2px;
+        background: #e2e8f0;
+        border-radius: 1px;
+    }
+
+    .tl-item {
+        position: relative;
+        padding-bottom: 1.25rem;
+    }
+
+    .tl-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .tl-dot {
+        position: absolute;
+        left: -1.5rem;
+        top: .2rem;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: #3b82f6;
+        box-shadow: 0 0 0 2px #bfdbfe;
+    }
+
+    .tl-dot.success {
+        background: #22c55e;
+        box-shadow: 0 0 0 2px #bbf7d0;
+    }
+
+    .tl-dot.warn {
+        background: #f59e0b;
+        box-shadow: 0 0 0 2px #fde68a;
+    }
+
+    .tl-date {
+        font-size: .72rem;
+        color: #94a3b8;
+    }
+
+    .tl-title {
+        font-size: .88rem;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .tl-body {
+        font-size: .8rem;
+        color: #64748b;
+        margin-top: .15rem;
+    }
+
+    /* Spinner animation */
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .spin {
+        animation: spin .8s linear infinite;
+        display: inline-block;
+    }
+
+    /* Check animation */
+    @keyframes popIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        70% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .pop-in {
+        animation: popIn .4s ease forwards;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<div class="update-hero">
+    <div class="update-hero-icon"><i class="fas fa-arrow-up-from-bracket"></i></div>
+    <div class="flex-grow-1">
+        <h1 class="update-hero-title">Gestion des mises à jour</h1>
+        <p class="update-hero-sub">Maintenez MELODI et ses modules à jour en toute sécurité.</p>
+        <div class="d-flex align-items-center gap-2 mt-2">
+            <span class="version-badge v-current"><i class="fas fa-code-branch"></i> v2.4.1 installée</span>
+            <span class="version-badge v-latest" id="latestBadge"><i class="fas fa-circle-check"></i> v2.5.0
+                disponible</span>
+        </div>
+    </div>
+    <div class="text-end d-none d-md-block">
+        <div class="text-white-50 small mb-1">Dernière vérification</div>
+        <div class="text-white fw-semibold small" id="lastCheck">il y a 2 min</div>
+        <button class="btn btn-sm btn-outline-light mt-2 d-flex align-items-center gap-2" id="btnCheck">
+            <i class="fas fa-rotate-right" id="checkIcon"></i> Vérifier maintenant
+        </button>
+    </div>
+</div>
+
+<!-- ── Statut cards ──────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="status-card">
+            <div class="status-icon icon-blue"><i class="fas fa-cubes"></i></div>
+            <div class="fw-bold fs-4">12</div>
+            <div class="text-muted small">Modules installés</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="status-card">
+            <div class="status-icon icon-amber"><i class="fas fa-triangle-exclamation"></i></div>
+            <div class="fw-bold fs-4" id="pendingCount">3</div>
+            <div class="text-muted small">Mises à jour en attente</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="status-card">
+            <div class="status-icon icon-green"><i class="fas fa-shield-halved"></i></div>
+            <div class="fw-bold fs-4">1</div>
+            <div class="text-muted small">Correctif sécurité</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="status-card">
+            <div class="status-icon icon-purple"><i class="fas fa-clock-rotate-left"></i></div>
+            <div class="fw-bold fs-4">2025-02-28</div>
+            <div class="text-muted small">Dernière mise à jour</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Contenu principal ─────────────────────────────────────── -->
+<div class="row g-4">
+
+    <!-- Colonne gauche : liste des mises à jour -->
+    <div class="col-lg-8">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="fw-bold mb-0" style="color:#1e293b;">
+                <i class="fas fa-download me-2 text-primary"></i>Mises à jour disponibles
+            </h5>
+            <button class="btn btn-primary btn-sm px-3 d-flex align-items-center gap-2" id="btnUpdateAll">
+                <i class="fas fa-angles-up"></i> Tout mettre à jour
+            </button>
+        </div>
+
+        <!-- MELODI Core -->
+        <div class="update-item" id="item-core">
+            <div class="update-item-icon icon-blue"><i class="fas fa-server"></i></div>
+            <div class="update-item-meta">
+                <p class="update-item-name">MELODI Core</p>
+                <p class="update-item-desc">Moteur principal : routeur, ORM, gestionnaire de modules, WebSocket.</p>
+                <div class="update-item-tags">
+                    <span class="tag tag-core">Core</span>
+                    <span class="tag tag-perf">Performance</span>
+                    <span class="version-badge v-current" style="font-size:.7rem;">v2.4.1 →
+                        <strong>v2.5.0</strong></span>
+                </div>
+                <div class="update-progress" id="prog-core">
+                    <div class="progress mt-2" style="height:6px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width:0%"
+                            id="bar-core"></div>
+                    </div>
+                    <div class="small text-muted mt-1" id="status-core">Téléchargement…</div>
+                </div>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-2">
+                <span class="badge bg-warning text-dark rounded-pill"><i class="fas fa-arrow-up me-1"></i>Mise à
+                    jour</span>
+                <button class="btn btn-sm btn-outline-primary" onclick="simulateUpdate('core')">Installer</button>
+                <a href="#changelog-core" data-bs-toggle="collapse"
+                    class="small text-muted text-decoration-none">Changelog <i class="fas fa-chevron-down"
+                        style="font-size:.7em;"></i></a>
+            </div>
+        </div>
+        <div class="collapse px-3 pb-3" id="changelog-core">
+            <div class="bg-light rounded p-3 small text-muted" style="border-left:3px solid #3b82f6;">
+                <strong class="text-dark">v2.5.0</strong> — 2026-02-28<br>
+                • Amélioration des performances WebSocket (+40%)<br>
+                • Nouveau système de cache en couches<br>
+                • Correction d'un bug de session sous Quart 0.20<br>
+                • API <code>add_context_processor</code> sur les modules
+            </div>
+        </div>
+
+        <!-- Module Sécurité -->
+        <div class="update-item" id="item-auth">
+            <div class="update-item-icon icon-green"><i class="fas fa-lock"></i></div>
+            <div class="update-item-meta">
+                <p class="update-item-name">Module Auth & Sécurité</p>
+                <p class="update-item-desc">Correctif CVE-2026-1042 : faille XSS dans le formulaire de login.</p>
+                <div class="update-item-tags">
+                    <span class="tag tag-security"><i class="fas fa-shield me-1"></i>Sécurité</span>
+                    <span class="version-badge v-warn" style="font-size:.7rem;">v1.3.0 → <strong>v1.3.2</strong></span>
+                </div>
+                <div class="update-progress" id="prog-auth">
+                    <div class="progress mt-2" style="height:6px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width:0%"
+                            id="bar-auth"></div>
+                    </div>
+                    <div class="small text-muted mt-1" id="status-auth">Téléchargement…</div>
+                </div>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-2">
+                <span class="badge bg-danger rounded-pill"><i class="fas fa-shield-exclamation me-1"></i>Critique</span>
+                <button class="btn btn-sm btn-outline-danger" onclick="simulateUpdate('auth')">Installer</button>
+                <a href="#changelog-auth" data-bs-toggle="collapse"
+                    class="small text-muted text-decoration-none">Changelog <i class="fas fa-chevron-down"
+                        style="font-size:.7em;"></i></a>
+            </div>
+        </div>
+        <div class="collapse px-3 pb-3" id="changelog-auth">
+            <div class="bg-light rounded p-3 small text-muted" style="border-left:3px solid #dc2626;">
+                <strong class="text-dark">v1.3.2</strong> — Correctif de sécurité<br>
+                • CVE-2026-1042 : échappement des entrées du formulaire /login<br>
+                • Renforcement des headers HTTP (CSP, X-Frame-Options)
+            </div>
+        </div>
+
+        <!-- Module Finance -->
+        <div class="update-item" id="item-finance">
+            <div class="update-item-icon icon-purple"><i class="fas fa-chart-line"></i></div>
+            <div class="update-item-meta">
+                <p class="update-item-name">Module Finance</p>
+                <p class="update-item-desc">Nouveaux graphiques interactifs, export PDF et rapports comparatifs.</p>
+                <div class="update-item-tags">
+                    <span class="tag tag-module">Module</span>
+                    <span class="version-badge v-current" style="font-size:.7rem;">v0.8.0 →
+                        <strong>v1.0.0</strong></span>
+                </div>
+                <div class="update-progress" id="prog-finance">
+                    <div class="progress mt-2" style="height:6px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-purple"
+                            style="width:0%;background:#a855f7!important;" id="bar-finance"></div>
+                    </div>
+                    <div class="small text-muted mt-1" id="status-finance">Téléchargement…</div>
+                </div>
+            </div>
+            <div class="d-flex flex-column align-items-end gap-2">
+                <span class="badge text-bg-secondary rounded-pill">Amélioration</span>
+                <button class="btn btn-sm btn-outline-secondary" onclick="simulateUpdate('finance')">Installer</button>
+                <a href="#changelog-finance" data-bs-toggle="collapse"
+                    class="small text-muted text-decoration-none">Changelog <i class="fas fa-chevron-down"
+                        style="font-size:.7em;"></i></a>
+            </div>
+        </div>
+        <div class="collapse px-3 pb-3" id="changelog-finance">
+            <div class="bg-light rounded p-3 small text-muted" style="border-left:3px solid #a855f7;">
+                <strong class="text-dark">v1.0.0</strong> — Version majeure<br>
+                • Graphiques Chart.js interactifs (zoom, drill-down)<br>
+                • Export PDF des rapports<br>
+                • Comparaison N vs N-1 automatique<br>
+                • Tableau de bord personnalisable par utilisateur
+            </div>
+        </div>
+
+        <!-- Aucune autre mise à jour -->
+        <div class="text-center py-4 text-muted small border rounded-3 bg-white" id="upToDateMsg" style="display:none;">
+            <i class="fas fa-circle-check text-success fs-4 mb-2 d-block"></i>
+            Tout est à jour ! Aucune mise à jour disponible.
+        </div>
+    </div>
+
+    <!-- Colonne droite : infos & historique -->
+    <div class="col-lg-4">
+
+        <!-- Sauvegardes avant MAJ -->
+        <div class="status-card mb-3">
+            <h6 class="fw-bold mb-3" style="color:#1e293b;"><i class="fas fa-database me-2 text-primary"></i>Avant de
+                mettre à jour</h6>
+            <div class="d-flex align-items-center gap-3 p-2 rounded"
+                style="background:#f8fafc;border:1px solid #e2e8f0;">
+                <i class="fas fa-circle-check text-success fs-5"></i>
+                <div>
+                    <div class="fw-medium small">Sauvegarde automatique</div>
+                    <div class="text-muted" style="font-size:.75rem;">Un snapshot DB est créé automatiquement avant
+                        chaque installation.</div>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary w-100 mt-3" onclick="simulateBackup()">
+                <i class="fas fa-floppy-disk me-2"></i>Sauvegarder maintenant
+            </button>
+            <div id="backupStatus" class="small text-success mt-2 text-center" style="display:none;">
+                <i class="fas fa-circle-check me-1"></i>Sauvegarde créée avec succès
+            </div>
+        </div>
+
+        <!-- Environnement -->
+        <div class="status-card mb-3">
+            <h6 class="fw-bold mb-3" style="color:#1e293b;"><i class="fas fa-microchip me-2 text-purple"
+                    style="color:#a855f7;"></i>Environnement</h6>
+            <table class="table table-sm mb-0" style="font-size:.82rem;">
+                <tr>
+                    <td class="text-muted">Python</td>
+                    <td class="fw-medium text-end">3.12.3</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Quart</td>
+                    <td class="fw-medium text-end">0.20.0</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">OS</td>
+                    <td class="fw-medium text-end">Ubuntu 24.04</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Espace disque</td>
+                    <td class="fw-medium text-end text-success">14.2 GB libre</td>
+                </tr>
+                <tr class="last">
+                    <td class="text-muted">Environnement</td>
+                    <td class="fw-medium text-end"><span class="badge bg-warning text-dark">Développement</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Historique -->
+        <div class="status-card">
+            <h6 class="fw-bold mb-3" style="color:#1e293b;"><i
+                    class="fas fa-clock-rotate-left me-2 text-primary"></i>Historique</h6>
+            <div class="timeline">
+                <div class="tl-item">
+                    <div class="tl-dot success"></div>
+                    <div class="tl-date">28 fév 2026</div>
+                    <div class="tl-title">Base Module v1.8.2</div>
+                    <div class="tl-body">Navigation multi-niveaux, toggle sidebar.</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot success"></div>
+                    <div class="tl-date">15 fév 2026</div>
+                    <div class="tl-title">MELODI Core v2.4.1</div>
+                    <div class="tl-body">Correctif asyncio loop, optimisation DB.</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot success"></div>
+                    <div class="tl-date">03 fév 2026</div>
+                    <div class="tl-title">Module Stock v0.5.0</div>
+                    <div class="tl-body">Import CSV, alertes de stock bas.</div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-dot warn"></div>
+                    <div class="tl-date">22 jan 2026</div>
+                    <div class="tl-title">Auth v1.2.0 — rollback</div>
+                    <div class="tl-body">Annulation suite à une incompatibilité DB.</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ── Toast notification ────────────────────────────────────── -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:2000;">
+    <div id="updateToast" class="toast align-items-center text-white border-0" role="alert" style="min-width:280px;">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2" id="toastBody">
+                <i class="fas fa-circle-check"></i> Mise à jour installée !
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        /* ── Check for updates simulation ──────────────── */
+        document.getElementById('btnCheck')?.addEventListener('click', function () {
+            const icon = document.getElementById('checkIcon');
+            icon.classList.add('spin');
+            this.disabled = true;
+            setTimeout(() => {
+                icon.classList.remove('spin');
+                this.disabled = false;
+                document.getElementById('lastCheck').textContent = 'à l\'instant';
+            }, 2200);
+        });
+
+        /* ── Update all button ─────────────────────────── */
+        document.getElementById('btnUpdateAll')?.addEventListener('click', function () {
+            ['core', 'auth', 'finance'].forEach((id, i) => {
+                setTimeout(() => simulateUpdate(id), i * 800);
+            });
+        });
+
+        /* ── Backup simulation ─────────────────────────── */
+        window.simulateBackup = function () {
+            const el = document.getElementById('backupStatus');
+            el.style.display = 'none';
+            setTimeout(() => { el.style.display = 'block'; }, 1200);
+        };
+
+        /* ── Per-item update simulation ────────────────── */
+        window.simulateUpdate = function (id) {
+            const prog = document.getElementById('prog-' + id);
+            const bar = document.getElementById('bar-' + id);
+            const status = document.getElementById('status-' + id);
+            const item = document.getElementById('item-' + id);
+
+            if (!prog || item.dataset.done === '1') return;
+            item.dataset.done = '1';
+
+            prog.classList.add('visible');
+            let pct = 0;
+
+            const steps = [
+                [15, 'Connexion au dépôt…'],
+                [35, 'Téléchargement en cours…'],
+                [60, 'Vérification de l\'intégrité…'],
+                [80, 'Installation des fichiers…'],
+                [95, 'Migration de la base…'],
+                [100, 'Finalisation…']
+            ];
+
+            let si = 0;
+            const iv = setInterval(() => {
+                if (si >= steps.length) { clearInterval(iv); return; }
+                const [target, label] = steps[si++];
+                bar.style.width = target + '%';
+                status.textContent = label;
+
+                if (target === 100) {
+                    clearInterval(iv);
+                    setTimeout(() => {
+                        item.style.opacity = '0.45';
+                        item.style.pointerEvents = 'none';
+                        status.innerHTML = '<i class="fas fa-circle-check text-success me-1"></i>Installé avec succès';
+                        bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                        showToast(id);
+                        checkAllDone();
+                    }, 400);
+                }
+            }, 450);
+        };
+
+        function showToast(id) {
+            const names = { core: 'MELODI Core', auth: 'Auth & Sécurité', finance: 'Module Finance' };
+            const toast = document.getElementById('updateToast');
+            document.getElementById('toastBody').innerHTML =
+                '<i class="fas fa-circle-check me-2"></i>' + (names[id] || id) + ' mis à jour !';
+            toast.className = 'toast align-items-center text-white border-0 bg-success';
+            const bsToast = new bootstrap.Toast(toast, { delay: 3500 });
+            bsToast.show();
+        }
+
+        function checkAllDone() {
+            const items = ['core', 'auth', 'finance'];
+            const allDone = items.every(id => {
+                const el = document.getElementById('item-' + id);
+                return el && el.dataset.done === '1';
+            });
+            if (allDone) {
+                setTimeout(() => {
+                    document.getElementById('upToDateMsg').style.display = 'block';
+                    document.getElementById('pendingCount').textContent = '0';
+                    document.getElementById('btnUpdateAll').disabled = true;
+                    document.getElementById('latestBadge').className = 'version-badge v-latest';
+                    document.getElementById('latestBadge').innerHTML = '<i class="fas fa-circle-check"></i> Tout est à jour';
+                }, 600);
+            }
+        }
+    })();
+</script>
+{% endblock %}

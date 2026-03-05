@@ -41,7 +41,8 @@ class BaseRoutes(WebRouter):
                         ]
                     },
                     {"path:": "/notifications", "methods": ["GET"], "handler": base_controller.notifications},
-                    {"path": "/logs", "methods": ["GET"], "handler": base_controller.logs}
+                    {"path": "/logs", "methods": ["GET"], "handler": base_controller.logs},
+                    {"path": "/update", "methods": ["GET"], "handler": base_controller.update}
                 ]
             }
         ], before_request=[self.get_middleware("auth_required")]) # self.get_middleware("admin_only")])

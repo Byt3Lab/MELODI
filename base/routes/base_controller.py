@@ -32,6 +32,9 @@ class BaseController(WebController):
         self.router.delete_session("user_payload")
         return self.router.redirect("/login")
     
+    async def update(self):
+        return await self.router.render_template("update.html")
+    
     async def logs(self):
         return await self.router.render_template("admin_logs.html")
 

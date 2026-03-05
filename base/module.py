@@ -61,7 +61,8 @@ class Base(ApplicationModule):
             children=[
                 {"label": "Utilisateurs", "icon": "fas fa-users", "url": "/admin/users"},
                 {"label": "Modules", "icon": "fas fa-cubes", "url": "/admin/modules"},
-                {"label": "Paramètres globaux", "icon": "fas fa-sliders-h", "url": "/admin/settings"}
+                {"label": "Paramètres globaux", "icon": "fas fa-sliders-h", "url": "/admin/settings"},
+                {"label": "Mise à jour", "icon": "fas fa-sliders-h", "url": "/admin/update"}
             ]
         )
         
@@ -100,6 +101,52 @@ class Base(ApplicationModule):
             await self.app.websocket_manager.send_to(client.id, f"Direct response to client {client.id}")
 
             return {"message": "pong", "received": params}
+
+        # ------------------------------------------------------------------
+        # Context Processor: User info available in all templates
+        # ------------------------------------------------------------------
+
+        self.add_context_processor(self.inject_user_context)
+        async def inject_user_context():
+            """
+            Injecte dans tous les templates Jinja2 :
+              - current_user      : dict complet du payload utilisateur (ou None)
+              - is_authenticated  : bool — True si une session utilisateur est active
+              - user_role         : str  — rôle de l'utilisateur (ex. 'admin', 'user') ou None
+              - user_permissions  : list — liste des permissions de l'utilisateur ou []
+            """
+            from quart import session
+            raw = session.get("user_payload")
+            if raw:
+                try:
+                    user = json.loads(raw) if isinstance(raw, str) else raw
+                except (ValueError, TypeError):
+                    user = None
+            else:
+                user = None
+
+            def current_user():
+                """Retourne le dict complet du payload utilisateur, ou None."""
+                return user
+
+            def user_is_authenticated():
+                """Retourne True si un utilisateur est connecté, False sinon."""
+                return user is not None
+
+            def user_role():
+                """Retourne le rôle de l'utilisateur (ex. 'admin', 'user') ou None."""
+                return user.get("role") if user else None
+
+            def user_permissions():
+                """Retourne la liste des permissions de l'utilisateur, ou []."""
+                return user.get("permissions", []) if user else []
+
+            return {
+                "current_user":          current_user,
+                "user_is_authenticated": user_is_authenticated,
+                "user_role":             user_role,
+                "user_permissions":      user_permissions,
+            }
 
         self.register_middlewares({
             "auth_required": self.auth_required_middleware,
