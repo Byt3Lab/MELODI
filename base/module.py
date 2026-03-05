@@ -107,46 +107,6 @@ class Base(ApplicationModule):
         # ------------------------------------------------------------------
 
         self.add_context_processor(self.inject_user_context)
-        async def inject_user_context():
-            """
-            Injecte dans tous les templates Jinja2 :
-              - current_user      : dict complet du payload utilisateur (ou None)
-              - is_authenticated  : bool — True si une session utilisateur est active
-              - user_role         : str  — rôle de l'utilisateur (ex. 'admin', 'user') ou None
-              - user_permissions  : list — liste des permissions de l'utilisateur ou []
-            """
-            from quart import session
-            raw = session.get("user_payload")
-            if raw:
-                try:
-                    user = json.loads(raw) if isinstance(raw, str) else raw
-                except (ValueError, TypeError):
-                    user = None
-            else:
-                user = None
-
-            def current_user():
-                """Retourne le dict complet du payload utilisateur, ou None."""
-                return user
-
-            def user_is_authenticated():
-                """Retourne True si un utilisateur est connecté, False sinon."""
-                return user is not None
-
-            def user_role():
-                """Retourne le rôle de l'utilisateur (ex. 'admin', 'user') ou None."""
-                return user.get("role") if user else None
-
-            def user_permissions():
-                """Retourne la liste des permissions de l'utilisateur, ou []."""
-                return user.get("permissions", []) if user else []
-
-            return {
-                "current_user":          current_user,
-                "user_is_authenticated": user_is_authenticated,
-                "user_role":             user_role,
-                "user_permissions":      user_permissions,
-            }
 
         self.register_middlewares({
             "auth_required": self.auth_required_middleware,
@@ -158,6 +118,32 @@ class Base(ApplicationModule):
             "admin_only": self.admin_only_middleware,
             "api_admin_only": self.api_admin_only_middleware,
         })
+
+    async def inject_user_context(self):
+        """
+        Injecte dans tous les templates Jinja2 :
+            - current_user      : dict complet du payload utilisateur (ou None)
+            - is_authenticated  : bool — True si une session utilisateur est active
+            - user_role         : str  — rôle de l'utilisateur (ex. 'admin', 'user') ou None
+            - user_permissions  : list — liste des permissions de l'utilisateur ou []
+        """
+        from quart import session
+        raw = session.get("user_payload")
+        if raw:
+            try:
+                user = json.loads(raw) if isinstance(raw, str) else raw
+            except (ValueError, TypeError):
+                user = None
+        else:
+            user = None
+
+        return {
+            "current_user":          user,
+            "user_is_authenticated":  user is not None,
+            "user_role":             user.get("role") if user else None,
+            "user_is_sudo":             user.get("is_sudo") if user else None,
+            "user_permissions":      user.get("permissions", []) if user else [],
+        }
 
     def add_404_not_found(self):
         PATH_DIR_BASE_MODULE = self.app.config.PATH_DIR_BASE_MODULE

@@ -15,7 +15,7 @@
 
             <!-- Avatar -->
             <div class="me-md-4 mb-3 mb-md-0">
-                <img src="{{ user.avatar_url or '/static/img/default_avatar.png' }}" 
+                <img src="{{ current_user.avatar_url or '/static/img/default_avatar.png' }}" 
                      alt="avatar"
                      class="rounded"
                      style="
@@ -29,28 +29,28 @@
             <!-- Infos -->
             <div class="flex-grow-1">
 
-                <h3 class="mb-3">{{ user.name or "John Doe" }}</h3>
+                <h3 class="mb-3">{{ current_user.name  }}</h3>
 
                 <table class="table table-sm">
                     <tbody>
                         <tr>
                             <th class="text-muted" style="width: 180px;">Email</th>
-                            <td>{{ user.email or "john.doe@example.com" }}</td>
+                            <td>{{ current_user.email or "john.doe@example.com" }}</td>
                         </tr>
                         <tr>
                             <th class="text-muted">Rôle</th>
                             <td>
-                                <span class="badge bg-primary">{{ user.role or "Administrateur" }}</span>
+                                <span class="badge bg-primary">{{ current_user.role or "Administrateur" }}</span>
                             </td>
                         </tr>
                         <tr>
                             <th class="text-muted">Compte créé le</th>
-                            <td>{{ user.created_at or "2024-01-15" }}</td>
+                            <td>{{ current_user.created_at or "2024-01-15" }}</td>
                         </tr>
                         <tr>
                             <th class="text-muted">Statut</th>
                             <td>
-                                {% if user.active %}
+                                {% if current_user.active %}
                                     <span class="badge bg-success">Actif</span>
                                 {% else %}
                                     <span class="badge bg-danger">Désactivé</span>
@@ -67,11 +67,11 @@
 
     <!-- Actions -->
     <div class="mt-4 d-flex gap-2">
-        <a href="/admin/user/edit/{{ user.id }}" class="btn btn-primary">
+        <a href="/admin/user/edit/{{ current_user.id }}" class="btn btn-primary">
             <i class="bi bi-pencil-square me-1"></i> Modifier le profil
         </a>
 
-        <a href="/admin/user/change-password/{{ user.id }}" class="btn btn-warning">
+        <a href="/admin/user/change-password/{{ current_user.id }}" class="btn btn-warning">
             <i class="bi bi-shield-lock-fill me-1"></i> Modifier le mot de passe
         </a>
 
