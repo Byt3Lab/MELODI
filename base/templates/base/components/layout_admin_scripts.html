@@ -1,0 +1,114 @@
+{#
+layout_admin_scripts.html
+─────────────────────────
+Scripts JavaScript de l'interface admin.
+Contient :
+1. Toggle sidebar desktop (avec persistance localStorage)
+2. Initialisation WebSocket (connexion, listeners statut, helper testWS)
+
+Inclus en bas de body depuis layout_admin.html.
+#}
+
+{# ── 1. Toggle sidebar ─────────────────────────────────────────────────── #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.getElementById('sidebarToggle');
+        const body = document.body;
+        const iconOpen = btn?.querySelector('.icon-open');
+        const iconClosed = btn?.querySelector('.icon-closed');
+
+        function applyCollapsed(collapsed) {
+            body.classList.toggle('sidebar-collapsed', collapsed);
+            if (iconOpen) iconOpen.style.display = collapsed ? 'none' : 'block';
+            if (iconClosed) iconClosed.style.display = collapsed ? 'block' : 'none';
+        }
+
+        // État initial
+        if (iconOpen) iconOpen.style.display = 'block';
+        if (iconClosed) iconClosed.style.display = 'none';
+
+        // Restaurer la préférence utilisateur
+        applyCollapsed(localStorage.getItem('sidebar-collapsed') === 'true');
+
+        btn?.addEventListener('click', function () {
+            const nowCollapsed = !body.classList.contains('sidebar-collapsed');
+            applyCollapsed(nowCollapsed);
+            localStorage.setItem('sidebar-collapsed', nowCollapsed);
+        });
+    });
+</script>
+
+{# ── 2. WebSocket init ─────────────────────────────────────────────────── #}
+<script>
+    (function () {
+        if (!window.wsManager) {
+            console.error('[Admin] WebSocketManager introuvable — vérifiez que le script est inclus.');
+            return;
+        }
+
+        const wsStatus = document.getElementById('ws-status');
+        const dot = wsStatus?.querySelector('.ws-dot');
+        const text = wsStatus?.querySelector('.ws-text');
+
+        /** Met à jour le badge de statut WebSocket dans la statusbar. */
+        function updateStatus(status) {
+            if (!dot || !text) return;
+            const states = {
+                open: { color: '#22c55e', label: 'Online', cls: 'ws-text small text-success fw-medium' },
+                close: { color: '#ef4444', label: 'Offline', cls: 'ws-text small text-danger fw-medium' },
+                error: { color: '#f59e0b', label: 'Erreur', cls: 'ws-text small text-warning fw-medium' },
+            };
+            const s = states[status] ?? { color: '#94a3b8', label: 'Connexion…', cls: 'ws-text small text-muted fw-medium' };
+            dot.style.backgroundColor = s.color;
+            text.innerText = s.label;
+            text.className = s.cls;
+        }
+
+        window.wsManager.connect();
+
+        window.wsManager.on('open', async () => {
+            console.log('[Admin] WebSocket connecté.');
+            updateStatus('open');
+
+            // Ping de contrôle au démarrage
+            try {
+                const res = await window.wsManager.call('base', 'ping', {
+                    client_time: new Date().toISOString(),
+                    context: 'admin_layout_init',
+                });
+                console.log('[Admin] RPC ping :', res);
+            } catch (err) {
+                console.error('[Admin] RPC ping échoué :', err.message);
+            }
+        });
+
+        window.wsManager.on('close', () => {
+            console.warn('[Admin] WebSocket déconnecté.');
+            updateStatus('close');
+        });
+
+        window.wsManager.on('error', (err) => {
+            console.error('[Admin] WebSocket erreur :', err);
+            updateStatus('error');
+        });
+
+        window.wsManager.on('broadcast', (msg) => console.log('[Admin] broadcast :', msg));
+        window.wsManager.on('direct', (msg) => console.log('[Admin] direct :', msg));
+
+        /**
+         * Helper console développeur.
+         * Usage : await testWS('base', 'ping', {foo: 'bar'})
+         */
+        window.testWS = async (module, func, params = {}) => {
+            console.log(`[testWS] ${module}.${func}`, params);
+            try {
+                const result = await window.wsManager.call(module, func, params);
+                console.log('[testWS] Résultat :', result);
+                return result;
+            } catch (e) {
+                console.error('[testWS] Erreur :', e.message);
+                throw e;
+            }
+        };
+    })();
+</script>

@@ -1,0 +1,172 @@
+{#
+layout_admin_sidebar.html
+─────────────────────────
+Contient :
+- La macro nav_icon (icône d'un item de navigation)
+- La macro nav_menu (liste de navigation 3 niveaux)
+- La macro sidebar_footer (mini-profil utilisateur)
+- Le bloc sidebar desktop (#admin-sidebar)
+- Le sidebar mobile (offcanvas #mobileSidebar)
+
+Usage depuis layout_admin.html :
+{% include "base/components/layout_admin_sidebar.html" %}
+#}
+
+{# ─────────────────────────────────────────────────────────────────
+Macro : icône d'un item de navigation
+Paramètres : item (dict), size (px string, ex. "20px")
+───────────────────────────────────────────────────────────────── #}
+{% macro nav_icon(item, size="20px") %}
+{% if item.get('icon_url') %}
+<img src="{{ item.icon_url }}" class="me-2" style="width:{{ size }};height:{{ size }};object-fit:contain;">
+{% elif item.get('icon') %}
+<i class="{{ item.icon }}"></i>
+{% endif %}
+{% endmacro %}
+
+{# ─────────────────────────────────────────────────────────────────
+Macro : liste de navigation 3 niveaux
+Paramètres :
+items – liste d'items de navigation
+prefix – préfixe unique d'ID ("dsk_" ou "mob_")
+───────────────────────────────────────────────────────────────── #}
+{% macro nav_menu(items, prefix) %}
+<ul class="nav flex-column">
+    {% for item in items %}
+    {% if not item.get('required_role') or user.get('role') == item.get('required_role') %}
+    <li class="nav-item">
+        {% set l1_id = prefix ~ (item.id or loop.index) %}
+
+        {# ── Niveau 1 : parent avec enfants ── #}
+        {% if item.get('children') and item.children|length > 0 %}
+        <a class="nav-link collapsed" data-bs-toggle="collapse" href="#{{ l1_id }}" role="button" aria-expanded="false"
+            aria-controls="{{ l1_id }}">
+            {{ nav_icon(item, "20px") }}
+            <span>{{ item.label | safe }}</span>
+            <i class="fas fa-chevron-down ms-auto" style="font-size:0.8em;transition:transform .2s;"></i>
+        </a>
+
+        <div class="collapse" id="{{ l1_id }}">
+            <ul class="nav flex-column ms-2">
+                {% for child in item.children %}
+                {% if not child.get('required_role') or user.get('role') == child.get('required_role') %}
+                {% set l2_id = l1_id ~ '_' ~ loop.index %}
+                <li class="nav-item">
+
+                    {# ── Niveau 2 : parent avec enfants ── #}
+                    {% if child.get('children') and child.children|length > 0 %}
+                    <a class="nav-link collapsed py-2" data-bs-toggle="collapse" href="#{{ l2_id }}" role="button"
+                        aria-expanded="false" aria-controls="{{ l2_id }}" style="font-size:0.9em;padding-left:1.2rem;">
+                        {{ nav_icon(child, "16px") }}
+                        <span>{{ child.label | safe }}</span>
+                        <i class="fas fa-chevron-down ms-auto" style="font-size:0.7em;transition:transform .2s;"></i>
+                    </a>
+
+                    <div class="collapse" id="{{ l2_id }}">
+                        <ul class="nav flex-column ms-2">
+                            {% for grandchild in child.children %}
+                            {% if not grandchild.get('required_role') or user.get('role') ==
+                            grandchild.get('required_role') %}
+                            <li class="nav-item">
+                                {# ── Niveau 3 : toujours un lien ── #}
+                                <a href="{{ grandchild.url or '#' }}"
+                                    class="nav-link py-1 {% if request.path == grandchild.url %}active{% endif %}"
+                                    style="font-size:0.82em;padding-left:1.6rem;">
+                                    {{ nav_icon(grandchild, "14px") }}
+                                    <span>{{ grandchild.label | safe }}</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    {% else %}
+                    {# ── Niveau 2 : lien simple ── #}
+                    <a href="{{ child.url or '#' }}"
+                        class="nav-link py-2 {% if request.path == child.url %}active{% endif %}"
+                        style="font-size:0.9em;padding-left:1.2rem;">
+                        {{ nav_icon(child, "16px") }}
+                        <span>{{ child.label | safe }}</span>
+                    </a>
+                    {% endif %}
+
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        {# ── Niveau 1 : en-tête de section ── #}
+        {% elif item.get('type') == 'header' %}
+        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3" style="font-size:0.7rem;letter-spacing:1px;">{{
+            item.label | safe }}</div>
+
+        {% else %}
+        {# ── Niveau 1 : lien simple ── #}
+        <a href="{{ item.url or '#' }}" class="nav-link {% if request.path == item.url %}active{% endif %}">
+            {{ nav_icon(item, "20px") }}
+            <span>{{ item.label | safe }}</span>
+        </a>
+        {% endif %}
+
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+{% endmacro %}
+
+{# ─────────────────────────────────────────────────────────────────
+Macro : pied de sidebar (mini-profil)
+───────────────────────────────────────────────────────────────── #}
+{% macro sidebar_footer_profile() %}
+<div class="sidebar-footer">
+    <a href="/admin/profile" class="user-mini-profile">
+        <div class="avatar bg-primary rounded-circle d-flex align-items-center
+                    justify-content-center text-white fw-bold" style="width:36px;height:36px;">
+            {{ user.username[0]|upper if user.username else 'A' }}
+        </div>
+        <div class="d-flex flex-column">
+            <span class="fw-medium text-white" style="font-size:0.9rem;">{{ user.username }}</span>
+            <span style="font-size:0.75rem;">Administrateur</span>
+        </div>
+    </a>
+</div>
+{% endmacro %}
+
+{# ═══════════════════════════════════════════════════════════════
+SIDEBAR MOBILE (Offcanvas Bootstrap)
+═══════════════════════════════════════════════════════════════ #}
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+
+    <div class="offcanvas-header border-bottom border-secondary">
+        <div class="d-flex align-items-center">
+            <img src="/static/base/melodi.png" alt="MELODI" height="28" class="me-2">
+            <h5 class="offcanvas-title text-white fw-bold" id="mobileSidebarLabel">MELODI</h5>
+        </div>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-0 d-flex flex-column">
+        <div class="sidebar-menu">
+            {{ nav_menu(registry.get_zone('navigation'), 'mob_') }}
+        </div>
+        {{ sidebar_footer_profile() }}
+    </div>
+</div>
+
+{# ═══════════════════════════════════════════════════════════════
+SIDEBAR DESKTOP (nav fixe)
+═══════════════════════════════════════════════════════════════ #}
+<nav id="admin-sidebar" class="d-none d-lg-flex">
+    <div class="sidebar-brand">
+        <img src="/static/base/melodi.png" alt="MELODI">
+        <span>MELODI</span>
+    </div>
+
+    <div class="sidebar-menu">
+        {{ nav_menu(registry.get_zone('navigation'), 'dsk_') }}
+    </div>
+
+    {{ sidebar_footer_profile() }}
+</nav>

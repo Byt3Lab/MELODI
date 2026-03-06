@@ -1,5 +1,17 @@
 {% extends "base/components/layout.html" %}
 
+{# ═══════════════════════════════════════════════════════════════════════════
+layout_admin.html — Orchestrateur du layout admin
+──────────────────────────────────────────────────
+Architecture :
+layout_admin_sidebar.html → sidebar desktop + mobile (offcanvas)
+layout_admin_header.html → barre supérieure
+layout_admin_scripts.html → JS toggle sidebar + WebSocket
+
+Blocks exposés aux templates enfants :
+admin_styles → CSS spécifique à une page admin
+admin_content → contenu principal de la page
+═══════════════════════════════════════════════════════════════════════════ #}
 
 {% block head %}
 {{ super() }}
@@ -7,6 +19,7 @@
 <script src="/static/base/websocket/websocket_manager.js"></script>
 
 <style>
+    /* ── Variables globales ─────────────────────────────────────────────────── */
     :root {
         --sidebar-width: 280px;
         --header-height: 70px;
@@ -15,7 +28,7 @@
         --text-muted: #94a3b8;
         --border-color: #e2e8f0;
         --bg-light: #f8fafc;
-        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1), 0 2px 4px -1px rgba(0, 0, 0, .06);
     }
 
     body {
@@ -23,14 +36,14 @@
         background-color: var(--bg-light);
     }
 
-    /* Layout Structure */
+    /* ── Structure générale ─────────────────────────────────────────────────── */
     .admin-wrapper {
         display: flex;
         min-height: 100vh;
         overflow-x: hidden;
     }
 
-    /* Sidebar Styling */
+    /* ── Sidebar ────────────────────────────────────────────────────────────── */
     #admin-sidebar {
         width: var(--sidebar-width);
         background: var(--primary-gradient);
@@ -41,7 +54,7 @@
         bottom: 0;
         z-index: 1000;
         transition: all 0.3s ease;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, .15);
         display: flex;
         flex-direction: column;
     }
@@ -51,7 +64,7 @@
         display: flex;
         align-items: center;
         padding: 0 1.5rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, .1);
     }
 
     .sidebar-brand img {
@@ -62,8 +75,8 @@
     .sidebar-brand span {
         font-weight: 700;
         font-size: 1.25rem;
-        letter-spacing: 0.5px;
-        margin-left: 0.75rem;
+        letter-spacing: .5px;
+        margin-left: .75rem;
     }
 
     .sidebar-menu {
@@ -72,75 +85,77 @@
         overflow-y: auto;
     }
 
+    /* ── Navigation items ───────────────────────────────────────────────────── */
     .nav-item {
-        margin-bottom: 0.25rem;
+        margin-bottom: .25rem;
     }
 
     .nav-link {
         color: var(--text-muted) !important;
-        padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
+        padding: .75rem 1rem;
+        border-radius: .5rem;
         display: flex;
         align-items: center;
         font-weight: 500;
-        transition: all 0.2s;
+        transition: all .2s;
     }
 
     .nav-link:hover {
         color: #fff !important;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, .05);
         transform: translateX(4px);
     }
 
     .nav-link.active {
         color: #fff !important;
         background: var(--accent-color);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, .3);
     }
 
     .nav-link i {
         width: 24px;
         font-size: 1.1rem;
-        margin-right: 0.75rem;
+        margin-right: .75rem;
         text-align: center;
     }
 
+    /* ── Pied de sidebar ────────────────────────────────────────────────────── */
     .sidebar-footer {
         padding: 1rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid rgba(255, 255, 255, .1);
+        background: rgba(0, 0, 0, .2);
     }
 
     .user-mini-profile {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 0.5rem;
-        border-radius: 0.5rem;
-        transition: background 0.2s;
+        padding: .5rem;
+        border-radius: .5rem;
+        transition: background .2s;
         text-decoration: none;
         color: white;
     }
 
     .user-mini-profile:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, .05);
         color: white;
     }
 
-    /* Main Content Area */
+    /* ── Zone principale ────────────────────────────────────────────────────── */
     #admin-main {
         flex: 1;
         margin-left: var(--sidebar-width);
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        transition: margin-left 0.3s ease;
+        transition: margin-left .3s ease;
     }
 
-    /* Header Styling */
+    /* ── Header ─────────────────────────────────────────────────────────────── */
     .admin-header {
         height: var(--header-height);
-        background: #fff;
+        background: rgba(255, 255, 255, .9);
         border-bottom: 1px solid var(--border-color);
         display: flex;
         align-items: center;
@@ -149,7 +164,6 @@
         top: 0;
         z-index: 900;
         backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.9);
     }
 
     .header-search {
@@ -163,13 +177,13 @@
         border: 1px solid transparent;
         padding-left: 2.5rem;
         border-radius: 99px;
-        transition: all 0.2s;
+        transition: all .2s;
     }
 
     .header-search input:focus {
         background: #fff;
         border-color: var(--accent-color);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
     }
 
     .header-search i {
@@ -188,7 +202,7 @@
         align-items: center;
         justify-content: center;
         color: #64748b;
-        transition: all 0.2s;
+        transition: all .2s;
         background: transparent;
         border: none;
     }
@@ -198,13 +212,76 @@
         color: var(--accent-color);
     }
 
-    /* Content Container */
+    /* ── Contenu ─────────────────────────────────────────────────────────────── */
     .admin-content {
         padding: 2rem;
         flex: 1;
     }
 
-    /* Mobile Responsiveness */
+    /* ── Utilitaires ─────────────────────────────────────────────────────────── */
+    .card-admin {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        box-shadow: var(--card-shadow);
+        transition: transform .2s;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .breadcrumb-admin {
+        font-size: .875rem;
+        color: var(--text-muted);
+        margin-top: .25rem;
+    }
+
+    /* ── Toggle sidebar (bouton header) ──────────────────────────────────────── */
+    #sidebarToggle {
+        width: 36px;
+        height: 36px;
+        border-radius: .5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: background .2s, border-color .2s, color .2s;
+        flex-shrink: 0;
+    }
+
+    #sidebarToggle:hover {
+        background: var(--bg-light);
+        border-color: var(--border-color);
+        color: var(--accent-color);
+    }
+
+    #sidebarToggle svg {
+        transition: opacity .2s;
+    }
+
+    /* ── Sidebar réduite ─────────────────────────────────────────────────────── */
+    body.sidebar-collapsed #admin-sidebar {
+        width: 0;
+        overflow: hidden;
+        box-shadow: none;
+    }
+
+    body.sidebar-collapsed #admin-main {
+        margin-left: 0;
+    }
+
+    /* ── Responsive mobile ───────────────────────────────────────────────────── */
     @media (max-width: 991.98px) {
         #admin-sidebar {
             transform: translateX(-100%);
@@ -223,7 +300,6 @@
             transform: translateX(0);
         }
 
-        /* Offcanvas specific overrides */
         .offcanvas-start {
             background: var(--primary-gradient);
             color: white;
@@ -234,429 +310,38 @@
             filter: invert(1) grayscale(100%) brightness(200%);
         }
     }
-
-    /* Utility Classes for Admin */
-    .card-admin {
-        background: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 1rem;
-        box-shadow: var(--card-shadow);
-        transition: transform 0.2s;
-    }
-
-    .page-header {
-        margin-bottom: 2rem;
-    }
-
-    .page-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-    }
-
-    .breadcrumb-admin {
-        font-size: 0.875rem;
-        color: var(--text-muted);
-        margin-top: 0.25rem;
-    }
-
-    /* Sidebar toggle button inside brand */
-    .sidebar-toggle-btn {
-        margin-left: auto;
-        background: transparent;
-        border: none;
-        color: rgba(255, 255, 255, 0.6);
-        width: 32px;
-        height: 32px;
-        border-radius: 0.375rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s;
-        flex-shrink: 0;
-    }
-
-    .sidebar-toggle-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-    }
-
-    .sidebar-toggle-btn i {
-        font-size: 1rem;
-        transition: transform 0.3s ease;
-    }
-
-    /* Collapsed Sidebar Styles — fermeture totale */
-    body.sidebar-collapsed #admin-sidebar {
-        width: 0;
-        overflow: hidden;
-        box-shadow: none;
-    }
-
-    body.sidebar-collapsed #admin-main {
-        margin-left: 0;
-    }
-
-    /* Bouton toggle sidebar dans le header */
-    #sidebarToggle {
-        width: 36px;
-        height: 36px;
-        border-radius: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        border: 1px solid transparent;
-        color: #64748b;
-        cursor: pointer;
-        transition: background 0.2s, border-color 0.2s, color 0.2s;
-        flex-shrink: 0;
-    }
-
-    #sidebarToggle:hover {
-        background: var(--bg-light);
-        border-color: var(--border-color);
-        color: var(--accent-color);
-    }
-
-    #sidebarToggle svg {
-        transition: opacity 0.2s;
-    }
 </style>
+
+{# ── Styles supplémentaires optionnels (surchargeable par les pages) ── #}
+{% block admin_styles %}{% endblock %}
+
 {% endblock %}
 
-{% if user_is_authenticated == True %}
 
-{% set user={} %}
-{% set theme="light" %}
+{# Variables de session/contexte #}
+{% set user = current_user %}
+{% set theme = "light" %}
 
 {% block content %}
+{% if user_is_authenticated == True %}
+
 <div class="admin-wrapper">
-    <!-- Mobile Sidebar (Offcanvas) -->
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
-        <div class="offcanvas-header border-bottom border-secondary">
-            <div class="d-flex align-items-center">
-                <img src="/static/base/melodi.png" alt="MELODI" height="28" class="me-2">
-                <h5 class="offcanvas-title text-white fw-bold" id="mobileSidebarLabel">MELODI</h5>
-            </div>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body p-0 d-flex flex-column">
-            <!-- Mobile Menu Content - Same as Desktop -->
-            <div class="sidebar-menu">
-                <ul class="nav flex-column">
-                    {% for item in registry.get_zone('navigation') %}
-                    {% if not item.get('required_role') or user.get('role') == item.get('required_role') %}
-                    <li class="nav-item">
-                        {% set l1_id = 'mob_' ~ (item.id or loop.index) %}
 
-                        {% if item.get('children') and item.children|length > 0 %}
-                        {# ----- LEVEL 1: parent with children ----- #}
-                        <a class="nav-link collapsed" data-bs-toggle="collapse" href="#{{ l1_id }}" role="button"
-                            aria-expanded="false" aria-controls="{{ l1_id }}">
-                            {% if item.get('icon_url') %}<img src="{{ item.icon_url }}" class="me-2"
-                                style="width:20px;height:20px;object-fit:contain;">{% elif item.get('icon') %}<i
-                                class="{{ item.icon }}"></i>{% endif %}
-                            <span>{{ item.label | safe }}</span>
-                            <i class="fas fa-chevron-down ms-auto"
-                                style="font-size:0.8em;transition:transform .2s;"></i>
-                        </a>
-                        <div class="collapse" id="{{ l1_id }}">
-                            <ul class="nav flex-column ms-2">
-                                {% for child in item.children %}
-                                {% if not child.get('required_role') or user.get('role') == child.get('required_role')
-                                %}
-                                {% set l2_id = l1_id ~ '_' ~ loop.index %}
-                                <li class="nav-item">
-                                    {% if child.get('children') and child.children|length > 0 %}
-                                    {# ----- LEVEL 2: parent with children ----- #}
-                                    <a class="nav-link collapsed py-2" data-bs-toggle="collapse" href="#{{ l2_id }}"
-                                        role="button" aria-expanded="false" aria-controls="{{ l2_id }}"
-                                        style="font-size:0.9em;padding-left:1.2rem;">
-                                        {% if child.get('icon_url') %}<img src="{{ child.icon_url }}" class="me-2"
-                                            style="width:16px;height:16px;object-fit:contain;">{% elif child.get('icon')
-                                        %}<i class="{{ child.icon }}" style="font-size:0.85em;"></i>{% endif %}
-                                        <span>{{ child.label | safe }}</span>
-                                        <i class="fas fa-chevron-down ms-auto"
-                                            style="font-size:0.7em;transition:transform .2s;"></i>
-                                    </a>
-                                    <div class="collapse" id="{{ l2_id }}">
-                                        <ul class="nav flex-column ms-2">
-                                            {% for grandchild in child.children %}
-                                            {% if not grandchild.get('required_role') or user.get('role') ==
-                                            grandchild.get('required_role') %}
-                                            <li class="nav-item">
-                                                {# ----- LEVEL 3: always a link ----- #}
-                                                <a href="{{ grandchild.url or '#' }}"
-                                                    class="nav-link py-1 {% if request.path == grandchild.url %}active{% endif %}"
-                                                    style="font-size:0.82em;padding-left:1.6rem;">
-                                                    {% if grandchild.get('icon_url') %}<img
-                                                        src="{{ grandchild.icon_url }}" class="me-1"
-                                                        style="width:14px;height:14px;object-fit:contain;">{% elif
-                                                    grandchild.get('icon') %}<i class="{{ grandchild.icon }}"
-                                                        style="font-size:0.8em;"></i>{% endif %}
-                                                    <span>{{ grandchild.label | safe }}</span>
-                                                </a>
-                                            </li>
-                                            {% endif %}
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                    {% else %}
-                                    {# ----- LEVEL 2: simple link ----- #}
-                                    <a href="{{ child.url or '#' }}"
-                                        class="nav-link py-2 {% if request.path == child.url %}active{% endif %}"
-                                        style="font-size:0.9em;padding-left:1.2rem;">
-                                        {% if child.get('icon_url') %}<img src="{{ child.icon_url }}" class="me-2"
-                                            style="width:16px;height:16px;object-fit:contain;">{% elif child.get('icon')
-                                        %}<i class="{{ child.icon }}" style="font-size:0.85em;"></i>{% endif %}
-                                        <span>{{ child.label | safe }}</span>
-                                    </a>
-                                    {% endif %}
-                                </li>
-                                {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
+    {# ── Sidebars (desktop + mobile) ── #}
+    {% include "base/components/layout_admin_sidebar.html" %}
 
-                        {% elif item.get('type') == 'header' %}
-                        {# ----- Section header ----- #}
-                        <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
-                            style="font-size:0.7rem;letter-spacing:1px;">{{ item.label | safe }}</div>
-
-                        {% else %}
-                        {# ----- LEVEL 1: simple link ----- #}
-                        <a href="{{ item.url or '#' }}"
-                            class="nav-link {% if request.path == item.url %}active{% endif %}">
-                            {% if item.get('icon_url') %}<img src="{{ item.icon_url }}" class="me-2"
-                                style="width:20px;height:20px;object-fit:contain;">{% elif item.get('icon') %}<i
-                                class="{{ item.icon }}"></i>{% endif %}
-                            <span>{{ item.label | safe }}</span>
-                        </a>
-                        {% endif %}
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="sidebar-footer">
-                <a href="/admin/profile" class="user-mini-profile">
-                    <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                        style="width: 36px; height: 36px;">
-                        {{ user.username[0]|upper if user.username else 'A' }}
-                    </div>
-                    <div class="d-flex flex-column">
-                        <span class="fw-medium text-white" style="font-size: 0.9rem;">{{ user.username }}</span>
-                        <span class="" style="font-size: 0.75rem;">Administrateur</span>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Desktop Sidebar -->
-    <nav id="admin-sidebar" class="d-none d-lg-flex">
-        <div class="sidebar-brand">
-            <img src="/static/base/melodi.png" alt="MELODI">
-            <span>MELODI</span>
-        </div>
-
-        <div class="sidebar-menu">
-            <ul class="nav flex-column">
-                {% for item in registry.get_zone('navigation') %}
-                {% if not item.get('required_role') or user.get('role') == item.get('required_role') %}
-                <li class="nav-item">
-                    {% set l1_id = 'dsk_' ~ (item.id or loop.index) %}
-
-                    {% if item.get('children') and item.children|length > 0 %}
-                    {# ----- LEVEL 1: parent with children ----- #}
-                    <a class="nav-link collapsed" data-bs-toggle="collapse" href="#{{ l1_id }}" role="button"
-                        aria-expanded="false" aria-controls="{{ l1_id }}">
-                        {% if item.get('icon_url') %}<img src="{{ item.icon_url }}" class="me-2"
-                            style="width:20px;height:20px;object-fit:contain;">{% elif item.get('icon') %}<i
-                            class="{{ item.icon }}"></i>{% endif %}
-                        <span>{{ item.label | safe }}</span>
-                        <i class="fas fa-chevron-down ms-auto" style="font-size:0.8em;transition:transform .2s;"></i>
-                    </a>
-                    <div class="collapse" id="{{ l1_id }}">
-                        <ul class="nav flex-column ms-2">
-                            {% for child in item.children %}
-                            {% if not child.get('required_role') or user.get('role') == child.get('required_role') %}
-                            {% set l2_id = l1_id ~ '_' ~ loop.index %}
-                            <li class="nav-item">
-                                {% if child.get('children') and child.children|length > 0 %}
-                                {# ----- LEVEL 2: parent with children ----- #}
-                                <a class="nav-link collapsed py-2" data-bs-toggle="collapse" href="#{{ l2_id }}"
-                                    role="button" aria-expanded="false" aria-controls="{{ l2_id }}"
-                                    style="font-size:0.9em;padding-left:1.2rem;">
-                                    {% if child.get('icon_url') %}<img src="{{ child.icon_url }}" class="me-2"
-                                        style="width:16px;height:16px;object-fit:contain;">{% elif child.get('icon')
-                                    %}<i class="{{ child.icon }}" style="font-size:0.85em;"></i>{% endif %}
-                                    <span>{{ child.label | safe }}</span>
-                                    <i class="fas fa-chevron-down ms-auto"
-                                        style="font-size:0.7em;transition:transform .2s;"></i>
-                                </a>
-                                <div class="collapse" id="{{ l2_id }}">
-                                    <ul class="nav flex-column ms-2">
-                                        {% for grandchild in child.children %}
-                                        {% if not grandchild.get('required_role') or user.get('role') ==
-                                        grandchild.get('required_role') %}
-                                        <li class="nav-item">
-                                            {# ----- LEVEL 3: always a link ----- #}
-                                            <a href="{{ grandchild.url or '#' }}"
-                                                class="nav-link py-1 {% if request.path == grandchild.url %}active{% endif %}"
-                                                style="font-size:0.82em;padding-left:1.6rem;">
-                                                {% if grandchild.get('icon_url') %}<img src="{{ grandchild.icon_url }}"
-                                                    class="me-1" style="width:14px;height:14px;object-fit:contain;">{%
-                                                elif grandchild.get('icon') %}<i class="{{ grandchild.icon }}"
-                                                    style="font-size:0.8em;"></i>{% endif %}
-                                                <span>{{ grandchild.label | safe }}</span>
-                                            </a>
-                                        </li>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                                {% else %}
-                                {# ----- LEVEL 2: simple link ----- #}
-                                <a href="{{ child.url or '#' }}"
-                                    class="nav-link py-2 {% if request.path == child.url %}active{% endif %}"
-                                    style="font-size:0.9em;padding-left:1.2rem;">
-                                    {% if child.get('icon_url') %}<img src="{{ child.icon_url }}" class="me-2"
-                                        style="width:16px;height:16px;object-fit:contain;">{% elif child.get('icon')
-                                    %}<i class="{{ child.icon }}" style="font-size:0.85em;"></i>{% endif %}
-                                    <span>{{ child.label | safe }}</span>
-                                </a>
-                                {% endif %}
-                            </li>
-                            {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    {% elif item.get('type') == 'header' %}
-                    {# ----- Section header ----- #}
-                    <div class="text-uppercase small fw-bold mt-3 mb-2 px-3"
-                        style="font-size:0.7rem;letter-spacing:1px;">{{ item.label | safe }}</div>
-
-                    {% else %}
-                    {# ----- LEVEL 1: simple link ----- #}
-                    <a href="{{ item.url or '#' }}" class="nav-link {% if request.path == item.url %}active{% endif %}">
-                        {% if item.get('icon_url') %}<img src="{{ item.icon_url }}" class="me-2"
-                            style="width:20px;height:20px;object-fit:contain;">{% elif item.get('icon') %}<i
-                            class="{{ item.icon }}"></i>{% endif %}
-                        <span>{{ item.label | safe }}</span>
-                    </a>
-                    {% endif %}
-                </li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="sidebar-footer">
-            <a href="/admin/profile" class="user-mini-profile">
-                <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                    style="width: 36px; height: 36px;">
-                    {{ user.username[0]|upper if user.username else 'A' }}
-                </div>
-                <div class="d-flex flex-column">
-                    <span class="fw-medium text-white" style="font-size: 0.9rem;">{{ user.username }}</span>
-                    <span class="" style="font-size: 0.75rem;">Administrateur</span>
-                </div>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
+    {# ── Zone principale ── #}
     <div id="admin-main">
-        <!-- Header -->
-        <header class="admin-header">
-            <button class="btn btn-icon d-lg-none me-2" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#mobileSidebar">
-                <i class="fas fa-bars"></i>
-            </button>
 
-            <!-- Bouton toggle sidebar (desktop uniquement) -->
-            <button id="sidebarToggle" class="d-none d-lg-flex me-2" title="Basculer le menu"
-                aria-label="Toggle sidebar">
-                <!-- Icon: sidebar open — cliquer pour fermer -->
-                <svg class="icon-open" width="18" height="18" viewBox="0 0 18 18" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="1.5" width="15" height="15" rx="2" stroke="currentColor" stroke-width="1.5" />
-                    <line x1="6" y1="1.5" x2="6" y2="16.5" stroke="currentColor" stroke-width="1.5" />
-                    <path d="M9.5 11.5L7.5 9L9.5 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-                <!-- Icon: sidebar closed — cliquer pour ouvrir -->
-                <svg class="icon-closed" width="18" height="18" viewBox="0 0 18 18" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1.5" y="1.5" width="15" height="15" rx="2" stroke="currentColor" stroke-width="1.5" />
-                    <line x1="6" y1="1.5" x2="6" y2="16.5" stroke="currentColor" stroke-width="1.5" />
-                    <path d="M8.5 6.5L10.5 9L8.5 11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-            </button>
+        {# ── Barre supérieure ── #}
+        {% include "base/components/layout_admin_header.html" %}
 
-            <div class="header-search d-none d-md-block">
-                <i class="fas fa-search"></i>
-                <input type="text" class="form-control" placeholder="Rechercher...">
-            </div>
-
-            <div class="ms-auto d-flex align-items-center gap-3 header-actions">
-                <!-- Dynamically injected StatusBar items -->
-                {% for item in registry.get_zone('statusbar') %}
-                {{ item.component | safe }}
-                {% endfor %}
-
-                <button class="btn btn-icon position-relative">
-                    <i class="far fa-bell"></i>
-                    <span
-                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white"
-                        style="font-size: 0.6rem; padding: 0.25em 0.4em;">
-                        3
-                    </span>
-                </button>
-
-                <div class="dropdown ms-2">
-                    <button class="btn btn-light rounded-pill d-flex align-items-center gap-2 px-3 py-1 border"
-                        type="button" data-bs-toggle="dropdown">
-                        <div class="avatar bg-secondary rounded-circle d-flex align-items-center justify-content-center text-white"
-                            style="width: 28px; height: 28px; font-size: 0.8rem;">
-                            {{ user.username[0]|upper if user.username else 'A' }}
-                        </div>
-                        <span class="d-none d-sm-block small fw-medium">{{ user.username }}</span>
-                        <i class="fas fa-chevron-down small text-muted"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                        <li>
-                            <div class="dropdown-header"><strong>{{ user.username }} gomsu gaetant</strong></div>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item py-2" href="/admin/profile"><i
-                                    class="fas fa-user me-2 text-muted"></i> Mon Profil</a></li>
-                        <li><a class="dropdown-item py-2" href="/"><i
-                                    class="fas fa-external-link-alt me-2 text-muted"></i> Voir le site</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item py-2 text-danger" href="/logout"><i
-                                    class="fas fa-sign-out-alt me-2"></i> Déconnexion</a></li>
-                    </ul>
-                </div>
-            </div>
-        </header>
-
-        <!-- Page Content -->
+        {# ── Contenu de la page ── #}
         <main class="admin-content">
-            {% block admin_content %}
-            {% endblock %}
+            {% block admin_content %}{% endblock %}
         </main>
 
+        {# ── Pied de page ── #}
         <footer class="mt-auto py-3 px-4 border-top bg-white">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-start text-muted small">
@@ -668,139 +353,12 @@
                 </div>
             </div>
         </footer>
-    </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const btn = document.getElementById('sidebarToggle');
-        const body = document.body;
+    </div>{# /admin-main #}
+</div>{# /admin-wrapper #}
 
-        // Gestion visibilité des deux icônes SVG
-        const iconOpen = btn?.querySelector('.icon-open');
-        const iconClosed = btn?.querySelector('.icon-closed');
-
-        function applyCollapsed(collapsed) {
-            body.classList.toggle('sidebar-collapsed', collapsed);
-            if (iconOpen) iconOpen.style.display = collapsed ? 'none' : 'block';
-            if (iconClosed) iconClosed.style.display = collapsed ? 'block' : 'none';
-        }
-
-        // Initialisation — masquer icon-closed par défaut
-        if (iconOpen) iconOpen.style.display = 'block';
-        if (iconClosed) iconClosed.style.display = 'none';
-
-        // Restaurer la préférence utilisateur
-        const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-        applyCollapsed(isCollapsed);
-
-        btn?.addEventListener('click', function () {
-            const nowCollapsed = !body.classList.contains('sidebar-collapsed');
-            applyCollapsed(nowCollapsed);
-            localStorage.setItem('sidebar-collapsed', nowCollapsed);
-        });
-    });
-</script>
-
-<script>
-    /**
-     * MELODI WebSocket Example Implementation
-     * This demonstrates how to use the global wsManager to:
-     * 1. Connect to the backend
-     * 2. Listen for connection status changes
-     * 3. Update the UI accordingly
-     */
-    (function () {
-        if (!window.wsManager) {
-            console.error("WebSocketManager not found! Make sure the script is included.");
-            return;
-        }
-
-        const wsStatus = document.getElementById('ws-status');
-        const dot = wsStatus?.querySelector('.ws-dot');
-        const text = wsStatus?.querySelector('.ws-text');
-
-        function updateStatus(status) {
-            if (!dot || !text) return;
-
-            switch (status) {
-                case 'open':
-                    dot.style.backgroundColor = '#22c55e'; // Green
-                    text.innerText = 'Online';
-                    text.className = 'ws-text small text-success fw-medium';
-                    break;
-                case 'close':
-                    dot.style.backgroundColor = '#ef4444'; // Red
-                    text.innerText = 'Offline';
-                    text.className = 'ws-text small text-danger fw-medium';
-                    break;
-                case 'error':
-                    dot.style.backgroundColor = '#f59e0b'; // Amber
-                    text.innerText = 'Error';
-                    text.className = 'ws-text small text-warning fw-medium';
-                    break;
-                default:
-                    dot.style.backgroundColor = '#94a3b8'; // Muted
-                    text.innerText = 'Connecting...';
-                    text.className = 'ws-text small text-muted fw-medium';
-            }
-        }
-
-        // Initialize connection
-        window.wsManager.connect();
-
-        // Status Listeners
-        window.wsManager.on('open', async () => {
-            console.log("[App] WebSocket connected and ready.");
-            updateStatus('open');
-
-            // --- CONCRETE EXAMPLE ---
-            // Let's call the 'ping' function in the 'base' module
-            try {
-                const response = await window.wsManager.call('base', 'ping', {
-                    client_time: new Date().toISOString(),
-                    context: "admin_layout_init"
-                });
-                console.log("[App] RPC Ping success:", response);
-            } catch (err) {
-                console.error("[App] RPC Ping failed:", err.message);
-            }
-        });
-
-        window.wsManager.on('close', () => {
-            console.warn("[App] WebSocket connection lost.");
-            updateStatus('close');
-        });
-
-        window.wsManager.on('error', (err) => {
-            console.error("[App] WebSocket error:", err);
-            updateStatus('error');
-        });
-
-        // Example: Listen for broadcast messages
-        window.wsManager.on('broadcast', (msg) => {
-            console.log("[App] New broadcast message:", msg);
-        });
-
-        // Example: Listen for direct messages (from server to specific client)
-        window.wsManager.on('direct', (msg) => {
-            console.log("[App] New direct message:", msg);
-        });
-
-        // Developer Helper: Global helper to test RPC calls from console
-        window.testWS = async (module, func, params = {}) => {
-            console.log(`[Test] Calling ${module}.${func}...`);
-            try {
-                const result = await window.wsManager.call(module, func, params);
-                console.log("[Test] Result:", result);
-                return result;
-            } catch (e) {
-                console.error("[Test] RPC Error:", e.message);
-                throw e;
-            }
-        };
-    })();
-</script>
-{% endblock %}
+{# ── Scripts JS (toggle sidebar + WebSocket) ── #}
+{% include "base/components/layout_admin_scripts.html" %}
 
 {% endif %}
+{% endblock %}

@@ -1,0 +1,110 @@
+{#
+layout_admin_header.html
+────────────────────────
+Barre supérieure de l'interface admin.
+Contient :
+- Bouton menu mobile (offcanvas)
+- Bouton toggle sidebar desktop
+- Barre de recherche
+- Zone statusbar (contributions dynamiques du registry)
+- Cloche de notifications
+- Dropdown profil utilisateur
+
+Inclus depuis layout_admin.html uniquement.
+#}
+<header class="admin-header">
+
+    {# ── Bouton menu mobile ── #}
+    <button class="btn btn-icon d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar"
+        aria-label="Ouvrir le menu">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    {# ── Toggle sidebar desktop ── #}
+    <button id="sidebarToggle" class="d-none d-lg-flex me-2" title="Basculer le menu" aria-label="Toggle sidebar">
+        {# Icône : sidebar ouverte → cliquer pour fermer #}
+        <svg class="icon-open" width="18" height="18" viewBox="0 0 18 18" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect x="1.5" y="1.5" width="15" height="15" rx="2" stroke="currentColor" stroke-width="1.5" />
+            <line x1="6" y1="1.5" x2="6" y2="16.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M9.5 11.5L7.5 9L9.5 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </svg>
+        {# Icône : sidebar fermée → cliquer pour ouvrir #}
+        <svg class="icon-closed" width="18" height="18" viewBox="0 0 18 18" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <rect x="1.5" y="1.5" width="15" height="15" rx="2" stroke="currentColor" stroke-width="1.5" />
+            <line x1="6" y1="1.5" x2="6" y2="16.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M8.5 6.5L10.5 9L8.5 11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"
+                stroke-linejoin="round" />
+        </svg>
+    </button>
+
+    {# ── Barre de recherche ── #}
+    <div class="header-search d-none d-md-block">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" placeholder="Rechercher...">
+    </div>
+
+    {# ── Actions header (droite) ── #}
+    <div class="ms-auto d-flex align-items-center gap-3 header-actions">
+
+        {# Contributions dynamiques (StatusBar) #}
+        {% for item in registry.get_zone('statusbar') %}
+        {{ item.component | safe }}
+        {% endfor %}
+
+        {# Cloche de notifications #}
+        <button class="btn btn-icon position-relative" aria-label="Notifications">
+            <i class="far fa-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle
+                         badge rounded-pill bg-danger border border-white"
+                style="font-size:0.6rem;padding:0.25em 0.4em;">
+                3
+            </span>
+        </button>
+
+        {# Dropdown profil utilisateur #}
+        <div class="dropdown ms-2">
+            <button class="btn btn-light rounded-pill d-flex align-items-center gap-2 px-3 py-1 border" type="button"
+                data-bs-toggle="dropdown" aria-label="Menu utilisateur">
+                <div class="avatar bg-secondary rounded-circle d-flex align-items-center
+                            justify-content-center text-white" style="width:28px;height:28px;font-size:0.8rem;">
+                    {{ user.username[0]|upper if user.username else 'A' }}
+                </div>
+                <span class="d-none d-sm-block small fw-medium">{{ user.username }}</span>
+                <i class="fas fa-chevron-down small text-muted"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                <li>
+                    <div class="dropdown-header">
+                        <strong>{{ user.username }}</strong>
+                    </div>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a class="dropdown-item py-2" href="/admin/profile">
+                        <i class="fas fa-user me-2 text-muted"></i> Mon Profil
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item py-2" href="/">
+                        <i class="fas fa-external-link-alt me-2 text-muted"></i> Voir le site
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a class="dropdown-item py-2 text-danger" href="/logout">
+                        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</header>
