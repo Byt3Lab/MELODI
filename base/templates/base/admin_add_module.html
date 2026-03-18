@@ -1,0 +1,271 @@
+{% extends "base/components/layout_admin.html" %}
+
+{% block title %}Ajouter un module{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1 fw-bold">Ajouter un module</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="/admin/modules"
+                            class="text-decoration-none text-muted">Modules</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Ajouter</li>
+                </ol>
+            </nav>
+        </div>
+        <a href="/admin/modules" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <ul class="nav nav-pills" id="addModuleTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="zip-tab" data-bs-toggle="tab" data-bs-target="#zip-pane"
+                                type="button" role="tab" aria-controls="zip-pane" aria-selected="true">
+                                <i class="bi bi-file-earmark-zip me-2"></i>Fichier ZIP
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-pane"
+                                type="button" role="tab" aria-controls="url-pane" aria-selected="false">
+                                <i class="bi bi-link-45deg me-2"></i>Lien URL
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="store-tab" data-bs-toggle="tab" data-bs-target="#store-pane"
+                                type="button" role="tab" aria-controls="store-pane" aria-selected="false">
+                                <i class="bi bi-shop me-2"></i>Store MELODI
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-4">
+                    <div class="tab-content" id="addModuleTabsContent">
+
+                        <!-- Tab: ZIP -->
+                        <div class="tab-pane fade show active" id="zip-pane" role="tabpanel" aria-labelledby="zip-tab"
+                            tabindex="0">
+                            <div class="text-center mb-4">
+                                <h5 class="fw-bold">Téléverser une archive ZIP</h5>
+                                <p class="text-muted small">Sélectionnez un fichier ZIP contenant un module MELODI
+                                    valide (avec <code>infos.json</code> et <code>module.py</code>).</p>
+                            </div>
+
+                            <form id="uploadZipForm" enctype="multipart/form-data">
+                                <div class="upload-area p-5 mb-4 text-center border rounded bg-light" id="dropZone">
+                                    <i class="bi bi-cloud-arrow-up display-3 text-muted mb-3"></i>
+                                    <h5>Glissez-déposez votre archive ici</h5>
+                                    <p class="text-muted small mb-3">ou</p>
+                                    <label for="moduleZipInput" class="btn btn-primary px-4 rounded-pill">
+                                        Parcourir les fichiers
+                                    </label>
+                                    <input type="file" id="moduleZipInput" name="file" class="d-none" accept=".zip"
+                                        required>
+                                    <div id="fileSelectedInfo" class="mt-3 d-none text-primary fw-medium small">
+                                        Fichier sélectionné : <span id="fileNameDisplay"></span>
+                                    </div>
+                                </div>
+                                <div id="uploadAlert" class="alert d-none" role="alert"></div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-dark w-100 py-2 button-spinner"
+                                        id="btnUploadSubmit" disabled>
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" role="status"
+                                            aria-hidden="true"></span>
+                                        Installer le module
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Tab: URL -->
+                        <div class="tab-pane fade" id="url-pane" role="tabpanel" aria-labelledby="url-tab" tabindex="0">
+                            <div class="text-center mb-4 mt-3">
+                                <div class="mb-3">
+                                    <i class="bi bi-link display-4 text-secondary opacity-50"></i>
+                                </div>
+                                <h5>Téléchargement depuis une URL</h5>
+                                <p class="text-muted small">Entrez le lien direct vers le fichier ZIP du module.</p>
+                            </div>
+                            <div class="form-group mb-4">
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-white bg-opacity-50"><i
+                                            class="bi bi-globe2 text-muted"></i></span>
+                                    <input type="url" class="form-control"
+                                        placeholder="https://exemple.com/mon-module.zip" disabled>
+                                    <button class="btn btn-secondary px-4" disabled>Télécharger</button>
+                                </div>
+                            </div>
+                            <div class="alert alert-info border-0 bg-info bg-opacity-10 text-info text-center small">
+                                <i class="bi bi-info-circle me-1"></i> Cette fonctionnalité sera disponible
+                                prochainement.
+                            </div>
+                        </div>
+
+                        <!-- Tab: Store -->
+                        <div class="tab-pane fade" id="store-pane" role="tabpanel" aria-labelledby="store-tab"
+                            tabindex="0">
+                            <div class="text-center py-5">
+                                <i class="bi bi-shop display-1 text-primary opacity-50 mb-3"></i>
+                                <h4 class="fw-bold">Store MELODI</h4>
+                                <p class="text-muted">Parcourez et installez des modules certifiés directement depuis
+                                    notre catalogue en ligne.</p>
+                                <hr class="w-25 mx-auto my-4 text-muted">
+                                <span class="badge bg-secondary px-3 py-2 rounded-pill fs-6"><i
+                                        class="bi bi-tools me-1"></i> En cours de développement</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link {
+        color: #495057;
+        transition: all 0.2s;
+    }
+
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: #f8f9fa;
+        color: #0d6efd !important;
+    }
+
+    .nav-pills .nav-link.active {
+        color: #fff !important;
+    }
+
+    .upload-area {
+        border: 2px dashed #dee2e6 !important;
+        transition: all 0.3s ease;
+    }
+
+    .upload-area.dragover {
+        border-color: #0d6efd !important;
+        background-color: rgba(13, 110, 253, 0.05) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('moduleZipInput');
+        const fileSelectedInfo = document.getElementById('fileSelectedInfo');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const btnSubmit = document.getElementById('btnUploadSubmit');
+        const form = document.getElementById('uploadZipForm');
+        const alertBox = document.getElementById('uploadAlert');
+
+        // Drag and drop setup
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            let dt = e.dataTransfer;
+            let files = dt.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', function () {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.name.endsWith('.zip') || file.type === 'application/zip' || file.type === 'application/x-zip-compressed') {
+                    // To attach dragged file to the input explicitly (some browsers allow, some need DataTransfer object)
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+
+                    fileNameDisplay.textContent = file.name;
+                    fileSelectedInfo.classList.remove('d-none');
+                    btnSubmit.disabled = false;
+                    showAlert(); // hide alert
+                } else {
+                    showAlert('Veuillez sélectionner un fichier .zip valide.', 'danger');
+                    fileNameDisplay.textContent = '';
+                    fileSelectedInfo.classList.add('d-none');
+                    btnSubmit.disabled = true;
+                    fileInput.value = '';
+                }
+            }
+        }
+
+        function showAlert(msg = '', type = 'danger') {
+            if (!msg) {
+                alertBox.classList.add('d-none');
+                return;
+            }
+            alertBox.className = `alert alert-${type} flex-grow-1`;
+            alertBox.innerHTML = msg;
+            alertBox.classList.remove('d-none');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!fileInput.files.length) return;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            // Loading state
+            btnSubmit.disabled = true;
+            const spinner = btnSubmit.querySelector('.spinner-border');
+            spinner.classList.remove('d-none');
+            showAlert();
+
+            try {
+                const fetchResponse = await fetch('/api/base/modules/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const response = await fetchResponse.json();
+
+                if (!fetchResponse.ok || response.error) {
+                    throw new Error(response.error || 'Erreur lors du téléversement du module.');
+                }
+
+                showAlert(response.message || 'Module installé et enregistré avec succès !', 'success');
+
+                // Redirect after success
+                setTimeout(() => {
+                    window.location.href = '/admin/modules';
+                }, 1500);
+
+            } catch (error) {
+                showAlert(error.message || 'Une erreur est survenue lors du téléversement.', 'danger');
+                btnSubmit.disabled = false;
+            } finally {
+                spinner.classList.add('d-none');
+            }
+        });
+    });
+</script>
+{% endblock %}

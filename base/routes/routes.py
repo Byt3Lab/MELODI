@@ -40,6 +40,7 @@ class BaseRoutes(WebRouter):
                             {"path": "/<path:mod>/on", "methods": ["GET"], "handler": base_controller.on_module}
                         ]
                     },
+                    {"path": "/add_module", "methods": ["GET"], "handler": base_controller.admin_add_module},
                     {"path:": "/notifications", "methods": ["GET"], "handler": base_controller.notifications},
                     {"path": "/logs", "methods": ["GET"], "handler": base_controller.logs},
                     {"path": "/update", "methods": ["GET"], "handler": base_controller.update}

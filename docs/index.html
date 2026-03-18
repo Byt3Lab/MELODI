@@ -381,23 +381,28 @@
             <div class="nav-group">
                 <div class="nav-header">Architecture</div>
                 <a href="#architecture" class="nav-link">Vue d'ensemble</a>
+                <a href="#quart" class="nav-link">Quart & Asynchrone</a>
                 <a href="#lifecycle" class="nav-link">Cycle de Vie</a>
                 <a href="#modules-vs-plugins" class="nav-link">Modules vs Plugins</a>
+                <a href="#creation-module" class="nav-link">Création de Module</a>
             </div>
             <div class="nav-group">
                 <div class="nav-header">Système de Routing</div>
                 <a href="#routers" class="nav-link">WebRouter & APIRouter</a>
+                <a href="#middlewares" class="nav-link">Middlewares Web & API</a>
                 <a href="#static-files" class="nav-link">Fichiers Statiques</a>
             </div>
             <div class="nav-group">
                 <div class="nav-header">Composants</div>
                 <a href="#widgets" class="nav-link">Widgets</a>
                 <a href="#menus" class="nav-link">Menus</a>
+                <a href="#dashboard" class="nav-link">Dashboard Admin</a>
                 <a href="#homepage" class="nav-link">HomePage Manager</a>
             </div>
             <div class="nav-group">
                 <div class="nav-header">Systèmes</div>
-                <a href="#events" class="nav-link">Événements</a>
+                <a href="#events" class="nav-link">Événements asynchrones</a>
+                <a href="#actions-hooks" class="nav-link">Actions & Hooks</a>
                 <a href="#services" class="nav-link">Services</a>
                 <a href="#translation" class="nav-link">Translation (i18n)</a>
                 <a href="#storage" class="nav-link">Storage</a>
@@ -596,9 +601,9 @@ async def api_liste_clients():
         └── logo.png</code></pre>
 
                 <h3>Utilisation dans les templates</h3>
-                <pre><code>&lt;link rel="stylesheet" href="/mon_module/static/css/style.css"&gt;
-&lt;script src="/mon_module/static/js/app.js"&gt;&lt;/script&gt;
-&lt;img src="/mon_module/static/images/logo.png"&gt;</code></pre>
+                <pre><code>&lt;link rel="stylesheet" href="/static/mon_module/css/style.css"&gt;
+&lt;script src="/static/mon_module/js/app.js"&gt;&lt;/script&gt;
+&lt;img src="/static/mon_module/images/logo.png"&gt;</code></pre>
             </section>
 
             <section id="melodijs">
@@ -610,7 +615,7 @@ async def api_liste_clients():
                 <div class="alert alert-info">
                     <strong>Templates MelodiJS :</strong> Les composants MelodiJS sont stockés dans
                     <code>modulename/templates/melodijs/</code> et exposés automatiquement via
-                    <code>/static_templates_melodijs/modulename/fichier.html</code>
+                    <code>/melodijs/modulename/fichier.html</code>
                 </div>
 
                 <h3>Architecture MelodiJS</h3>
@@ -683,7 +688,7 @@ app.mount("#app")</code></pre>
                 <pre><code>import { createApp } from '/static/base/melodiJS/melodijs.js'
 
 function getUrlTemplate(template) {
-    return "/static_templates_melodijs/mon_module/" + template + ".html"
+    return "/melodijs/mon_module/" + template + ".html"
 }
 
 const app = createApp({
@@ -810,7 +815,7 @@ const app = createApp({
                 }
             },
             template: {
-                url: "/static_templates_melodijs/mon_module/todolist.html"
+                url: "/melodijs/mon_module/todolist.html"
             },
             methods: {
                 ajouterTache(e) {
@@ -846,7 +851,7 @@ app.mount("#app")</code></pre>
         &lt;c-todolist&gt;&lt;/c-todolist&gt;
     &lt;/div&gt;
     
-    &lt;script type="module" src="/mon_module/static/js/todo.js"&gt;&lt;/script&gt;
+    &lt;script type="module" src="/static/mon_module/js/todo.js"&gt;&lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
@@ -1128,7 +1133,7 @@ module = ContactModule(name="Contacts", router_name="contacts")</code></pre>
 &lt;html&gt;
 &lt;head&gt;
     &lt;title&gt;Contacts&lt;/title&gt;
-    &lt;link rel="stylesheet" href="/contacts/static/css/contacts.css"&gt;
+    &lt;link rel="stylesheet" href="/static/contacts/css/contacts.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
     &lt;h1&gt;Liste des Contacts&lt;/h1&gt;
@@ -1398,6 +1403,99 @@ module = BlogModule(name="Blog", router_name="blog")</code></pre>
                 </div>
             </section>
 
+            <section id="quart">
+                <h2>Migration vers Quart & Asynchrone</h2>
+                <p>MELODI a migré de Flask (synchrone) vers <strong>Quart</strong> (ASGI) pour gérer plus efficacement
+                    la concurrence et les I/O. Cela impacte directement la manière d'écrire les requêtes et les accès en
+                    base de données.</p>
+                <div class="alert alert-warning">
+                    <strong>Règle d'or :</strong> Utilisez <code>async def</code> pour vos vues (routes) et
+                    <code>await</code> pour les requêtes I/O ou DB (ex: <code>await self.app.db.select(...)</code>). Si
+                    vous appelez une fonction purement synchrone bloquante, utilisez l'utilitaire <code>run_sync</code>
+                    présent dans <code>core.utils</code>.
+                </div>
+            </section>
+
+            <section id="creation-module">
+                <h2>Création de Module & Installation ZIP</h2>
+                <p>Un module doit respecter une enveloppe claire pour que le <code>ModuleManager</code> de MELODI
+                    l'initialise.</p>
+                <h3>Structure minimale</h3>
+                <pre><code>mon_module/
+├── infos.json
+└── module.py</code></pre>
+                <p><code>infos.json</code> contient le nom, la version et les dépendances du module.</p>
+                <p><code>module.py</code> hérite obligatoirement de l'une des classes mères (ex:
+                    <code>ApplicationModule</code>) et assigne l'instance à la variable globale <code>module</code> :
+                </p>
+                <pre><code>class MonModule(ApplicationModule):
+    def load(self):
+        super().load()
+module = MonModule("mon_module", "mon_module")</code></pre>
+
+                <h3>Nouveau ! Upload de Module ZIP</h3>
+                <p>Vous n'avez plus besoin d'un accès SSH ou FTP direct pour ajouter un module. Compressez simplement le
+                    dossier <code>mon_module/</code> en une archive `.zip` (assurez-vous que <code>infos.json</code> et
+                    <code>module.py</code> soient à la racine de l'archive). Ensuite, via l'interface d'administration
+                    allez dans <strong>Gestion &gt; Modules</strong>, cliquez sur <strong>Ajouter</strong> et téléversez
+                    votre fichier zip !
+                </p>
+            </section>
+
+            <section id="middlewares">
+                <h2>Middlewares Web & API</h2>
+                <p>Les middlewares interceptent les requêtes avant (<code>before_request</code>) ou après
+                    (<code>after_request</code>) la route. C'est idéal pour ajouter une vérification de la session, des
+                    rôles, ou formater des données.</p>
+                <pre><code># Récupérer un middleware natif (ex. vérifier la connexion)
+auth_mw = self.get_middleware("auth_required")
+
+@self.router.add_route("/prive", before_request=[auth_mw])
+async def prive():
+    return "Contenu sécurisé uniquement accessible aux connectés"</code></pre>
+            </section>
+
+            <section id="dashboard">
+                <h2>Tableau de Bord Administrateur</h2>
+                <p>En plus du menu latéral (configuré via <code>MenuItemManager</code>), vous pouvez enrichir la page
+                    d'accueil d'administration (Dashboard) ajoutant des blocs statistiques ou d'activités.</p>
+
+                <h3>Ajouter un Widget au Tableau de bord</h3>
+                <p>Vous pouvez ajouter de petits composants visuels interactifs sur le tableau de bord d'administration
+                    :</p>
+                <pre><code>self.register_dashboard_widget(
+    title="Chiffre d'Affaire Mensuel",
+    component="mon_module/admin_dashboard/ca_widget.html",
+    dimensions={"w": 3, "h": 2},
+    priority=10,
+    required_role="admin"  # Optionnel : restreindre la visibilité
+)</code></pre>
+            </section>
+
+            <section id="actions-hooks">
+                <h2>ActionManager & HookManager</h2>
+                <p>En plus de l'<code>EventListener</code> (qui orchestre du pub/sub asynchrone), MELODI expose
+                    l'<strong>ActionManager</strong> (pour exécuter des actions, souvent UI, depuis divers endroits) et
+                    le <strong>HookManager</strong> (pour modifier dynamiquement une valeur de manière synchrone).</p>
+                <h3>HookManager (Modifier les données)</h3>
+                <p>Un module peut autoriser d'autres modules à filtrer ou altérer une donnée précise en l'injectant dans
+                    un Hook :</p>
+                <pre><code># Execution dans Module A (Donneur d'ordre)
+data = self.app.hook_manager.execute("modifier_facture", facture)
+
+# Ecoute dans Module B (Abonné)
+def add_tva(fact):
+    fact['tva'] = 20
+    return fact
+self.app.hook_manager.register("modifier_facture", add_tva)</code></pre>
+
+                <h3>ActionManager (Déclencher des comportements)</h3>
+                <p>Les actions permettent de récupérer des valeurs aggrégées, comme des générateurs de code HTML fournis
+                    par plusieurs modules pour alimenter un Header ou une Toolbar :</p>
+                <pre><code># Exécution synchronisée d'actions enregistrées sous un identifiant
+html_buttons = self.app.action_manager.execute("admin_toolbar_buttons", user=current_user)
+</code></pre>
+            </section>
         </main>
     </div>
 

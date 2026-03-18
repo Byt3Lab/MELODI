@@ -26,6 +26,7 @@ class BaseApiRoutes(APIRouter):
             {"path": "/settings/home_page/<path:home_page>/on", "methods": ["GET"], "handler": self.settings_home_page_on},
             {"path": "/settings/home_page_clear", "methods": ["GET"], "handler": self.settings_home_page_clear},
             {"path": "/modules", "methods": ["GET"], "handler": self.admin_modules},
+            {"path": "/modules/upload", "methods": ["POST"], "handler": self.upload_module},
             {"path": "/modules/<path:mod>/off", "methods": ["GET"], "handler": self.off_module},
             {"path": "/modules/<path:mod>/on", "methods": ["GET"], "handler": self.on_module},
             {"path": "/restart_server", "methods": ["GET"], "handler": self.restart_server},
@@ -83,6 +84,21 @@ class BaseApiRoutes(APIRouter):
         data = {"modules":modules,"modules_len":modules_len}
 
         return self.render_json(data)
+    
+    async def upload_module(self):
+        request = self.get_request()
+        files = await request.files
+        file_storage = files.get("file")
+        
+        from base.services.module_service import ModuleService
+        module_service = ModuleService(self.module)
+        
+        success, message = await module_service.extract_and_install_zip(file_storage)
+        
+        if success:
+            return self.render_json({"message": message}, status_code=200)
+        else:
+            return self.render_json({"error": message}, status_code=400)
     
     async def on_module(self,mod:str):
         await self.app.module_manager.on_module(mod)

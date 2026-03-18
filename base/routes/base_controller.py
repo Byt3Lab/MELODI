@@ -69,6 +69,9 @@ class BaseController(WebController):
         modules_len= len(modules)
         return await self.router.render_template("admin_modules.html",modules=modules, modules_len=modules_len)
 
+    async def admin_add_module(self):
+        return await self.router.render_template("admin_add_module.html")
+
     async def on_module(self,mod:str):
         await self.app.module_manager.on_module(mod)
         return self.router.redirect("/admin/modules")
