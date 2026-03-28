@@ -412,6 +412,7 @@
             <div class="nav-group">
                 <div class="nav-header">Base de Données</div>
                 <a href="#database" class="nav-link">DataBase ORM</a>
+                <a href="#migrations" class="nav-link">Migrations</a>
             </div>
             <div class="nav-group">
                 <div class="nav-header">Tutoriels</div>
@@ -1045,6 +1046,25 @@ self.app.db.update("produits", {"stock": 5}, where={"id": 1})
 
 # DELETE
 self.app.db.delete("produits", where={"id": 1})</code></pre>
+            </section>
+
+            <section id="migrations">
+                <h2>Migrations de Base de Données</h2>
+                <p>MELODI gère de manière autonome l'évolution de la structure de la base de données de vos modules à travers un système de migration modulaire.</p>
+
+                <h3>Fonctionnement</h3>
+                <p>Chaque module héberge ses propres scripts de migration SQL dans un dossier <code>migrations/</code>. Au démarrage, l'application vérifie automatiquement les versions grâce à la table globale <code>schema_migrations</code> et exécute de manière séquentielle les scripts manquants au sein d'une transaction (COMMIT/ROLLBACK).</p>
+
+                <h3>Structure des Fichiers</h3>
+                <p>Vos fichiers SQL doivent être nommés avec une version numérique logique. Le système parse l'identifiant numérique présent immédiatement après le "v" (ex : v1, v1.0.0, v2_ajout, etc) pour définir l'ordre logique d'exécution :</p>
+                <pre><code>mon_module/
+└── migrations/
+    ├── v1_initial.sql
+    ├── v2_ajout_champ_statut.sql
+    └── v10.0.0.sql</code></pre>
+
+                <h3>Contenu du script SQL</h3>
+                <p>Écrivez simplement du code SQL valide. Au démarrage (dans <code>core/application.py</code>), MELODI s'assure d'exécuter ce script et d'enregistrer le succès dans <code>schema_migrations</code>. S'il échoue, il annule les changements (ROLLBACK) et arrête l'exécution de la boucle pour préserver la cohérence des données de votre module.</p>
             </section>
 
             <section id="tutorial-contact">

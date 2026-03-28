@@ -8,6 +8,7 @@ Originellement basé sur Flask, l'architecture a été **migrée vers Quart** po
 - **Architecture Modulaire** : Chaque fonctionnalité métier est encapsulée dans un module autonome (`modules/`).
 - **Web-Ready et 100% Asynchrone** : Basé sur **Quart** (ASGI), permettant des WebSocket natifs et des requêtes I/O non bloquantes.
 - **Extensible sans modifier le cœur** : Système de *Hooks*, d'*Actions*, et d'*Événements* pour interagir entre modules sans couplage fort.
+- **Migrations DB Automatisées** : Système de *Migration* transactionnel intégré qui exécute séquentiellement les scripts SQL de vos modules (dossier `migrations/`).
 - **Interface d'administration intégrée** : Un module `base` fournit tout le socle (connexion, tableau de bord, gestions des modules).
 - **Internationalisation (i18n)** : Support multi-langues natif pour tous les modules.
 - **UI Réactive** : Intégration de `MelodiJS` pour le rendu réactif (type Vue.js) sans processus de build lourd.

@@ -11,7 +11,7 @@ from core.utils import HookManager
 from core.utils import ActionManager
 from core.websocket import WebSocketManager
 from core.email import EmailManager
-
+from core.db.migration import Migration
 class Application:
     def __init__(self):
         self.server = QuartAdapter()
@@ -20,6 +20,7 @@ class Application:
     def init(self):
         self.config = Config()
         self.db = DataBase(self)
+        self.migration = Migration(self)
         self.router = WebRouter(name="main", app=self, module=None)
         self.api_router = APIRouter(app=self, name="main_api")
         
@@ -93,6 +94,10 @@ class Application:
             return
         
         self.db.init_database()
+        
+        # Exécution des migrations avant de charger l'application
+        await self.migration.run_migrations()
+        
         self.user_sudo_exist = await self.verify_user_sudo_exist()
         
         if not self.user_sudo_exist:
