@@ -86,13 +86,14 @@ class Migration:
         return self._sort_modules_topologically(modules_paths)
 
     def _build_modules_paths_dict(self) -> dict[str, str]:
-        """Construit un dictionnaire contenant les chemins des modules installés et de base."""
+        """Construit un dictionnaire contenant les chemins des modules activés et de base."""
         modules_paths = {}
         if path_exist(self.app.config.PATH_DIR_BASE_MODULE):
             modules_paths["base"] = self.app.config.PATH_DIR_BASE_MODULE
         
         for module_name in self.app.module_manager.list_modules_installs:
-            modules_paths[module_name] = join_paths(self.app.config.PATH_DIR_MODULES, module_name)
+            if self.app.module_manager.isOn(module_name):
+                modules_paths[module_name] = join_paths(self.app.config.PATH_DIR_MODULES, module_name)
             
         return modules_paths
 
@@ -173,19 +174,21 @@ class Migration:
             self.current_session = session
 
             # 1. Exécuter le script Python associé (s'il existe)
-            await self._run_python_migration_if_exists(module_name, version, sql_filename, migrations_dir)
+            should_run_sql = await self._run_python_migration_if_exists(module_name, version, sql_filename, migrations_dir)
 
             # 2. Exécuter le script SQL
-            await self._run_sql_migration(session, sql_file_path)
+            if should_run_sql is not False:
+                await self._run_sql_migration(session, sql_file_path)
 
-            # 3. Mettre à jour la table de suivi
-            await self._update_tracking_version(session, module_name, version)
-            
-            # Validation de la transaction pour cette migration
-            await session.commit()
-            print(f"Migration réussie pour {module_name} : {sql_filename} (version {version})")
-            return True
+                # 3. Mettre à jour la table de suivi
+                await self._update_tracking_version(session, module_name, version)
+                
+                # Validation de la transaction pour cette migration
+                await session.commit()
+                print(f"Migration réussie pour {module_name} : {sql_filename} (version {version})")
+                return True
 
+            raise Exception(f"Migration annulée pour {module_name} (fichier {sql_filename}): le script Python a renvoyé False")
         except Exception as e:
             # Si erreur, on annule toutes les opérations de ce fichier
             await session.rollback()
@@ -200,7 +203,7 @@ class Migration:
         py_filename = sql_filename[:-4] + ".py" if sql_filename.endswith(".sql") else None
         
         if not py_filename:
-            return
+            return True
             
         py_file_path = join_paths(migrations_dir, py_filename)
         
@@ -210,7 +213,9 @@ class Migration:
                 py_module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(py_module)
                 if hasattr(py_module, "migrate"):
-                    await py_module.migrate(self)
+                    return await py_module.migrate(self)
+        
+        return True
 
     async def _run_sql_migration(self, session, sql_file_path: str):
         """Lit et exécute le contenu d'un fichier SQL dans la session courante."""
