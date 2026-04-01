@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from core import Application as Melodi
-import asyncio
 
 app = Melodi()
 
