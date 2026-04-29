@@ -2,7 +2,7 @@ import os
 import stat
 import platform
 
-class FileLawPermissions:
+class FilePermissions:
     def __init__(self, path: str):
         self.path = os.path.abspath(path)
         self.is_windows = platform.system() == "Windows"
@@ -23,30 +23,43 @@ class FileLawPermissions:
 
         try:
             is_dir = os.path.isdir(self.path)
-            mode = 0
+            mode = os.stat(self.path).st_mode
             
             # Lecture
-            if permissions.get('read'):
-                mode |= stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
+            if 'read' in permissions:
+                if permissions['read']:
+                    mode |= stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
+                else:
+                    mode &= ~(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
             
             # Écriture
-            if permissions.get('write'):
-                mode |= stat.S_IWUSR
+            if 'write' in permissions:
+                if permissions['write']:
+                    mode |= stat.S_IWUSR
+                else:
+                    mode &= ~(stat.S_IWUSR)
                 # Note: Sur Unix, l'écriture sur un dossier permet de supprimer/créer des fichiers
             
             # Exécution
+            if 'execute' in permissions:
+                if permissions['execute']:
+                    mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+                else:
+                    mode &= ~(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
             # Règle d'or : Un dossier a BESOIN de l'exécution pour être parcouru
-            if permissions.get('execute') or (is_dir and permissions.get('read')):
+            if is_dir and (mode & stat.S_IRUSR):
                 mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
 
             os.chmod(self.path, mode)
 
             if self.is_windows:
                 # Gestion spécifique de l'attribut lecture seule
-                if permissions.get('write'):
-                    os.chmod(self.path, stat.S_IWRITE)
-                else:
-                    os.chmod(self.path, stat.S_IREAD)
+                if 'write' in permissions:
+                    if permissions['write']:
+                        os.chmod(self.path, stat.S_IWRITE)
+                    else:
+                        os.chmod(self.path, stat.S_IREAD)
 
             return True
         except PermissionError:
@@ -64,14 +77,14 @@ class FileLawPermissions:
         try:
             for root, dirs, files in os.walk(self.path):
                 # Appliquer au dossier courant
-                FileLawPermissions(root).set_permissions(permissions)
+                FilePermissions(root).set_permissions(permissions)
                 # Appliquer aux fichiers
                 for f in files:
-                    FileLawPermissions(os.path.join(root, f)).set_permissions(permissions)
+                    FilePermissions(os.path.join(root, f)).set_permissions(permissions)
             return True
         except Exception as e:
             print(f"Erreur récursive : {e}")
             return False
         
     def __repr__(self):
-        return f"FileLawPermissions(path='{self.path}')"
+        return f"FilePermissions(path='{self.path}')"
