@@ -20,7 +20,12 @@ Paramètres : item (dict), size (px string, ex. "20px")
 {% if item.get('icon_url') %}
 <img src="{{ item.icon_url }}" class="me-2" style="width:{{ size }};height:{{ size }};object-fit:contain;">
 {% elif item.get('icon') %}
-<i class="{{ item.icon }}"></i>
+{% if 'name=' in item.icon %}
+<img src="/static_base_icons?{{ item.icon }}" class="me-2"
+    style="width:{{ size }};height:{{ size }};object-fit:contain;">
+{% else %}
+<i class="{{ item.icon }} me-2" style="font-size:{{ size }};"></i>
+{% endif %}
 {% endif %}
 {% endmacro %}
 
@@ -43,7 +48,8 @@ prefix – préfixe unique d'ID ("dsk_" ou "mob_")
             aria-controls="{{ l1_id }}">
             {{ nav_icon(item, "20px") }}
             <span>{{ item.label | safe }}</span>
-            <i class="fas fa-chevron-down ms-auto" style="font-size:0.8em;transition:transform .2s;"></i>
+            <img src="/static_base_icons?name=expand_more&fill=white" class="ms-auto"
+                style="width:16px;height:16px;transition:transform .2s;">
         </a>
 
         <div class="collapse" id="{{ l1_id }}">
@@ -59,7 +65,8 @@ prefix – préfixe unique d'ID ("dsk_" ou "mob_")
                         aria-expanded="false" aria-controls="{{ l2_id }}" style="font-size:0.9em;padding-left:1.2rem;">
                         {{ nav_icon(child, "16px") }}
                         <span>{{ child.label | safe }}</span>
-                        <i class="fas fa-chevron-down ms-auto" style="font-size:0.7em;transition:transform .2s;"></i>
+                        <img src="/static_base_icons?name=expand_more&fill=white" class="ms-auto"
+                            style="width:14px;height:14px;transition:transform .2s;">
                     </a>
 
                     <div class="collapse" id="{{ l2_id }}">

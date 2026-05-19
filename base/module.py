@@ -51,30 +51,30 @@ class Base(ApplicationModule):
         # ------------------------------------------------------------------
         
         # Dashboard item
-        self.register_navigation(label="Tableau de bord", icon="fas fa-chart-pie", url="/admin", priority=100)
+        self.register_navigation(label="Tableau de bord", icon="name=dashboard&fill=white", url="/admin", priority=100)
         
         # Gestion with Sub-menus
         self.register_navigation(
             label="Gestion",
-            icon="fas fa-briefcase",
+            icon="name=admin_panel_settings&fill=white",
             priority=90,
             children=[
-                {"label": "Utilisateurs", "icon": "fas fa-users", "url": "/admin/users"},
-                {"label": "Modules", "icon": "fas fa-cubes", "url": "/admin/modules"},
-                {"label": "Paramètres globaux", "icon": "fas fa-sliders-h", "url": "/admin/settings"},
-                {"label": "Mise à jour", "icon": "fas fa-sliders-h", "url": "/admin/update"}
+                {"label": "Utilisateurs", "icon": "name=people&fill=white", "url": "/admin/users"},
+                {"label": "Modules", "icon": "name=extension&fill=white", "url": "/admin/modules"},
+                {"label": "Paramètres globaux", "icon": "name=tune&fill=white", "url": "/admin/settings"},
+                {"label": "Mise à jour", "icon": "name=update&fill=white", "url": "/admin/update"}
             ]
         )
         
         # System with Permissions and Sub-menus
         self.register_navigation(
             label="Système",
-            icon="fas fa-cogs",
+            icon="name=settings_applications&fill=white",
             priority=40,
             required_role="admin",
             children=[
-                {"label": "Paramètres", "icon": "fas fa-cog", "url": "/admin/settings"},
-                {"label": "Journaux", "icon": "fas fa-list-alt", "url": "/admin/logs"}
+                {"label": "Paramètres", "icon": "name=settings&fill=white", "url": "/admin/settings"},
+                {"label": "Journaux", "icon": "name=list_alt&fill=white", "url": "/admin/logs"}
             ]
         )
 

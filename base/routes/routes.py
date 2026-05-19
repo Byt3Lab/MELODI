@@ -14,6 +14,7 @@ class BaseRoutes(WebRouter):
         self.after_request()(self.get_middleware("deny_iframe"))
         
         self.add_route("/", methods=["GET"])(base_controller.home)
+        self.add_route("/static_base_icons", methods=["GET"])(base_controller.static_base_icons)
 
         self.add_many_routes([
             {"path": "/login", "methods": ["GET", 'post'], "handler": base_controller.login},

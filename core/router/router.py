@@ -198,9 +198,9 @@ class Router:
         from quart import request
         return request
     
-    def make_response(self, content, status_code=200, headers=None):
+    async def make_response(self, content, status_code=200, headers=None):
         from quart import make_response
-        response = make_response(content, status_code)
+        response = await make_response(content, status_code)
         if headers:
             for key, value in headers.items():
                 response.headers[key] = value

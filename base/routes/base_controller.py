@@ -99,3 +99,42 @@ class BaseController(WebController):
 
     async def notifications(self):
         return await self.router.render_template("admin_notifications.html")
+
+    async def static_base_icons(self):
+        from quart import abort
+
+        req = self.router.get_request()
+        name = req.args.get('name')
+        fill = req.args.get('fill', '')
+        size = req.args.get('size', '')
+
+        if not name:
+            return abort(400, "Missing name parameter")
+        
+        import os, re
+        
+        icon_path = os.path.join(os.getcwd(), "base", "static", "icons", f"{name}.svg")
+        
+        if not os.path.exists(icon_path):
+            return abort(404, "Icon not found")
+        
+        with open(icon_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        if size:
+            content = re.sub(r'(<svg[^>]*?)\sheight="[^"]*"', r'\1', content)
+            content = re.sub(r'(<svg[^>]*?)\swidth="[^"]*"', r'\1', content)
+            content = re.sub(r'(<svg)', f'\\1 width="{size}" height="{size}"', content)
+
+        if fill:
+            # On vérifie si la balise <svg> possède déjà un attribut fill
+            # Cette regex cherche un 'fill=' UNIQUEMENT à l'intérieur des chevrons <svg ...>
+            if re.search(r'<svg[^>]*\sfill="[^"]*"', content):
+                # Si oui, on remplace uniquement celui du <svg>
+                content = re.sub(r'(<svg[^>]*\s)fill="[^"]*"', f'\\1fill="{fill}"', content)
+            else:
+                # Si non, on l'injecte juste après le mot '<svg'
+                content = re.sub(r'(<svg)', f'\\1 fill="{fill}"', content)
+                
+        # Some Material icons have internal fill/stroke that might need override or the SVG itself will take fill.
+        return await self.router.make_response(content, 200, {"Content-Type": "image/svg+xml"})
