@@ -16,7 +16,7 @@
     border-radius: 14px;
     overflow: hidden;
     background: #fff;
-    box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
   }
 
   /* --- Left Section --- */
@@ -31,7 +31,7 @@
   .auth-left .brand img {
     width: 56px;
     height: auto;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
   }
 
   .auth-left p {
@@ -71,6 +71,7 @@
     .auth-left {
       display: none;
     }
+
     .auth-card {
       border-radius: 10px;
     }
@@ -89,7 +90,7 @@
           <!-- Left Panel -->
           <div class="col-md-5 auth-left">
             <div class="brand d-flex align-items-center gap-2 mb-3">
-              <img src="/static/base/melodi.png" alt="Melodi">
+              <img src="/static/base/melodi.png" alt="Melodi" style="border-radius: 30px;">
               <div>
                 <a href="/" style="color:#fff;text-decoration:none;">
                   <strong>MELODI</strong>
@@ -99,8 +100,8 @@
             </div>
 
             <h3>Bienvenue 👋</h3>
-            <p>Connectez-vous pour accéder à votre tableau de bord.  
-               Si vous n’avez pas de compte, contactez votre administrateur.</p>
+            <p>Connectez-vous pour accéder à votre tableau de bord.
+              Si vous n’avez pas de compte, contactez votre administrateur.</p>
 
             <div class="mt-auto footnote">Sécurité & confidentialité garanties</div>
           </div>
@@ -110,25 +111,25 @@
             <h4 class="mb-3">Connexion</h4>
 
             {% if error %}
-              <div class="alert alert-danger">{{ error }}</div>
+            <div class="alert alert-danger">{{ error }}</div>
             {% endif %}
 
             <form method="post" action="/login">
 
               {% if csrf_token %}
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
               {% endif %}
 
               <div class="mb-3">
                 <label for="username" class="form-label">Email ou identifiant</label>
                 <input type="text" id="username" name="username" class="form-control"
-                       placeholder="ex: admin@entreprise.com" required>
+                  placeholder="ex: admin@entreprise.com" required>
               </div>
 
               <div class="mb-3">
                 <label for="password" class="form-label">Mot de passe</label>
                 <input type="password" id="password" name="password" class="form-control"
-                       placeholder="Entrez votre mot de passe" required>
+                  placeholder="Entrez votre mot de passe" required>
               </div>
 
               <div class="d-flex justify-content-between align-items-center mb-3">

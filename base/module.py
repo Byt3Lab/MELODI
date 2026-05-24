@@ -59,10 +59,19 @@ class Base(ApplicationModule):
             icon="name=admin_panel_settings&fill=white",
             priority=90,
             children=[
-                {"label": "Utilisateurs", "icon": "name=people&fill=white", "url": "/admin/users"},
-                {"label": "Modules", "icon": "name=extension&fill=white", "url": "/admin/modules"},
-                {"label": "Paramètres globaux", "icon": "name=tune&fill=white", "url": "/admin/settings"},
-                {"label": "Mise à jour", "icon": "name=update&fill=white", "url": "/admin/update"}
+                {"label": "Utilisateurs", "icon": "name=people&fill=white", "url": "/admin/base/users", "children": [
+                    {"label": "Tous les utilisateurs", "icon": "name=people&fill=white", "url": "/admin/base/users"},
+                    {"label": "Ajouter un utilisateur", "icon": "name=person_add&fill=white", "url": "/admin/base/users/add"},
+                    {"label": "Rôles et permissions", "icon": "name=security&fill=white", "url": "/admin/base/users/roles"},
+                    {"label": "Sessions actives", "icon": "name=devices&fill=white", "url": "/admin/base/users/sessions"},
+                    {"label": "Logs d'activité", "icon": "name=history&fill=white", "url": "/admin/base/users/activity-logs"},
+                ]},
+                {"label": "Modules", "icon": "name=extension&fill=white", "url": "/admin/base/modules", "children": [
+                    {"label": "Tous les modules", "icon": "name=extension&fill=white", "url": "/admin/base/modules"},
+                    {"label": "Ajouter un module", "icon": "name=add&fill=white", "url": "/admin/base/modules/add"},
+                ]},
+                {"label": "Paramètres globaux", "icon": "name=tune&fill=white", "url": "/admin/base/settings"},
+                {"label": "Mise à jour", "icon": "name=update&fill=white", "url": "/admin/base/update"}
             ]
         )
         
@@ -73,8 +82,8 @@ class Base(ApplicationModule):
             priority=40,
             required_role="admin",
             children=[
-                {"label": "Paramètres", "icon": "name=settings&fill=white", "url": "/admin/settings"},
-                {"label": "Journaux", "icon": "name=list_alt&fill=white", "url": "/admin/logs"}
+                {"label": "Paramètres", "icon": "name=settings&fill=white", "url": "/admin/base/settings"},
+                {"label": "Journaux", "icon": "name=list_alt&fill=white", "url": "/admin/base/logs"}
             ]
         )
 
