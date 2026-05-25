@@ -1,0 +1,80 @@
+<div id="ws-status" class="d-flex align-items-center gap-2 px-2 py-1 rounded-pill bg-light border"
+    title="WebSocket Status">
+    <span class="ws-dot"
+        style="width: 8px; height: 8px; border-radius: 50%; background-color: #94a3b8; display: inline-block;"></span>
+    <span class="ws-text small text-muted fw-medium" style="font-size: 0.7rem;">Connecting...</span>
+</div>
+
+<script>
+    (function () {
+        if (!window.wsManager) {
+            console.error('[Admin] WebSocketManager introuvable — vérifiez que le script est inclus.');
+            return;
+        }
+
+        const wsStatus = document.getElementById('ws-status');
+        const dot = wsStatus?.querySelector('.ws-dot');
+        const text = wsStatus?.querySelector('.ws-text');
+
+        /** Met à jour le badge de statut WebSocket dans la statusbar. */
+        function updateStatus(status) {
+            if (!dot || !text) return;
+            const states = {
+                open: { color: '#22c55e', label: 'Online', cls: 'ws-text small text-success fw-medium' },
+                close: { color: '#ef4444', label: 'Offline', cls: 'ws-text small text-danger fw-medium' },
+                error: { color: '#f59e0b', label: 'Erreur', cls: 'ws-text small text-warning fw-medium' },
+            };
+            const s = states[status] ?? { color: '#94a3b8', label: 'Connexion…', cls: 'ws-text small text-muted fw-medium' };
+            dot.style.backgroundColor = s.color;
+            text.innerText = s.label;
+            text.className = s.cls;
+        }
+
+        window.wsManager.connect();
+
+        window.wsManager.on('open', async () => {
+            console.log('[Admin] WebSocket connecté.');
+            updateStatus('open');
+
+            // Ping de contrôle au démarrage
+            try {
+                const res = await window.wsManager.call('base', 'ping', {
+                    client_time: new Date().toISOString(),
+                    context: 'admin_layout_init',
+                });
+                console.log('[Admin] RPC ping :', res);
+            } catch (err) {
+                console.error('[Admin] RPC ping échoué :', err.message);
+            }
+        });
+
+        window.wsManager.on('close', () => {
+            console.warn('[Admin] WebSocket déconnecté.');
+            updateStatus('close');
+        });
+
+        window.wsManager.on('error', (err) => {
+            console.error('[Admin] WebSocket erreur :', err);
+            updateStatus('error');
+        });
+
+        window.wsManager.on('broadcast', (msg) => console.log('[Admin] broadcast :', msg));
+        window.wsManager.on('direct', (msg) => console.log('[Admin] direct :', msg));
+
+        /**
+        * Helper console développeur.
+        * Usage : await testWS('base', 'ping', {foo: 'bar'})
+        */
+        window.testWS = async (module, func, params = {}) => {
+            console.log(`[testWS] ${module}.${func}`, params);
+            try {
+                const result = await window.wsManager.call(module, func, params);
+                console.log('[testWS] Résultat :', result);
+                return result;
+            } catch (e) {
+                console.error('[testWS] Erreur :', e.message);
+                throw e;
+            }
+        };
+    })();
+</script>

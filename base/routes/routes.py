@@ -25,9 +25,9 @@ class BaseRoutes(WebRouter):
             {"path": "/logout", "methods": ["GET"], "handler": base_controller.logout},
             {"path": "/admin", "methods": ["GET"], "handler": base_controller.admin_dashboard,
                 "children": [
-                    {"path": "/users", "methods": ["GET"], "handler": base_controller.admin_users},
-                    {"path": "/profile", "methods": ["GET"], "handler": base_controller.profile},
-                    {"path": "/settings", "methods": ["GET"], "handler": base_controller.admin_settings,
+                    {"path": "/base/users", "methods": ["GET"], "handler": base_controller.admin_users},
+                    {"path": "/base/profile", "methods": ["GET"], "handler": base_controller.profile},
+                    {"path": "/base/settings", "methods": ["GET"], "handler": base_controller.admin_settings,
                         "children": [
                             {"path": "/widgets", "methods": ["GET"], "handler": base_controller.settings_widgets},
                             {"path": "/home_page", "methods": ["GET"], "handler": base_controller.settings_home_page},
@@ -35,16 +35,16 @@ class BaseRoutes(WebRouter):
                             {"path": "/home_page_clear", "methods": ["GET"], "handler": base_controller.settings_home_page_clear}
                         ]
                     },
-                    {"path": "/modules", "methods": ["GET"], "handler": base_controller.admin_modules,
+                    {"path": "/base/modules", "methods": ["GET"], "handler": base_controller.admin_modules,
                         "children": [
                             {"path": "/<path:mod>/off", "methods": ["GET"], "handler": base_controller.off_module},
                             {"path": "/<path:mod>/on", "methods": ["GET"], "handler": base_controller.on_module}
                         ]
                     },
-                    {"path": "/add_module", "methods": ["GET"], "handler": base_controller.admin_add_module},
-                    {"path:": "/notifications", "methods": ["GET"], "handler": base_controller.notifications},
-                    {"path": "/logs", "methods": ["GET"], "handler": base_controller.logs},
-                    {"path": "/update", "methods": ["GET"], "handler": base_controller.update}
+                    {"path": "/base/add_module", "methods": ["GET"], "handler": base_controller.admin_add_module},
+                    {"path:": "/base/notifications", "methods": ["GET"], "handler": base_controller.notifications},
+                    {"path": "/base/logs", "methods": ["GET"], "handler": base_controller.logs},
+                    {"path": "/base/update", "methods": ["GET"], "handler": base_controller.update}
                 ]
             }
         ], before_request=[self.get_middleware("auth_required")]) # self.get_middleware("admin_only")])

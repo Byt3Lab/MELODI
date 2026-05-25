@@ -38,14 +38,58 @@ class Base(ApplicationModule):
     def init_load(self):
         self.init_translation("fr")
         self.add_404_not_found()
+        self.add_widgets()
+        self.add_navigation()
+        self.add_ws_function()
+        self.add_middlewares()
+        # ------------------------------------------------------------------
+        # Context Processor: User info available in all templates
+        # ------------------------------------------------------------------
 
+        self.add_context_processor(self.inject_user_context)
+
+    async def inject_user_context(self):
+        """
+        Injecte dans tous les templates Jinja2 :
+            - current_user      : dict complet du payload utilisateur (ou None)
+            - is_authenticated  : bool — True si une session utilisateur est active
+            - user_role         : str  — rôle de l'utilisateur (ex. 'admin', 'user') ou None
+            - user_permissions  : list — liste des permissions de l'utilisateur ou []
+        """
+        from quart import session
+        raw = session.get("user_payload")
+        if raw:
+            try:
+                user = json.loads(raw) if isinstance(raw, str) else raw
+            except (ValueError, TypeError):
+                user = None
+        else:
+            user = None
+
+        return {
+            "current_user":          user,
+            "user_is_authenticated":  user is not None,
+            "user_role":             user.get("role") if user else None,
+            "user_is_sudo":             user.get("is_sudo") if user else None,
+            "user_permissions":      user.get("permissions", []) if user else [],
+        }
+
+    def add_404_not_found(self):
+        PATH_DIR_BASE_MODULE = self.app.config.PATH_DIR_BASE_MODULE
+        self.app.config.path_template_404_not_found = join_paths(PATH_DIR_BASE_MODULE, 'templates', 'base', '404.html')
+        
+    def add_widgets(self):
         self.register_dashboard_widget(
             title="Base Widget",
-            component=self.base_widget,
+            component=self.render_widget_template("dashboard"),
             dimensions={"w": 4, "h": 2},
             priority=10
         )
-        
+
+        # StatusBar Zone (Top Admin Header)
+        self.register_statusbar_item(component=self.render_widget_template("ws_status"), priority=100)
+
+    def add_navigation(self):
         # ------------------------------------------------------------------
         # Contribution Registry: Layout Injection
         # ------------------------------------------------------------------
@@ -87,15 +131,7 @@ class Base(ApplicationModule):
             ]
         )
 
-        # StatusBar Zone (Top Admin Header)
-        ws_status_html = """
-        <div id="ws-status" class="d-flex align-items-center gap-2 px-2 py-1 rounded-pill bg-light border" title="WebSocket Status">
-            <span class="ws-dot" style="width: 8px; height: 8px; border-radius: 50%; background-color: #94a3b8; display: inline-block;"></span>
-            <span class="ws-text small text-muted fw-medium" style="font-size: 0.7rem;">Connecting...</span>
-        </div>
-        """
-        self.register_statusbar_item(component=ws_status_html, priority=100)
-
+    def add_ws_function(self):
         @self.register_ws_function()
         async def ping(params, client):
             import asyncio
@@ -111,120 +147,95 @@ class Base(ApplicationModule):
 
             return {"message": "pong", "received": params}
 
-        # ------------------------------------------------------------------
-        # Context Processor: User info available in all templates
-        # ------------------------------------------------------------------
+        @self.register_ws_function("base.ping")
+        async def ping(params, client):
+            await asyncio.sleep(2)
 
-        self.add_context_processor(self.inject_user_context)
+            # send broadcast message to all connected clients
+            await self.app.websocket_manager.broadcast(f"Ping received from client {client.id}")
+           
+            await asyncio.sleep(2)
 
-        self.register_middlewares({
-            "auth_required": self.auth_required_middleware,
-            "guest_only": self.guest_only_middleware,
-            "api_auth_required": self.api_auth_required_middleware,
-            "api_guest_only": self.api_guest_only_middleware,
-            "deny_iframe": self.deny_iframe_middelware,
-            "check_maintenance": self.check_maintenance_middleware,
-            "admin_only": self.admin_only_middleware,
-            "api_admin_only": self.api_admin_only_middleware,
-        })
+            await self.app.websocket_manager.send_to(client.id, f"Direct response to client {client.id}")
 
-    async def inject_user_context(self):
-        """
-        Injecte dans tous les templates Jinja2 :
-            - current_user      : dict complet du payload utilisateur (ou None)
-            - is_authenticated  : bool — True si une session utilisateur est active
-            - user_role         : str  — rôle de l'utilisateur (ex. 'admin', 'user') ou None
-            - user_permissions  : list — liste des permissions de l'utilisateur ou []
-        """
-        from quart import session
-        raw = session.get("user_payload")
-        if raw:
-            try:
-                user = json.loads(raw) if isinstance(raw, str) else raw
-            except (ValueError, TypeError):
-                user = None
-        else:
-            user = None
-
-        return {
-            "current_user":          user,
-            "user_is_authenticated":  user is not None,
-            "user_role":             user.get("role") if user else None,
-            "user_is_sudo":             user.get("is_sudo") if user else None,
-            "user_permissions":      user.get("permissions", []) if user else [],
-        }
-
-    def add_404_not_found(self):
-        PATH_DIR_BASE_MODULE = self.app.config.PATH_DIR_BASE_MODULE
-        self.app.config.path_template_404_not_found = join_paths(PATH_DIR_BASE_MODULE, 'templates', 'base', '404.html')
+            return {"message": "pong", "received": params}
         
-    def base_widget(self):
-        return "<div><h3>Base Widget</h3><p>This is a sample widget from the Base module.</p></div>"
-    
-    def auth_required_middleware(self,router:WebRouter):
-        user = router.get_session("user_payload")
-        if not user:
-            return router.redirect("/login") 
-        payload = json.loads(user)
-        router.set_scope_attr("user_payload", payload)
-
-    def guest_only_middleware(self, router:WebRouter):
-        user = router.get_session("user_payload")
-
-        if user:
-            return router.redirect("/")
-            
-    def api_auth_required_middleware(self,router:APIRouter):
-        payload = None
-
-        user = router.get_session("user_payload")
-
-        if user:
+    def add_middlewares(self):
+        def auth_required_middleware(router:WebRouter):
+            user = router.get_session("user_payload")
+            if not user:
+                return router.redirect("/login") 
             payload = json.loads(user)
-            return None
-        
-        auth_header = router.get_header("Authorization")
+            router.set_scope_attr("user_payload", payload)
 
-        if auth_header and auth_header.startswith("Bearer "):
-            jwt_token = auth_header.split(" ")[1]
-            
-            payload = router.jwt_decode(jwt_token)
-            
-            if payload:
-                router.set_scope_attr("user_payload", payload)
+        def guest_only_middleware(router:WebRouter):
+            user = router.get_session("user_payload")
+
+            if user:
+                return router.redirect("/")
+                
+        def api_auth_required_middleware(router:APIRouter):
+            payload = None
+
+            user = router.get_session("user_payload")
+
+            if user:
+                payload = json.loads(user)
                 return None
             
-        return router.render_json({"error": "Unauthorized"}, status_code=401)
+            auth_header = router.get_header("Authorization")
+
+            if auth_header and auth_header.startswith("Bearer "):
+                jwt_token = auth_header.split(" ")[1]
+                
+                payload = router.jwt_decode(jwt_token)
+                
+                if payload:
+                    router.set_scope_attr("user_payload", payload)
+                    return None
+                
+            return router.render_json({"error": "Unauthorized"}, status_code=401)
+            
+        def api_guest_only_middleware(router:APIRouter):
+            user = router.get_session("user_payload")
+
+            if user:
+                return router.render_json({"error": "Unauthorized"}, status_code=400)
+            
+            if router.get_header("Authorization"):
+                return router.render_json({"error": "Unauthorized"}, status_code=400)
+            
+        def admin_only_middleware(router:WebRouter):
+            user = router.get_scope_attr("user_payload")
+
+            if not user or user.get("role") != "admin":
+                return router.redirect("/")
+
+        def api_admin_only_middleware(router:APIRouter):
+            user = router.get_scope_attr("user_payload")
+
+            if not user or user.get("role") != "admin":
+                return router.render_json({"error": "Unauthorized"}, status_code=403)
+            
+        def deny_iframe_middelware(response: Response) -> Response:
+            response.headers['X-Frame-Options'] = 'DENY'
+            return response
         
-    def api_guest_only_middleware(self, router:APIRouter):
-        user = router.get_session("user_payload")
+        def check_maintenance_middleware():
+            if not self.app.config.allow_request:
+                return "Service Unavailable for maintenance", 503
 
-        if user:
-            return router.render_json({"error": "Unauthorized"}, status_code=400)
+        self.register_middlewares({
+            "auth_required": auth_required_middleware,
+            "guest_only": guest_only_middleware,
+            "api_auth_required": api_auth_required_middleware,
+            "api_guest_only": api_guest_only_middleware,
+            "deny_iframe": deny_iframe_middelware,
+            "check_maintenance": check_maintenance_middleware,
+            "admin_only": admin_only_middleware,
+            "api_admin_only": api_admin_only_middleware,
+        })
         
-        if router.get_header("Authorization"):
-            return router.render_json({"error": "Unauthorized"}, status_code=400)
-        
-    def admin_only_middleware(self, router:WebRouter):
-        user = router.get_scope_attr("user_payload")
-
-        if not user or user.get("role") != "admin":
-            return router.redirect("/")
-
-    def api_admin_only_middleware(self, router:APIRouter):
-        user = router.get_scope_attr("user_payload")
-
-        if not user or user.get("role") != "admin":
-            return router.render_json({"error": "Unauthorized"}, status_code=403)
-        
-    def deny_iframe_middelware(self,response: Response) -> Response:
-        response.headers['X-Frame-Options'] = 'DENY'
-        return response
-    
-    def check_maintenance_middleware(self):
-        if not self.app.config.allow_request:
-            return "Service Unavailable for maintenance", 503
-
 module = Base(
     name="base", 
     router_name="base", 
