@@ -1,9 +1,10 @@
 {
-    "version":"1.0",
-    "name":"melodi docs",
-    "title":"gestion de la documentation",
-    "description":"gestion de la documentation",
-    "depends":{
-        "modules":[]
+    "version": "1.0",
+    "name": "melodi docs",
+    "title": "gestion de la documentation",
+    "description": "gestion de la documentation",
+    "type_distribution": "cloud",
+    "depends": {
+        "modules": []
     }
 }

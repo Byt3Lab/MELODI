@@ -125,6 +125,12 @@ class ModuleManager:
 
         module_infos = self.get_module_infos(name_module)
     
+        type_distribution = module_infos.get("type_distribution", "")
+
+        if type_distribution != "" and type_distribution != self.app.config.TYPE_DISTRIBUTION:
+            print(f"Le module {name_module} n'est pas compatible avec la distribution {self.app.config.TYPE_DISTRIBUTION}")
+            return
+
         try:
             depends = module_infos["depends"]["modules"]
         except:

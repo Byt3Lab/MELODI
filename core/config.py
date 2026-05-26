@@ -13,6 +13,7 @@ class Config:
     PATH_DIR_BASE_MODULE = join_paths(PATH_DIR_RACINE, "base")
     PATH_DIR_MODULES = join_paths(PATH_DIR_RACINE, "modules")
     PATH_DIR_STORAGE = join_paths(PATH_DIR_RACINE, "storage")
+    TYPE_DISTRIBUTION = "cloud"
     allow_request = True
     path_template_404_not_found: str = ""
     infos_org = {}
@@ -31,7 +32,18 @@ class Config:
         self.load_infos_org()
         self.load_secret_key()
         self.load_jwt_secret_key()
+        self.load_type_distribution()
         self.ensure_storage_directories()
+
+    def load_type_distribution(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "type_distribution.txt")
+        if path_exist(path):
+            self.TYPE_DISTRIBUTION = read_file(path_file=path).strip()
+            if self.TYPE_DISTRIBUTION not in ["cloud", "local"]:
+                self.TYPE_DISTRIBUTION = "cloud"
+        else:
+            self.TYPE_DISTRIBUTION = "cloud"
+            write_file(path_file=path, content=self.TYPE_DISTRIBUTION)
 
     def load_secret_key(self):
         path = join_paths(self.PATH_DIR_CONFIG, "secret_key.txt")
