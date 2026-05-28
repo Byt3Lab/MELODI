@@ -112,15 +112,38 @@ class Module:
             module_name = self.dirname
         return self.app.middleware_manager.get_middleware(module_name=module_name, middleware=middleware)
 
-    def add_event_listener(self, event_name:str, listener:Callable, module_name:str|None=None):
-        if module_name is None:
-            module_name = self.dirname
-        self.app.event_listener.add_event_listener(module_name, event_name, listener)
+    def add_event_listener(self, target_module: str, event_name: str, listener: Callable):
+        """S'abonne à un événement émis par un autre module."""
+        if target_module == self.dirname:
+            raise ValueError("Un module ne peut pas s'abonner à ses propres événements.")
+        self.app.event_listener.add_event_listener(target_module, event_name, listener)
 
-    def notify_event(self, event_name:str, data:Any=None, module_name:str|None=None):
-        if module_name is None:
-            module_name = self.dirname
-        self.app.event_listener.notify_event(module_name, event_name, data)
+    def notify_event(self, event_name: str, data: Any = None):
+        """Déclenche un événement propre à ce module."""
+        self.app.event_listener.notify_event(self.dirname, event_name, data)
+
+    def add_hook(self, target_module: str, hook_name: str, hook: Callable):
+        """S'abonne à un hook exposé par un autre module."""
+        if target_module == self.dirname:
+            raise ValueError("Un module ne peut pas s'abonner à ses propres hooks.")
+        self.app.hook_manager.add_hook(target_module, hook_name, hook)
+
+    def execute_hook(self, hook_name: str, *args, **kwargs):
+        """Déclenche un hook pour informer le reste de l'application."""
+        # Un module déclenche toujours ses propres hooks
+        self.app.hook_manager.execute_hook(self.dirname, hook_name, *args, **kwargs)
+
+    def add_action(self, action_name: str, action: Callable):
+        """Enregistre une nouvelle action disponible pour ce module."""
+        # Un module ne devrait enregistrer des actions que pour lui-même
+        self.app.action_manager.add_action(self.dirname, action_name, action)
+
+    def execute_action(self, target_module: str, action_name: str, *args, **kwargs):
+        """Demande l'exécution d'une action appartenant à un autre module."""
+        if target_module == self.dirname:
+            raise ValueError("Un module ne peut pas exécuter ses propres actions.")
+        # On exige le module cible
+        self.app.action_manager.execute_action(target_module, action_name, *args, **kwargs)
 
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         if self.translation == None:
