@@ -1,10 +1,16 @@
+import inspect
 from typing import Any
+import asyncio
+
 class EventListener:
     def __init__(self):
         self._events:dict[str,dict[str,list]] = {}
+        self.background_tasks = set()
 
     def add_event_listener(self, module_name:str, event_name: str, callback):
         """Ajoute un callback pour un événement."""
+        if not inspect.iscoroutinefunction(callback):
+            raise ValueError(f"Le callback pour '{event_name}' doit être une fonction asynchrone (async def).")
         if module_name not in self._events:
             self._events[module_name] = {}
             self._events[module_name][event_name] = []
@@ -30,8 +36,9 @@ class EventListener:
         """Supprime tous les callbacks de tous les événements."""
         self._events.clear()
         
-    def notify_event(self, module_name:str, event_name: str, data: Any = None):
+    async def notify_event(self, module_name:str, event_name: str, data=None):
         """Déclenche l’événement et exécute tous les callbacks associés."""
-
         for callback in self._events.get(module_name, {}).get(event_name, []):
-            callback(data)
+            task = asyncio.create_task(callback(data)) 
+            self.background_tasks.add(task)
+            task.add_done_callback(self.background_tasks.discard)

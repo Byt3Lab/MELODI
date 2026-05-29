@@ -1,8 +1,12 @@
+import inspect
+
 class HookManager:
     def __init__(self):
         self._hooks = {}
 
     def register_hook(self, module_name: str, hook_name: str, func):
+        if not inspect.iscoroutinefunction(func):
+            raise ValueError(f"Le hook '{hook_name}' doit être une fonction asynchrone (async def).")
         if module_name not in self._hooks:
             self._hooks[module_name] = {}
         if hook_name not in self._hooks[module_name]:
@@ -10,10 +14,17 @@ class HookManager:
         
         self._hooks[module_name][hook_name].append(func)
 
-    def execute_hook(self, module_name: str, hook_name: str, *args, **kwargs):
+    async def execute_hook(self, module_name: str, hook_name: str, payload=None):
+        """
+        Exécute les hooks en mode pipeline. Chaque hook prend un "payload" 
+        (objet ou dict), le modifie, et sa valeur de retour devient le payload 
+        pour le hook suivant.
+        """
         if module_name in self._hooks and hook_name in self._hooks[module_name]:
             for func in self._hooks[module_name][hook_name]:
-                func(*args, **kwargs)
+                payload = await func(payload)
+                
+        return payload
 
     def remove_hook(self, module_name: str, hook_name: str, func):
         """Supprime un callback spécifique d'un hook."""

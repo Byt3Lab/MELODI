@@ -2,7 +2,7 @@
 :root {
     --sidebar-width: 280px;
     --header-height: 70px;
-    --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --primary-gradient: linear-gradient(135deg, #002a4e 0%, #004a8d 100%);
     --accent-color: #3b82f6;
     --text-muted: #94a3b8;
     --border-color: #e2e8f0;
@@ -25,7 +25,7 @@ body {
 /* ── Sidebar ────────────────────────────────────────────────────────────── */
 #admin-sidebar {
     width: var(--sidebar-width);
-    background: var(--primary-gradient);
+    background: #1c1c1c;
     color: #fff;
     position: fixed;
     top: 0;
@@ -145,34 +145,6 @@ body {
     backdrop-filter: blur(10px);
 }
 
-.header-search {
-    position: relative;
-    max-width: 400px;
-    width: 100%;
-}
-
-.header-search input {
-    background: var(--bg-light);
-    border: 1px solid transparent;
-    padding-left: 2.5rem;
-    border-radius: 99px;
-    transition: all .2s;
-}
-
-.header-search input:focus {
-    background: #fff;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, .1);
-}
-
-.header-search i {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-}
-
 .header-actions .btn-icon {
     width: 40px;
     height: 40px;
@@ -263,6 +235,7 @@ body.sidebar-collapsed #admin-main {
 /* ── Responsive mobile ───────────────────────────────────────────────────── */
 @media (max-width: 991.98px) {
     #admin-sidebar {
+        background-color: #1c1c1c;
         transform: translateX(-100%);
         width: 280px;
     }
@@ -280,7 +253,7 @@ body.sidebar-collapsed #admin-main {
     }
 
     .offcanvas-start {
-        background: var(--primary-gradient);
+        background: #2a2929;
         color: white;
         border: none;
     }

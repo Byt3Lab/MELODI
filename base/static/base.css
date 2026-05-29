@@ -6,8 +6,8 @@
     --muted2: rgba(255, 255, 255, 0.65);
 
     /* New Design Variables */
-    --brand-dark: #003366;
-    --brand-light: #00509e;
+    --brand-dark: var(--primary-900);
+    --brand-light: var(--primary-700);
     --brand-accent: #FFD580;
     --nav-height: 70px;
 }
@@ -98,6 +98,7 @@
     color: var(--brand-dark);
     transform: translateY(-3px);
 }
+
 /* Reference Section Styles */
 .reference-section {
     padding: 6rem 0;
@@ -184,4 +185,3 @@
     opacity: 0;
     transform: translateX(-30px);
 }
-
