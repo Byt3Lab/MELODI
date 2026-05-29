@@ -9,11 +9,13 @@ class ActionManager:
             raise ValueError(f"L'action '{action_name}' doit être une fonction asynchrone (async def).")
         if module_name not in self._actions:
             self._actions[module_name] = {}
+        if action_name in self._actions[module_name]:
+            raise ValueError(f"L'action '{action_name}' existe déjà pour le module '{module_name}'.")
         self._actions[module_name][action_name] = action_func
 
-    async def execute_action(self, module_name: str, action_name: str, *args, **kwargs):
+    async def execute_action(self, module_name: str, action_name: str, payload:dict):
         if module_name in self._actions and action_name in self._actions[module_name]:
-            return await self._actions[module_name][action_name](*args, **kwargs)
+            return await self._actions[module_name][action_name](payload)
         else:
             raise ValueError(f"Action '{action_name}' non trouvée pour le module '{module_name}'.")
 

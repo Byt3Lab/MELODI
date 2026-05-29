@@ -84,18 +84,6 @@ class Module:
     def get_api_router(self)->APIRouter:
         return self.api_router
     
-    # def register_widget(self, name_widget:str|None=None, infos={}):
-    #     def decorator (func):
-    #         if callable(func):
-    #             if not name_widget:
-    #                 self.app.widget_manager.register(name_module=self.dirname, name_widget= func.__name__, widget=func, infos=infos)
-    #             self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
-    #             return
-            
-    #         if name_widget:
-    #             self.app.widget_manager.register(name_module=self.dirname, name_widget= name_widget, widget=func, infos=infos)
-    #     return decorator
-
     def register_home_page(self, home_page, infos):
         self.app.home_page_manager.register(name_module=self.dirname, home_page=home_page, infos=infos)
 
@@ -138,12 +126,12 @@ class Module:
         # Un module ne devrait enregistrer des actions que pour lui-même
         self.app.action_manager.register_action(self.dirname, action_name, action)
 
-    async def execute_action(self, target_module: str, action_name: str, *args, **kwargs):
+    async def execute_action(self, target_module: str, action_name: str, payload:dict):
         """Demande l'exécution d'une action appartenant à un autre module."""
         if target_module == self.dirname:
             raise ValueError("Un module ne peut pas exécuter ses propres actions.")
         # On exige le module cible
-        return await self.app.action_manager.execute_action(target_module, action_name, *args, **kwargs)
+        return await self.app.action_manager.execute_action(target_module, action_name, payload)
 
     def translate(self, filename:list[str]|str, keys:list[str]|str, lang:str|None = None, ):
         if self.translation == None:
