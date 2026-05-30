@@ -112,10 +112,10 @@ class Base(ApplicationModule):
                 ]},
                 {"label": "Modules", "icon": "name=extension&fill=white", "url": "/admin/base/modules", "children": [
                     {"label": "Tous les modules", "icon": "name=extension&fill=white", "url": "/admin/base/modules"},
-                    {"label": "Ajouter un module", "icon": "name=add&fill=white", "url": "/admin/base/modules/add"},
+                    {"label": "Ajouter un module", "icon": "name=add&fill=white", "url": "/admin/base/add_module"},
                 ]},
                 {"label": "Paramètres globaux", "icon": "name=tune&fill=white", "url": "/admin/base/settings"},
-                {"label": "Mise à jour", "icon": "name=update&fill=white", "url": "/admin/base/update"}
+                {"label": "Mise à jour de l'application", "icon": "name=update&fill=white", "url": "/admin/base/update"}
             ]
         )
         
@@ -149,6 +149,7 @@ class Base(ApplicationModule):
 
         @self.register_ws_function("base.ping")
         async def ping(params, client):
+            import asyncio
             await asyncio.sleep(2)
 
             # send broadcast message to all connected clients

@@ -14,6 +14,7 @@ class Config:
     PATH_DIR_MODULES = join_paths(PATH_DIR_RACINE, "modules")
     PATH_DIR_STORAGE = join_paths(PATH_DIR_RACINE, "storage")
     TYPE_DISTRIBUTION = "cloud"
+    PREFIX_DB = "ml_"
     allow_request = True
     path_template_404_not_found: str = ""
     infos_org = {}
@@ -21,6 +22,10 @@ class Config:
     jwt_secret_key = "default_secret_key"
 
     def __init__(self):
+        self.ensure_storage_directories()
+        self.ensure_config_directories()
+        self.ensure_modules_directories()
+        
         self.db_config = self.load_db_config()
         self.DB_PROVIDER = self.db_config.get("db_provider") or "postgresql"
         self.DB_USER = self.db_config.get("db_user") or "postgres"
@@ -33,7 +38,15 @@ class Config:
         self.load_secret_key()
         self.load_jwt_secret_key()
         self.load_type_distribution()
-        self.ensure_storage_directories()
+        self.load_prefix_db()
+
+    def load_prefix_db(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "prefix_db.txt")
+        if path_exist(path):
+            self.PREFIX_DB = read_file(path_file=path).strip()
+        else:
+            self.PREFIX_DB = "ml_"
+            write_file(path_file=path, content=self.PREFIX_DB)
 
     def load_type_distribution(self):
         path = join_paths(self.PATH_DIR_CONFIG, "type_distribution.txt")
@@ -100,9 +113,16 @@ class Config:
         lib = "+asyncpg"
 
         return f"{provider}{lib}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-    
+
+    def ensure_config_directories(self):
+        create_dir_if_not_exist(self.PATH_DIR_CONFIG)
+ 
+    def ensure_modules_directories(self):
+        create_dir_if_not_exist(self.PATH_DIR_MODULES)
+
     def ensure_storage_directories(self):
         create_dir_if_not_exist(self.PATH_DIR_STORAGE)
+        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "tmp_uploads"))
         create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "uploads"))
         create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "logs"))
         create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "cache"))

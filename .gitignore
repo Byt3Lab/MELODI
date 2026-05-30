@@ -21,14 +21,12 @@ database.db
 help.txt
 idea.txt
 storage
-config/*
-!config/__init__.py
-modules/*
-!modules/__init__.py
-plugins/*
-!plugins/__init__.py
+config
+modules
+plugins
 lea
 learn.py
+todo.md
 
 # Distribution / packaging
 .Python
