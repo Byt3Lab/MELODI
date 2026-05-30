@@ -2,6 +2,8 @@ import os
 import pathlib
 import json
 from core.utils import create_dir_if_not_exist, path_exist, read_file, join_paths, read_file, write_file
+from core.utils.file_permissions import FilePermissions
+
 # from doteenv import load_dotenv
 
 # load_dotenv()
@@ -25,7 +27,7 @@ class Config:
         self.ensure_storage_directories()
         self.ensure_config_directories()
         self.ensure_modules_directories()
-        
+
         self.db_config = self.load_db_config()
         self.DB_PROVIDER = self.db_config.get("db_provider") or "postgresql"
         self.DB_USER = self.db_config.get("db_user") or "postgres"
@@ -116,13 +118,36 @@ class Config:
 
     def ensure_config_directories(self):
         create_dir_if_not_exist(self.PATH_DIR_CONFIG)
- 
+        
+        fp = FilePermissions(self.PATH_DIR_CONFIG)
+        fp.set_permissions({"read":True,"write":True,"execute":True})
+        
+        path_init_py = join_paths(self.PATH_DIR_CONFIG, "__init__.py")
+        write_file(path_file=path_init_py, content="")
+
     def ensure_modules_directories(self):
         create_dir_if_not_exist(self.PATH_DIR_MODULES)
 
+        fp = FilePermissions(self.PATH_DIR_MODULES)
+        fp.set_permissions({"read":True,"write":True,"execute":True})
+
+        path_init_py = join_paths(self.PATH_DIR_MODULES, "__init__.py")
+        write_file(path_file=path_init_py, content="")
+
     def ensure_storage_directories(self):
         create_dir_if_not_exist(self.PATH_DIR_STORAGE)
+        
+        fp = FilePermissions(self.PATH_DIR_STORAGE)
+        fp.set_permissions({"read":True,"write":True,"execute":True})
+
+        path_init_py = join_paths(self.PATH_DIR_STORAGE, "__init__.py")
+        write_file(path_file=path_init_py, content="")
+
         create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "tmp_uploads"))
         create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "uploads"))
         create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "logs"))
         create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "cache"))
+        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "tmp_uploads"), 0o777)
+        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "uploads"), 0o777)
+        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "logs"), 0o777)
+        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "cache"), 0o777)
