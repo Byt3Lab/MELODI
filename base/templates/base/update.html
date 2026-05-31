@@ -1,173 +1,131 @@
 {% extends "base/components/layout_admin.html" %}
 
-{% block title %}Mises à jour de MELODI ERP{% endblock %}
+{% block title %}Système de Mises à jour | MELODI ERP{% endblock %}
 
 {% block head %}
 {{ super() }}
 <style>
-	:root{--bg:#f8fafc;--card:#ffffff;--muted:#6b7280;--accent:#0ea5a4;--accent-2:#06b6d4;--danger:#ef4444}
-	body{background:linear-gradient(180deg,#f8fafc 0%, #ffffff 100%)}
-	.update-card{max-width:980px;margin:1.6rem auto;padding:1.25rem;border-radius:12px;background:var(--card);box-shadow:0 6px 18px rgba(15,23,42,0.07);border:1px solid rgba(99,102,241,0.03);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial}
-	.update-card h2{margin:0;font-size:1.35rem;color:#0f172a}
-	.update-card h4{margin:.6rem 0 .25rem 0;color:#0f172a}
-	.muted{color:var(--muted);font-size:0.95rem}
-	.controls{display:grid;grid-template-columns:1fr 380px;gap:1rem;margin-top:1rem;align-items:start}
-	.col{min-width:0}
-	input[type=file], input[type=url], input[type=text]{width:100%;padding:.5rem;border:1px solid #e6edf3;border-radius:8px;background:#fbfdff}
-	input[type=file]{padding:.45rem 0}
-	label{font-size:0.95rem;color:#0f172a}
-	.hint{font-size:.88rem;color:#94a3b8}
-	.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:8px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;cursor:pointer}
-	.btn.secondary{background:#eef2ff;color:#3730a3}
-	.btn.ghost{background:transparent;border:1px solid #e6edf3;color:#0f172a}
-	.progress{width:100%;height:14px;background:#f1f5f9;border-radius:999px;overflow:hidden;border:1px solid #e6edf3}
-	.progress > .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#34d399);transition:width .25s}
-	pre.output{background:#0b1220;color:#e6f4f1;padding:0.75rem;border-radius:10px;max-height:280px;overflow:auto;border:1px solid rgba(255,255,255,0.03)}
-	.small{font-size:.88rem;color:var(--muted)}
-	@media (max-width:720px){ .update-card{padding:1rem} .col{min-width:100%} }
-</style>
+    /* Variables globales (Palette Melodi ERP) */
+    :root {
+        --melodi-primary: #002a4e;
+        --melodi-accent: #0395D1;
+        --bg-body: #f1f5f9;
+        --bg-card: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --success: #10b981;
+        --danger: #ef4444;
+        --radius-lg: 12px;
+        --radius-md: 8px;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', system-ui, sans-serif; line-height: 1.5; margin: 0; }
+    .admin-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+    .page-header { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+    .page-header h1 { margin: 0; font-size: 1.8rem; color: var(--melodi-primary); font-weight: 700; }
+    .version-badge { display: inline-flex; align-items: center; background: #e0f2fe; color: var(--melodi-accent); padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.875rem; font-weight: 600; width: fit-content; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media (min-width: 992px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
+    .card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); display: flex; flex-direction: column; }
+    .card-title { margin: 0 0 1rem 0; font-size: 1.25rem; color: var(--melodi-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .form-group { margin-bottom: 1.25rem; }
+    label { display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-main); font-size: 0.95rem; }
+    input[type="file"], input[type="url"], input[type="text"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background-color: #f8fafc; box-sizing: border-box; font-family: inherit; }
+    input[type="text"] { font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+    .checkbox-wrapper { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 1rem; }
+    .btn-group { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: auto; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.25rem; border-radius: var(--radius-md); border: none; font-weight: 600; cursor: pointer; transition: all 0.2s ease; flex: 1; }
+    .btn-primary { background-color: var(--melodi-primary); color: white; }
+    .btn-outline { background-color: transparent; color: var(--text-main); border: 1px solid var(--border-color); }
+    .btn-danger { background-color: #fee2e2; color: var(--danger); }
+    .progress-container { margin-top: 2rem; background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+    .progress-bar-bg { width: 100%; height: 12px; background-color: #e2e8f0; border-radius: 99px; overflow: hidden; margin-bottom: 0.5rem; }
+    .progress-bar-fill { height: 100%; width: 0%; background-color: var(--melodi-accent); transition: width 0.3s ease-out; }
+    .console-output { background-color: #0f172a; color: #38bdf8; padding: 1rem; border-radius: var(--radius-lg); font-family: monospace; font-size: 0.9rem; height: 300px; overflow-y: auto; white-space: pre-wrap; margin: 0; }
 </style>
 {% endblock %}
 
 {% block admin_content %}
-<div class="update-card">
-	<h2>Mise à jour de l'application</h2>
-	<p class="muted">Utilisez ce formulaire pour mettre à jour MELODI. Ceci est un prototype — ajustez les endpoints côté serveur.</p>
+<div class="admin-container">
+    <div class="page-header">
+        <h1>Gestionnaire de Mises à jour</h1>
+        <div class="version-badge">Version actuelle : {{ current_version|default('v1.0.0') }}</div>
+    </div>
 
-	<div class="controls">
-		<div class="col" aria-live="polite">
-			<h4>Version actuelle</h4>
-			<p class="muted">{{ current_version|default('Inconnue') }}</p>
+    <div class="dashboard-grid">
+        <!-- Installation manuelle -->
+        <div class="card">
+            <h2 class="card-title">Installation manuelle</h2>
+            <form id="uploadForm" style="display: flex; flex-direction: column; height: 100%;">
+                <div class="form-group">
+                    <label for="updateFile">Sélectionner l'archive (.zip)</label>
+                    <input type="file" id="updateFile" name="update_file" accept=".zip" required />
+                </div>
+                <div class="form-group">
+                    <label for="hashFile">Signature SHA-256 (Optionnel)</label>
+                    <input type="text" id="hashFile" name="hash_file" placeholder="ex: 8b1a9953c461..." />
+                </div>
+                <div class="checkbox-wrapper"><input type="checkbox" id="backupCheckbox" checked /> <label for="backupCheckbox">Créer un point de restauration</label></div>
+                <div class="btn-group"><button class="btn btn-primary" type="submit" id="uploadBtn">Installer l'archive</button></div>
+            </form>
+        </div>
 
-			<h4>Upload d'une archive</h4>
-			<form id="uploadForm" class="form" aria-label="Upload mise à jour">
-				<input type="file" id="updateFile" name="update_file" accept=".zip,.tar,.gz" aria-describedby="fileHint" />
-				<div id="fileHint" class="hint">Formats acceptés: .zip, .tar, .gz — taille maximale contrôlée côté serveur.</div>
-				<div style="margin-top:.6rem">
-					<label class="small"><input type="checkbox" id="backupCheckbox" name="backup" checked />&nbsp;Créer une sauvegarde avant mise à jour</label>
-				</div>
-				<div style="margin-top:.9rem;display:flex;gap:.5rem;flex-wrap:wrap">
-					<button class="btn" type="submit" id="uploadBtn" aria-pressed="false">
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-						Téléverser et mettre à jour
-					</button>
-					<button type="button" class="btn ghost" id="downloadBtn">Télécharger log</button>
-					<div style="flex:1;min-width:120px;display:flex;align-items:center;justify-content:flex-end">
-						<span class="small hint">Dernière sauvegarde: {{ last_backup|default('N/A') }}</span>
-					</div>
-				</div>
-			</form>
-		</div>
+        <!-- Installation via URL -->
+        <div class="card">
+            <h2 class="card-title">Installation via URL</h2>
+            <form id="remoteForm" style="display: flex; flex-direction: column; height: 100%;">
+                <div class="form-group">
+                    <label for="updateUrl">Lien de téléchargement</label>
+                    <input type="url" id="updateUrl" name="update_url" placeholder="https://..." required />
+                </div>
+                <div class="form-group">
+                    <label for="hashUrl">Signature SHA-256 (Optionnel)</label>
+                    <input type="text" id="hashUrl" name="hash_url" placeholder="ex: 8b1a9953c461..." />
+                </div>
+                <div class="checkbox-wrapper"><input type="checkbox" id="backupRemote" checked /> <label for="backupRemote">Créer un point de restauration</label></div>
+                <div class="btn-group">
+                    <button class="btn btn-outline" type="button" id="checkBtn">Vérifier</button>
+                    <button class="btn btn-primary" type="submit" id="remoteBtn">Télécharger & Installer</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-		<div class="col">
-			<h4>Mise à jour par URL</h4>
-			<form id="remoteForm">
-				<input type="url" id="updateUrl" name="update_url" placeholder="https://example.com/update.zip" style="width:100%" aria-label="URL de l'archive de mise à jour" />
-				<div style="margin-top:.5rem">
-					<label class="small"><input type="checkbox" id="backupRemote" name="backup_remote" checked />&nbsp;Créer une sauvegarde</label>
-				</div>
-				<div style="margin-top:.9rem;display:flex;gap:.5rem;flex-wrap:wrap">
-					<button class="btn secondary" type="submit" id="remoteBtn">Démarrer mise à jour distante</button>
-					<button class="btn ghost" type="button" id="checkBtn">Vérifier URL</button>
-					<button class="btn ghost" type="button" id="previewBtn">Prévisualiser</button>
-				</div>
-			</form>
-		</div>
-	</div>
+    <div class="progress-container">
+        <div class="progress-status"><span id="progressText">En attente d'une action...</span><span id="progressPercentage">0%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+    </div>
 
-	<div style="margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
-		<div style="flex:1;min-width:220px">
-			<h4 style="margin-bottom:.35rem">Progression</h4>
-			<div class="progress" aria-hidden="true"><div class="bar" id="progressBar"></div></div>
-			<div id="progressText" class="small" style="margin-top:.5rem">Aucune action</div>
-		</div>
-		<div style="width:220px;min-width:180px">
-			<h4 style="margin-bottom:.35rem">Actions rapides</h4>
-			<div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-end">
-				<button class="btn ghost" id="btnRollback">Rollback</button>
-				<button class="btn ghost" id="btnClearCache">Clear cache</button>
-				<button class="btn ghost" id="btnHealth">Health</button>
-			</div>
-		</div>
-	</div>
-
-	<div style="margin-top:1rem">
-		<h4>Sortie</h4>
-		<pre class="output" id="outputPane">Prêt.</pre>
-	</div>
+    <div style="margin-top: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <h3>Terminal Système</h3>
+            <button class="btn btn-danger" style="padding: 0.4rem 0.8rem;" id="btnRollback">Annuler (Rollback)</button>
+        </div>
+        <pre class="console-output" id="outputPane">Système Melodi ERP prêt. En attente de commandes...</pre>
+    </div>
 </div>
 
 <script>
-;(function(){
-	const uploadForm = document.getElementById('uploadForm');
-	const remoteForm = document.getElementById('remoteForm');
-	const progressBar = document.getElementById('progressBar');
-	const progressText = document.getElementById('progressText');
-	const output = document.getElementById('outputPane');
+    document.addEventListener('DOMContentLoaded', function () {
+        const output = document.getElementById('outputPane');
+        function log(msg) { output.textContent += `\n[${new Date().toLocaleTimeString()}] ${msg}`; output.scrollTop = output.scrollHeight; }
 
-	function setProgress(p){
-		progressBar.style.width = Math.max(0,Math.min(100,p)) + '%';
-		progressText.textContent = p>=100 ? 'Terminé' : 'Progression: ' + Math.round(p) + '%';
-	}
+        document.getElementById('uploadForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const hash = document.getElementById('hashFile').value;
+            log(`Validation : Démarrage installation avec hash ${hash ? hash.substring(0,8) : 'NON SPÉCIFIÉ'}...`);
+            // Intégrer ici la logique d'upload réelle
+        });
 
-	uploadForm.addEventListener('submit', function(e){
-		e.preventDefault();
-		const file = document.getElementById('updateFile').files[0];
-		if(!file){ output.textContent = 'Veuillez sélectionner un fichier.'; return; }
-		const backup = document.getElementById('backupCheckbox').checked;
-		const fd = new FormData(); fd.append('update_file', file); fd.append('backup', backup ? '1':'0');
-
-		// Remplacez l'URL ci-dessous par le endpoint serveur qui gère l'upload
-		const url = '/admin/update/upload';
-		const xhr = new XMLHttpRequest();
-		xhr.open('POST', url, true);
-		xhr.upload.onprogress = function(ev){
-			if(ev.lengthComputable){ setProgress((ev.loaded/ev.total)*80); }
-		};
-		xhr.onload = function(){
-			try{ const json = JSON.parse(xhr.responseText); output.textContent = JSON.stringify(json, null, 2); }
-			catch(err){ output.textContent = xhr.responseText || 'Réponse vide'; }
-			setProgress(100);
-			uploadBtn.disabled = false; uploadBtn.setAttribute('aria-pressed','false');
-		};
-		xhr.onerror = function(){ output.textContent = 'Erreur lors de l\'upload.'; uploadBtn.disabled = false; uploadBtn.setAttribute('aria-pressed','false'); };
-		output.textContent = 'Envoi en cours...';
-		setProgress(5);
-		uploadBtn.disabled = true; uploadBtn.setAttribute('aria-pressed','true');
-		xhr.send(fd);
-	});
-
-	remoteForm.addEventListener('submit', function(e){
-		e.preventDefault();
-		const urlField = document.getElementById('updateUrl').value.trim();
-		if(!urlField){ output.textContent = 'Veuillez fournir une URL.'; return; }
-		const backup = document.getElementById('backupRemote').checked;
-		const endpoint = '/admin/update/remote';
-		output.textContent = 'Demande envoyée...'; setProgress(10);
-		remoteBtn = document.getElementById('remoteBtn');
-		remoteBtn.disabled = true;
-		fetch(endpoint, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:urlField,backup:backup})})
-			.then(r=>r.text()).then(t=>{ output.textContent = t; setProgress(100); remoteBtn.disabled = false; }).catch(err=>{ output.textContent = 'Erreur: '+err; setProgress(0); remoteBtn.disabled = false; });
-	});
-
-	// small interactions for utility buttons
-	document.getElementById('checkBtn').addEventListener('click', function(){
-		const u = document.getElementById('updateUrl').value.trim(); if(!u){ output.textContent='Entrez une URL.'; return; }
-		output.textContent = 'Vérification de l\'URL...'; fetch('/admin/update/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})}).then(r=>r.json()).then(j=>{ output.textContent=JSON.stringify(j,null,2); }).catch(e=>output.textContent='Erreur: '+e);
-	});
-	document.getElementById('downloadBtn').addEventListener('click', function(){ window.location.href='/admin/update/logs'; });
-	document.getElementById('btnRollback').addEventListener('click', function(){ if(!confirm('Confirmer rollback ?')) return; output.textContent='Rollback...'; fetch('/admin/update/rollback',{method:'POST'}).then(r=>r.text()).then(t=>output.textContent=t).catch(e=>output.textContent='Erreur: '+e); });
-	document.getElementById('btnClearCache').addEventListener('click', function(){ output.textContent='Clear cache...'; fetch('/admin/cache/clear',{method:'POST'}).then(r=>r.text()).then(t=>output.textContent=t).catch(e=>output.textContent='Erreur: '+e); });
-	document.getElementById('btnHealth').addEventListener('click', function(){ output.textContent='Vérification santé...'; fetch('/admin/health',{method:'GET'}).then(r=>r.text()).then(t=>output.textContent=t).catch(e=>output.textContent='Erreur: '+e); });
-
-	// disable buttons when no JS
-	const uploadBtn = document.getElementById('uploadBtn');
-	const remoteBtn = document.getElementById('remoteBtn');
-	if(uploadBtn) uploadBtn.removeAttribute('disabled');
-	if(remoteBtn) remoteBtn.removeAttribute('disabled');
-
-	// helper: reset progress periodically when idle
-	window.setProgress = setProgress;
-})();
+        document.getElementById('remoteForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const hash = document.getElementById('hashUrl').value;
+            log(`Validation : Démarrage téléchargement distant avec hash ${hash ? hash.substring(0,8) : 'NON SPÉCIFIÉ'}...`);
+            // Intégrer ici la logique de fetch réelle
+        });
+    });
 </script>
 {% endblock %}

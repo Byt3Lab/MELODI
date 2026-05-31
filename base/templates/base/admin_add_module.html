@@ -241,24 +241,29 @@
             showAlert();
 
             try {
-                const fetchResponse = await fetch('/api/base/modules/upload', {
+                const fetchResponse = await fetch('/api/base/modules/install/upload', {
                     method: 'POST',
                     body: formData
                 });
 
-                const response = await fetchResponse.json();
+                let response = null;
 
-                if (!fetchResponse.ok || response.error) {
+                try {
+                    response = await fetchResponse.json();
+                } catch (error) {
+                    throw new Error('Erreur lors du téléversement du module.');
+                }
+
+                if (!fetchResponse.ok) {
                     throw new Error(response.error || 'Erreur lors du téléversement du module.');
                 }
 
-                showAlert(response.message || 'Module installé et enregistré avec succès !', 'success');
+                showAlert(response.message || 'Module installé et enregistré avec succès ! redemarrer le serveur pour activer le module', 'success');
 
                 // Redirect after success
                 setTimeout(() => {
-                    window.location.href = '/admin/modules';
+                    window.location.href = '/admin/base/modules';
                 }, 1500);
-
             } catch (error) {
                 showAlert(error.message || 'Une erreur est survenue lors du téléversement.', 'danger');
                 btnSubmit.disabled = false;

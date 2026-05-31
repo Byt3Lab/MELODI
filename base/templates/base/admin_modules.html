@@ -19,7 +19,7 @@
                 <input type="text" id="moduleSearch" class="form-control border-start-0 ps-0"
                     placeholder="Rechercher un module...">
             </div>
-            <a href="/admin/add_module" class="btn btn-dark text-nowrap">
+            <a href="/admin/base/add_module" class="btn btn-dark text-nowrap">
                 <i class="bi bi-plus-lg me-1"></i> installer un module
             </a>
         </div>
@@ -44,10 +44,11 @@
                         <div class="form-check form-switch">
                             {% if module.enabled %}
                             <input class="form-check-input" type="checkbox" role="switch" checked
-                                onclick="window.location.href='/admin/modules/{{module.name}}/off'" title="Désactiver">
+                                onclick="window.location.href='/admin/base/modules/{{module.name}}/off'"
+                                title="Désactiver">
                             {% else %}
                             <input class="form-check-input" type="checkbox" role="switch"
-                                onclick="window.location.href='/admin/modules/{{module.name}}/on'" title="Activer">
+                                onclick="window.location.href='/admin/base/modules/{{module.name}}/on'" title="Activer">
                             {% endif %}
                         </div>
                     </div>
@@ -64,12 +65,23 @@
                     <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
                         <button class="btn btn-sm btn-light text-muted" data-bs-toggle="modal"
                             data-bs-target="#module_{{module.name}}">
-                            <i class="bi bi-info-circle me-1"></i> Détails
+                            <img src="/static_base_icons?name=remove_red_eye" alt="Voir les détails"
+                                title="Voir les détails">
                         </button>
 
+                        <a href="/admin/base/update/module/{{module.name}}" class="btn btn-sm">
+                            <img src="/static_base_icons?name=update" alt="Mettre à jour" title="Mettre à jour">
+                        </a>
+
                         {% if module.enabled %}
-                        <a href="/admin/modules/{{module.name}}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-gear me-1"></i> Gérer
+                        <a href="/admin/modules/{{module.name}}" class="btn btn-sm">
+                            <img src="/static_base_icons?name=east" alt="gérer" title="Gérer">
+                        </a>
+                        {% else %}
+                        <a href="/admin/base/module/{{module.name}}/delete"
+                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce module ?')"
+                            class="btn btn-sm">
+                            <img src="/static_base_icons?name=delete&fill=red" alt="Supprimer" title="Supprimer">
                         </a>
                         {% endif %}
                     </div>

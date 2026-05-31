@@ -37,11 +37,16 @@ def create_dir(path_dir, parents=True, exist_ok=True):
     from pathlib import Path
     Path(path_dir).mkdir(parents, exist_ok)
 
-def create_dir_if_not_exist(path_dir, parents=True, exist_ok=True):
+def create_dir_if_not_exist(path_dir, parents=True, exist_ok=True, permissions=None):
     if path_exist(path_dir):
         return
     
     create_dir(path_dir, parents, exist_ok)
+    
+    if permissions:
+        from core.utils.file_permissions import FilePermissions
+        fp = FilePermissions(path_dir)
+        fp.set_permissions(permissions)
 
 
 async def get_current_position():

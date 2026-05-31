@@ -15,8 +15,17 @@ class Config:
     PATH_DIR_BASE_MODULE = join_paths(PATH_DIR_RACINE, "base")
     PATH_DIR_MODULES = join_paths(PATH_DIR_RACINE, "modules")
     PATH_DIR_STORAGE = join_paths(PATH_DIR_RACINE, "storage")
+    PATH_DIR_STORAGE_TEMP = join_paths(PATH_DIR_STORAGE, "temp")
+    PATH_DIR_STORAGE_UPLOADS = join_paths(PATH_DIR_STORAGE, "uploads")
+    PATH_DIR_STORAGE_LOGS = join_paths(PATH_DIR_STORAGE, "logs")
+    PATH_DIR_STORAGE_CACHE = join_paths(PATH_DIR_STORAGE, "cache")
+    PATH_DIR_STORAGE_BACKUPS = join_paths(PATH_DIR_STORAGE, "backups")
+    PATH_DIR_STORAGE_APP_DATA = join_paths(PATH_DIR_STORAGE, "appData")
     TYPE_DISTRIBUTION = "cloud"
-    PREFIX_DB = "ml_"
+    PREFIX_DB = "ML_"
+    CURRENCY = "XAF"
+    TIME_ZONE = "UTC"
+    LANG = "fr"
     allow_request = True
     path_template_404_not_found: str = ""
     infos_org = {}
@@ -27,20 +36,16 @@ class Config:
         self.ensure_storage_directories()
         self.ensure_config_directories()
         self.ensure_modules_directories()
-
-        self.db_config = self.load_db_config()
-        self.DB_PROVIDER = self.db_config.get("db_provider") or "postgresql"
-        self.DB_USER = self.db_config.get("db_user") or "postgres"
-        self.DB_PASSWORD = self.db_config.get("db_password") or "password"
-        self.DB_HOST = self.db_config.get("db_host") or "localhost"
-        self.DB_PORT = self.db_config.get("db_port") or "5432"
-        self.DB_NAME = self.db_config.get("db_name") or "melodi_db"
-        
+        self.load_db_config()  
+        self.load_time_zone()
         self.load_infos_org()
         self.load_secret_key()
         self.load_jwt_secret_key()
         self.load_type_distribution()
         self.load_prefix_db()
+        self.load_currency()
+        self.load_lang()
+        self.load_time_zone()
 
     def load_prefix_db(self):
         path = join_paths(self.PATH_DIR_CONFIG, "prefix_db.txt")
@@ -49,6 +54,30 @@ class Config:
         else:
             self.PREFIX_DB = "ml_"
             write_file(path_file=path, content=self.PREFIX_DB)
+
+    def load_currency(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "currency.txt")
+        if path_exist(path):
+            self.CURRENCY = read_file(path_file=path).strip()
+        else:
+            self.CURRENCY = "XAF"
+            write_file(path_file=path, content=self.CURRENCY)
+
+    def load_lang(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "lang.txt")
+        if path_exist(path):
+            self.LANG = read_file(path_file=path).strip()
+        else:
+            self.LANG = "fr"
+            write_file(path_file=path, content=self.LANG)
+
+    def load_time_zone(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "time_zone.txt")
+        if path_exist(path):
+            self.TIME_ZONE = read_file(path_file=path).strip()
+        else:
+            self.TIME_ZONE = "UTC"
+            write_file(path_file=path, content=self.TIME_ZONE)
 
     def load_type_distribution(self):
         path = join_paths(self.PATH_DIR_CONFIG, "type_distribution.txt")
@@ -87,9 +116,24 @@ class Config:
 
     def load_db_config(self):
         path = join_paths(self.PATH_DIR_CONFIG, "db_conf.json")
-        if not path_exist(path):
-            return {}
-        return json.loads(read_file(path_file=path))
+        self.db_config = {}
+        if path_exist(path):
+            self.db_config = json.loads(read_file(path_file=path))
+        
+        self.DB_PROVIDER = self.db_config.get("db_provider") or "postgresql"
+        self.DB_USER = self.db_config.get("db_user") or "postgres"
+        self.DB_PASSWORD = self.db_config.get("db_password") or "password"
+        self.DB_HOST = self.db_config.get("db_host") or "localhost"
+        self.DB_PORT = self.db_config.get("db_port") or "5432"
+        self.DB_NAME = self.db_config.get("db_name") or "melodi_db"
+
+    def load_time_zone(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "time_zone.txt")
+        if path_exist(path):
+            self.TIME_ZONE = read_file(path_file=path).strip()
+        else:
+            self.TIME_ZONE = "UTC"
+            write_file(path_file=path, content=self.TIME_ZONE)
     
     def load_infos_org(self):
         path = join_paths(self.PATH_DIR_CONFIG, "infos_org.json")
@@ -117,37 +161,20 @@ class Config:
         return f"{provider}{lib}://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     def ensure_config_directories(self):
-        create_dir_if_not_exist(self.PATH_DIR_CONFIG)
-        
-        fp = FilePermissions(self.PATH_DIR_CONFIG)
-        fp.set_permissions({"read":True,"write":True,"execute":True})
-        
+        create_dir_if_not_exist(self.PATH_DIR_CONFIG, permissions={"read":True,"write":True,"execute":True})
         path_init_py = join_paths(self.PATH_DIR_CONFIG, "__init__.py")
         write_file(path_file=path_init_py, content="")
 
     def ensure_modules_directories(self):
-        create_dir_if_not_exist(self.PATH_DIR_MODULES)
-
-        fp = FilePermissions(self.PATH_DIR_MODULES)
-        fp.set_permissions({"read":True,"write":True,"execute":True})
-
+        create_dir_if_not_exist(self.PATH_DIR_MODULES, permissions={"read":True,"write":True,"execute":True})
         path_init_py = join_paths(self.PATH_DIR_MODULES, "__init__.py")
         write_file(path_file=path_init_py, content="")
 
-    def ensure_storage_directories(self):
-        create_dir_if_not_exist(self.PATH_DIR_STORAGE)
-        
-        fp = FilePermissions(self.PATH_DIR_STORAGE)
-        fp.set_permissions({"read":True,"write":True,"execute":True})
-
-        path_init_py = join_paths(self.PATH_DIR_STORAGE, "__init__.py")
-        write_file(path_file=path_init_py, content="")
-
-        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "tmp_uploads"))
-        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "uploads"))
-        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "logs"))
-        create_dir_if_not_exist(join_paths(self.PATH_DIR_STORAGE, "cache"))
-        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "tmp_uploads"), 0o777)
-        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "uploads"), 0o777)
-        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "logs"), 0o777)
-        # os.chmod(join_paths(self.PATH_DIR_STORAGE, "cache"), 0o777)
+    def ensure_storage_directories(self):  
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE, permissions={"read":True,"write":True,"execute":True})
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE_TEMP, permissions={"read":True,"write":True,"execute":True})
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE_UPLOADS, permissions={"read":True,"write":True,"execute":True})
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE_LOGS, permissions={"read":True,"write":True,"execute":True})
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE_CACHE, permissions={"read":True,"write":True,"execute":True})
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE_BACKUPS, permissions={"read":True,"write":True,"execute":True})
+        create_dir_if_not_exist(self.PATH_DIR_STORAGE_APP_DATA, permissions={"read":True,"write":True,"execute":True})

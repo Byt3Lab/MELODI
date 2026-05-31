@@ -42,9 +42,13 @@ class BaseRoutes(WebRouter):
                         ]
                     },
                     {"path": "/base/add_module", "methods": ["GET"], "handler": base_controller.admin_add_module},
-                    {"path:": "/base/notifications", "methods": ["GET"], "handler": base_controller.notifications},
+                    {"path": "/base/notifications", "methods": ["GET"], "handler": base_controller.notifications},
                     {"path": "/base/logs", "methods": ["GET"], "handler": base_controller.logs},
-                    {"path": "/base/update", "methods": ["GET"], "handler": base_controller.update}
+                    {"path": "/base/update", "methods": ["GET"], "handler": base_controller.update,
+                         "children": [
+                            {"path": "/module/<path:mod>", "methods": ["GET"], "handler": base_controller.update_module}
+                         ]
+                    }
                 ]
             }
         ], before_request=[self.get_middleware("auth_required")]) # self.get_middleware("admin_only")])

@@ -35,6 +35,10 @@ class BaseController(WebController):
     async def update(self):
         return await self.router.render_template("update.html")
     
+    async def update_module(self, mod:str):
+            
+        return await self.router.render_template("update_module.html", mod=mod)
+        
     async def logs(self):
         return await self.router.render_template("admin_logs.html")
 
