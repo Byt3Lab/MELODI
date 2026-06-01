@@ -128,6 +128,9 @@ class ModuleService(Service):
                         shutil.rmtree(target_dir)
                 
                 shutil.move(module_source_dir, module_dir)
+   
+               # migration de la base de donnes
+                self.app.migration._run_migrations_for_module(module_name, target_dir)
             except Exception as e:
                 if backup_dir and os.path.exists(backup_dir):
                     shutil.move(backup_dir, target_dir)
@@ -139,14 +142,7 @@ class ModuleService(Service):
             if module_name not in self.app.module_manager.list_modules_installs:
                 self.app.module_manager.list_modules_installs.append(module_name)
             
-            # migration de la base de donnes
-            # try:
-            #   self.app.migration._run_migrations_for_module(module_name)
-            # except Exception as e:
-            #   return False, "echec de la migration de la base de donnée"
-
             return True, f"Module '{module_name}' installé avec succès."
-            
         except zipfile.BadZipFile:
             return False, "Le fichier ZIP est corrompu."
         except Exception as e:

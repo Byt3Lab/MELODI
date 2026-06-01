@@ -72,13 +72,23 @@ class Migration:
     async def _create_tracking_table(self):
         """Crée la table de suivi globale des migrations si elle n'existe pas."""
         table_creation_query = """
-        CREATE TABLE IF NOT EXISTS schema_migrations (
+        CREATE TABLE IF NOT EXISTS {PREFIX_DB}schema_migrations (
             module_name VARCHAR(255) PRIMARY KEY,
             current_version INT NOT NULL DEFAULT 0,
             last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
-        await self.app.db.execute(table_creation_query, query_type="write")
+
+        query = table_creation_query.replace("{PREFIX_DB}", self.app.config.PREFIX_DB)
+
+        await self.app.db.execute(query, query_type="write")
+
+    async def _get_current_module_version(self, module_name: str) -> int:
+        """Récupère la version actuelle du module depuis la base de données."""
+        query = "SELECT current_version FROM {PREFIX_DB}schema_migrations WHERE module_name = :module_name"
+        query = query.replace("{PREFIX_DB}", self.app.config.PREFIX_DB)
+        res = await self.app.db.execute(query, {"module_name": module_name})
+        return res[0]["current_version"] if res else 0
 
     def _get_modules_to_migrate(self) -> list[tuple[str, str]]:
         """Récupère la liste de tous les modules (base + installés) à vérifier, triés par dépendances."""
@@ -104,7 +114,7 @@ class Migration:
         
         for m in modules_paths:
             if m == "base":
-                continue # 'base' n'a pas de dépendances explicites à traiter ici
+                continue
             
             infos = self.app.module_manager.get_module_infos(m)
             if infos and "depends" in infos and "modules" in infos["depends"]:
@@ -156,12 +166,6 @@ class Migration:
         parsed_files.sort(key=lambda x: x[0])
         return parsed_files
 
-    async def _get_current_module_version(self, module_name: str) -> int:
-        """Récupère la version actuelle du module depuis la base de données."""
-        query = "SELECT current_version FROM schema_migrations WHERE module_name = :module_name"
-        res = await self.app.db.execute(query, {"module_name": module_name})
-        return res[0]["current_version"] if res else 0
-
     async def _execute_migration_file(self, session, module_name: str, version: int, sql_filename: str, migrations_dir: str) -> bool:
         """
         Exécute un fichier de migration dans une transaction sécurisée.
@@ -177,8 +181,8 @@ class Migration:
             should_run_sql = await self._run_python_migration_if_exists(module_name, version, sql_filename, migrations_dir)
 
             # 2. Exécuter le script SQL
-            if should_run_sql is not False:
-                await self._run_sql_migration(session, sql_file_path)
+            if should_run_sql is True:
+                await self._run_sql_migration(session, sql_file_path, migrations_dir, version)
 
                 # 3. Mettre à jour la table de suivi
                 await self._update_tracking_version(session, module_name, version)
@@ -217,10 +221,36 @@ class Migration:
         
         return True
 
-    async def _run_sql_migration(self, session, sql_file_path: str):
+
+    def _get_migration_data(self, migrations_dir: str, version: int) -> dict:
+        """Récupère les données de migration pour un module."""
+        migration_data_path = join_paths(migrations_dir, f"v{version}_data.json")
+        
+        if path_exist(migration_data_path):
+            with open(migration_data_path, 'r', encoding='utf-8') as fh:
+                return json.load(fh)
+        
+        return {}
+
+    def _format_sql_query(self, query: str, migrations_dir: str, version: int) -> str:
+        """Remplace les balises {PREFIX_DB} et {migration_data} de façon sécurisée."""
+        
+        query = query.replace("{PREFIX_DB}", self.app.config.PREFIX_DB)
+        
+        migration_data = self._get_migration_data(migrations_dir, version)
+                
+        for key, value in migration_data.items():
+            placeholder = "{+"+key+"+}"
+            query = query.replace(placeholder, str(value))
+        
+        return query
+
+    async def _run_sql_migration(self, session, sql_file_path: str, migrations_dir: str, version: int):
         """Lit et exécute le contenu d'un fichier SQL dans la session courante."""
         with open(sql_file_path, 'r', encoding='utf-8') as fh:
             sql_content = fh.read()
+
+        sql_content = self._format_sql_query(sql_content, migrations_dir, version)
 
         if sql_content.strip():
             await session.execute(text(sql_content))
