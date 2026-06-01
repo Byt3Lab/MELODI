@@ -42,8 +42,8 @@ class BaseAPIController(APIController):
             pass
         
         options = {
-            "allow_update": options.get("allow_update", True),
-            "allow_backup": options.get("allow_backup", True),
+            "allow_update": options.get("allow_update", False),
+            "allow_backup": options.get("allow_backup", False),
         }
         
         success, message = await self.module_service.extract_and_install_zip(file_storage, options)
