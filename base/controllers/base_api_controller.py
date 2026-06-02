@@ -130,7 +130,7 @@ class BaseAPIController(APIController):
 
         res = await install_service.install(data)
 
-        return self.render_json(data=res.data, status_code=res.status_code)
+        return self.router.render_json(data=res.data, status_code=res.status_code)
         
     async def not_found(self,path):
         data = {"end_point_not_found":path}
@@ -157,4 +157,4 @@ class BaseAPIController(APIController):
         end = time.perf_counter()
         duration = end - start
         print(f"Fin de la requête à {end}, durée : {duration:.2f} secondes")
-        return self.render_json({"start": start, "end": end, "duration": f"{duration:.2f}s", "thread_name": threading_name, "thread_id": threading_id})
+        return self.router.render_json({"start": start, "end": end, "duration": f"{duration:.2f}s", "thread_name": threading_name, "thread_id": threading_id})

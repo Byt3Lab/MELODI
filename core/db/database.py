@@ -37,11 +37,14 @@ class DataBase():
             else:
                 await conn.run_sync(model.metadata.drop_all)
 
-    async def execute(self, query: str | Any, params: dict = None, query_type: str = "read"):
+    async def execute(self, query: str | Any, params: dict = None, query_type: str = "read", session:AsyncSession|None=None):
         if isinstance(query, str):
             query = text(query)
             
-        async with self.get_session() as session:
+        if session == None:
+            session = self.get_session()
+
+        async with session:
             result = await session.execute(query, params or {})
             
             if query_type == "read":

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 from typing import TYPE_CHECKING, Any
 import os
 import re
@@ -8,7 +9,6 @@ from core.utils import join_paths, path_exist
 
 if TYPE_CHECKING:
     from core.application import Application
-
 
 class Migration:
     """
@@ -29,17 +29,14 @@ class Migration:
         Exécute une requête SQL de façon sécurisée (dans la transaction courante si applicable).
         Particulièrement utile pour les scripts de migration Python qui accompagnent le SQL.
         """
-        if self.current_session:
-            return await self.current_session.execute(text(sql_query), params or {})
-        else:
-            return await self.app.db.execute(sql_query, params)
+        return await self.app.db.execute(query=sql_query, params=params, session=self.current_session)
 
     async def run_migrations(self):
         """Scanne les dossiers de migration pour chaque module et applique les scripts dans l'ordre."""
         await self._create_tracking_table()
         
         modules = self._get_modules_to_migrate()
-       
+    
         for module_name, module_path in modules:
             await self._run_migrations_for_module(module_name, module_path)
 
@@ -49,9 +46,10 @@ class Migration:
         
         if not path_exist(migrations_dir):
             return
-        
+
         parsed_files = self._get_migration_files(migrations_dir)
-        if not parsed_files:
+
+        if len(parsed_files) == 0:
             return
         
         current_db_version = await self._get_current_module_version(module_name)
@@ -66,29 +64,53 @@ class Migration:
                     session, module_name, version, filename, migrations_dir
                 )
                 if not success:
+                    await session.rollback()
+                    self.app.module_manager.off_module(module_name)
                     print(f"L'exécution des migrations a été interrompue pour le module {module_name}.")
                     break
 
     async def _create_tracking_table(self):
         """Crée la table de suivi globale des migrations si elle n'existe pas."""
         table_creation_query = """
-        CREATE TABLE IF NOT EXISTS {PREFIX_DB}schema_migrations (
+        CREATE TABLE IF NOT EXISTS {PREFIX_TABLE}schema_migrations (
             module_name VARCHAR(255) PRIMARY KEY,
             current_version INT NOT NULL DEFAULT 0,
             last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
 
-        query = table_creation_query.replace("{PREFIX_DB}", self.app.config.PREFIX_DB)
+        query = table_creation_query.replace("{PREFIX_TABLE}", self.app.config.PREFIX_TABLE)
 
-        await self.app.db.execute(query, query_type="write")
+        await self.app.db.execute(query = query, query_type="write")
+
+    async def _update_tracking_version(self, session, module_name: str, version: int):
+        """Met à jour ou insère la nouvelle version atteinte par le module dans la base."""
+        query = "SELECT 1 FROM {PREFIX_TABLE}schema_migrations WHERE module_name = :m"
+        query = query.replace("{PREFIX_TABLE}", self.app.config.PREFIX_TABLE)
+        check_res = await self.app.db.execute(query = query, params = {"m": module_name})
+
+        if len(check_res) == 1:
+            exists = True
+        else:
+            exists = False
+
+        if exists:
+            query = "UPDATE {PREFIX_TABLE}schema_migrations SET current_version = :v, last_update = CURRENT_TIMESTAMP WHERE module_name = :m"
+            query = query.replace("{PREFIX_TABLE}", self.app.config.PREFIX_TABLE)
+            await self.app.db.execute(query = query, params = {"v": version, "m": module_name}, query_type="write")
+        else:
+            query = "INSERT INTO {PREFIX_TABLE}schema_migrations (module_name, current_version) VALUES (:m, :v)"
+            query = query.replace("{PREFIX_TABLE}", self.app.config.PREFIX_TABLE)
+            await self.app.db.execute(query = query, params = {"m": module_name, "v": version}, query_type="write")
 
     async def _get_current_module_version(self, module_name: str) -> int:
         """Récupère la version actuelle du module depuis la base de données."""
-        query = "SELECT current_version FROM {PREFIX_DB}schema_migrations WHERE module_name = :module_name"
-        query = query.replace("{PREFIX_DB}", self.app.config.PREFIX_DB)
-        res = await self.app.db.execute(query, {"module_name": module_name})
-        return res[0]["current_version"] if res else 0
+        query = "SELECT current_version FROM {PREFIX_TABLE}schema_migrations WHERE module_name = :module_name"
+        query = query.replace("{PREFIX_TABLE}", self.app.config.PREFIX_TABLE)
+        res = await self.app.db.execute(query = query, params = {"module_name": module_name})
+        if len(res) == 0:
+            return 0
+        return res[0]["current_version"]
 
     def _get_modules_to_migrate(self) -> list[tuple[str, str]]:
         """Récupère la liste de tous les modules (base + installés) à vérifier, triés par dépendances."""
@@ -196,6 +218,7 @@ class Migration:
         except Exception as e:
             # Si erreur, on annule toutes les opérations de ce fichier
             await session.rollback()
+            await self.app.module_manager.off_module(module_name)
             print(f"Migration échouée pour {module_name} (fichier {sql_filename}): {e}")
             return False
             
@@ -217,10 +240,15 @@ class Migration:
                 py_module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(py_module)
                 if hasattr(py_module, "migrate"):
-                    return await py_module.migrate(self)
-        
+                    options = {
+                        "migration": self,
+                        "module_name": module_name,
+                        "version": version,
+                        "sql_filename": sql_filename,
+                        "migrations_dir": migrations_dir
+                    }
+                    return await py_module.migrate(options)
         return True
-
 
     def _get_migration_data(self, migrations_dir: str, version: int) -> dict:
         """Récupère les données de migration pour un module."""
@@ -233,9 +261,9 @@ class Migration:
         return {}
 
     def _format_sql_query(self, query: str, migrations_dir: str, version: int) -> str:
-        """Remplace les balises {PREFIX_DB} et {migration_data} de façon sécurisée."""
+        """Remplace les balises {PREFIX_TABLE} et {migration_data} de façon sécurisée."""
         
-        query = query.replace("{PREFIX_DB}", self.app.config.PREFIX_DB)
+        query = query.replace("{PREFIX_TABLE}", self.app.config.PREFIX_TABLE)
         
         migration_data = self._get_migration_data(migrations_dir, version)
                 
@@ -253,23 +281,10 @@ class Migration:
         sql_content = self._format_sql_query(sql_content, migrations_dir, version)
 
         if sql_content.strip():
-            await session.execute(text(sql_content))
+            await self.app.db.execute(query=sql_content,session=session)
 
-    async def _update_tracking_version(self, session, module_name: str, version: int):
-        """Met à jour ou insère la nouvelle version atteinte par le module dans la base."""
-        check_res = await session.execute(
-            text("SELECT 1 FROM schema_migrations WHERE module_name = :m"), 
-            {"m": module_name}
-        )
-        exists = check_res.first() is not None
+    async def remove_tracking_migration_for_module(self):
+        pass
 
-        if exists:
-            await session.execute(
-                text("UPDATE schema_migrations SET current_version = :v, last_update = CURRENT_TIMESTAMP WHERE module_name = :m"),
-                {"v": version, "m": module_name}
-            )
-        else:
-            await session.execute(
-                text("INSERT INTO schema_migrations (module_name, current_version) VALUES (:m, :v)"),
-                {"m": module_name, "v": version}
-            )
+    async def remove_all_tracking_migrations(self):
+        pass

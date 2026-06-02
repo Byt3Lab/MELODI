@@ -1,5 +1,6 @@
 from core.router import WebController
 from base.services import UserService
+from core.utils import path_exist, read_file, read_binary_file, join_paths
 
 class BaseController(WebController):
     def load(self):
@@ -21,7 +22,7 @@ class BaseController(WebController):
             if user_has_auth:
                 import json
                 if self.router.set_session("user_payload", json.dumps(user_has_auth)):
-                    return self.router.redirect("/admin")
+                    return await self.router.redirect("/admin")
         
         return await self.router.render_template("login.html")
     
@@ -30,7 +31,7 @@ class BaseController(WebController):
     
     async def logout(self):
         self.router.delete_session("user_payload")
-        return self.router.redirect("/login")
+        return await self.router.redirect("/login")
     
     async def update(self):
         return await self.router.render_template("update.html")
@@ -55,18 +56,18 @@ class BaseController(WebController):
         return await self.router.render_template("admin_widgets.html")
 
     async def settings_home_page(self):
-            home_page_on = self.app.home_page_manager.home_page_on
-            home_pages = self.app.home_page_manager.list_home_pages()
-            home_pages_len = len(home_pages)
-            return await self.router.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
+        home_page_on = self.app.home_page_manager.home_page_on
+        home_pages = self.app.home_page_manager.list_home_pages()
+        home_pages_len = len(home_pages)
+        return await self.router.render_template("admin_home_page.html", home_pages=home_pages, home_pages_len=home_pages_len, home_page_on=home_page_on)
 
     async def settings_home_page_on(self, home_page):
         self.app.home_page_manager.on(home_page)
-        return self.router.redirect("/admin/settings/home_page")
+        return await self.router.redirect("/admin/base/settings/home_page")
     
     async def settings_home_page_clear(self):
         self.app.home_page_manager.clear()
-        return self.router.redirect("/admin/settings/home_page")
+        return await self.router.redirect("/admin/base/settings/home_page")
 
     async def admin_modules(self):
         modules = self.app.module_manager.list_modules()
@@ -78,11 +79,21 @@ class BaseController(WebController):
 
     async def on_module(self,mod:str):
         await self.app.module_manager.on_module(mod)
-        return self.router.redirect("/admin/modules")
+        return await self.router.redirect("/admin/base/modules")
 
     async def off_module(self, mod:str):
         await self.app.module_manager.off_module(mod)
-        return self.router.redirect("/admin/modules")
+        return await self.router.redirect("/admin/base/modules")
+    
+    async def delete_module(self, mod:str):
+        from base.services import ModuleService
+        module_service = ModuleService(self.module)
+        
+        succes, message = await module_service.remove_module(mod)
+
+        print(f"Delete module result: success={succes}, message='{message}'")
+
+        return await self.router.redirect("/admin/base/modules")
     
     async def admin_settings(self):
         return await self.router.render_template("admin_settings.html")
@@ -105,25 +116,22 @@ class BaseController(WebController):
         return await self.router.render_template("admin_notifications.html")
 
     async def static_base_icons(self):
-        from quart import abort
-
         req = self.router.get_request()
         name = req.args.get('name')
         fill = req.args.get('fill', '')
         size = req.args.get('size', '')
 
         if not name:
-            return abort(400, "Missing name parameter")
+            return await self.router.abort(400, "Missing name parameter")
         
-        import os, re
+        import re
         
-        icon_path = os.path.join(os.getcwd(), "base", "static", "icons", f"{name}.svg")
+        icon_path = join_paths(self.app.config.PATH_DIR_RACINE, "base", "static", "icons", f"{name}.svg")
         
-        if not os.path.exists(icon_path):
-            return abort(404, "Icon not found")
+        if not path_exist(icon_path):
+            return await self.router. abort(404, "Icon not found")
         
-        with open(icon_path, 'r', encoding='utf-8') as f:
-            content = f.read()
+        content = read_file(icon_path, "r", "utf-8")
             
         if size:
             content = re.sub(r'(<svg[^>]*?)\sheight="[^"]*"', r'\1', content)
@@ -142,3 +150,39 @@ class BaseController(WebController):
                 
         # Some Material icons have internal fill/stroke that might need override or the SVG itself will take fill.
         return await self.router.make_response(content, 200, {"Content-Type": "image/svg+xml"})
+    
+    async def static_module_img(self):
+        req = self.router.get_request()
+        name = req.args.get('name')
+        target = req.args.get('target', 'icon')
+    
+        if not name:
+            return await self.router.abort(400, "Missing name parameter")
+        
+        if target in ["icon", "banner"]:
+            img_path = join_paths(self.app.config.PATH_DIR_RACINE, "modules", name, "static", f"{target}.png")
+        else:
+            return await self.router.abort(400, "Invalid target parameter")
+        
+        if not path_exist(img_path):
+            return await self.router.abort(404, f"{target.capitalize()} not found")
+        
+        content = read_binary_file(img_path)
+                
+        return await self.router.make_response(content, 200, {"Content-Type": "image/png"})
+    
+    async def static_org_img(self):
+        req = self.router.get_request()
+        name = req.args.get('name')
+    
+        if not name:
+            return await self.router.abort(400, "Missing name parameter")
+        
+        img_path = join_paths(self.app.config.PATH_DIR_RACINE, "static", "orgs", f"{name}.png")
+
+        if not path_exist(img_path):
+            return await self.router.abort(404, "Image not found")
+        
+        content = read_binary_file(img_path)
+                
+        return await self.router.make_response(content, 200, {"Content-Type": "image/png"})

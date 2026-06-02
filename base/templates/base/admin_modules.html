@@ -38,7 +38,7 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="bg-light rounded p-2 d-flex align-items-center justify-content-center"
                             style="width: 60px; height: 60px;">
-                            <img src="/static/{{module.name}}/icon.png" class="img-fluid"
+                            <img src="/static_module_img?name={{module.name}}&target=icon" class="img-fluid"
                                 style="max-height: 100%; object-fit: contain;">
                         </div>
                         <div class="form-check form-switch">
@@ -78,7 +78,7 @@
                             <img src="/static_base_icons?name=east" alt="gérer" title="Gérer">
                         </a>
                         {% else %}
-                        <a href="/admin/base/module/{{module.name}}/delete"
+                        <a href="/admin/base/modules/{{module.name}}/delete"
                             onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce module ?')"
                             class="btn btn-sm">
                             <img src="/static_base_icons?name=delete&fill=red" alt="Supprimer" title="Supprimer">
@@ -98,11 +98,11 @@
                         </div>
                         <div class="modal-body">
                             <div class="text-center mb-4">
-                                <img src="/static/{{module.name}}/banner.png" class="img-fluid rounded shadow-sm mb-3"
+                                <img src="/static_module_img?name={{module.name}}&target=banner" class="img-fluid rounded shadow-sm mb-3"
                                     style="max-height: 150px; width: 100%; object-fit: cover;"
                                     onerror="this.onerror=null; this.style.display='none'">
                                 <div class="d-flex justify-content-center align-items-center gap-2">
-                                    <img src="/static/{{module.name}}/icon.png" width="32" height="32" class="rounded"">
+                                    <img src="/static_module_img?name={{module.name}}&target=icon" width="32" height="32" class="rounded"">
                                     <span class=" badge bg-secondary">{{ module.infos.version }}</span>
                                 </div>
                             </div>

@@ -3,17 +3,18 @@ import pathlib
 import json
 from core.utils import create_dir_if_not_exist, path_exist, read_file, join_paths, read_file, write_file
 from core.utils.file_permissions import FilePermissions
+from core import PATH_DIR_RACINE, PATH_DIR_CONFIG, PATH_DIR_CORE, PATH_DIR_BASE_MODULE, PATH_DIR_MODULES
 
 # from doteenv import load_dotenv
 
 # load_dotenv()
 
 class Config:
-    PATH_DIR_RACINE = pathlib.Path(__file__).parent.parent.resolve()
-    PATH_DIR_CONFIG = join_paths(PATH_DIR_RACINE, "config")
-    PATH_DIR_CORE = join_paths(PATH_DIR_RACINE, "core")
-    PATH_DIR_BASE_MODULE = join_paths(PATH_DIR_RACINE, "base")
-    PATH_DIR_MODULES = join_paths(PATH_DIR_RACINE, "modules")
+    PATH_DIR_RACINE = PATH_DIR_RACINE
+    PATH_DIR_CONFIG = PATH_DIR_CONFIG
+    PATH_DIR_CORE = PATH_DIR_CORE
+    PATH_DIR_BASE_MODULE = PATH_DIR_BASE_MODULE
+    PATH_DIR_MODULES = PATH_DIR_MODULES
     PATH_DIR_STORAGE = join_paths(PATH_DIR_RACINE, "storage")
     PATH_DIR_STORAGE_TEMP = join_paths(PATH_DIR_STORAGE, "temp")
     PATH_DIR_STORAGE_UPLOADS = join_paths(PATH_DIR_STORAGE, "uploads")
@@ -22,7 +23,7 @@ class Config:
     PATH_DIR_STORAGE_BACKUPS = join_paths(PATH_DIR_STORAGE, "backups")
     PATH_DIR_STORAGE_APP_DATA = join_paths(PATH_DIR_STORAGE, "appData")
     TYPE_DISTRIBUTION = "cloud"
-    PREFIX_DB = "ML_"
+    PREFIX_TABLE = "ml_"
     CURRENCY = "XAF"
     TIME_ZONE = "UTC"
     LANG = "fr"
@@ -42,18 +43,18 @@ class Config:
         self.load_secret_key()
         self.load_jwt_secret_key()
         self.load_type_distribution()
-        self.load_prefix_db()
+        self.load_prefix_table()
         self.load_currency()
         self.load_lang()
         self.load_time_zone()
 
-    def load_prefix_db(self):
-        path = join_paths(self.PATH_DIR_CONFIG, "prefix_db.txt")
+    def load_prefix_table(self):
+        path = join_paths(self.PATH_DIR_CONFIG, "prefix_table.txt")
         if path_exist(path):
-            self.PREFIX_DB = read_file(path_file=path).strip()
+            self.PREFIX_TABLE = read_file(path_file=path).strip().lower()
         else:
-            self.PREFIX_DB = "ml_"
-            write_file(path_file=path, content=self.PREFIX_DB)
+            self.PREFIX_TABLE = "ml_"
+            write_file(path_file=path, content=self.PREFIX_TABLE)
 
     def load_currency(self):
         path = join_paths(self.PATH_DIR_CONFIG, "currency.txt")

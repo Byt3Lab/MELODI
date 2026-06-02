@@ -1,12 +1,15 @@
 from core.router import WebRouter
-from base.services import HomePageService, WidgetService, InstallService
-from .base_controller import BaseController
+
 class BaseRoutes(WebRouter):
     async def load (self):
+        from base.services import HomePageService, WidgetService, InstallService
+
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
         self.install_service = InstallService(module=self.module)
         
+        from ..controllers.base_controller import BaseController
+
         base_controller = BaseController(router=self)
         base_controller.load()
 
@@ -15,6 +18,8 @@ class BaseRoutes(WebRouter):
         
         self.add_route("/", methods=["GET"])(base_controller.home)
         self.add_route("/static_base_icons", methods=["GET"])(base_controller.static_base_icons)
+        self.add_route("/static_module_img", methods=["GET"])(base_controller.static_module_img)
+        self.add_route("/static_org_img", methods=["GET"])(base_controller.static_org_img)
 
         self.add_many_routes([
             {"path": "/login", "methods": ["GET", 'post'], "handler": base_controller.login},
@@ -38,7 +43,8 @@ class BaseRoutes(WebRouter):
                     {"path": "/base/modules", "methods": ["GET"], "handler": base_controller.admin_modules,
                         "children": [
                             {"path": "/<path:mod>/off", "methods": ["GET"], "handler": base_controller.off_module},
-                            {"path": "/<path:mod>/on", "methods": ["GET"], "handler": base_controller.on_module}
+                            {"path": "/<path:mod>/on", "methods": ["GET"], "handler": base_controller.on_module},
+                            {"path": "/<path:mod>/delete", "methods": ["GET"], "handler": base_controller.delete_module}
                         ]
                     },
                     {"path": "/base/add_module", "methods": ["GET"], "handler": base_controller.admin_add_module},
@@ -54,6 +60,8 @@ class BaseRoutes(WebRouter):
         ], before_request=[self.get_middleware("auth_required")]) # self.get_middleware("admin_only")])
 
     def load_installer(self):
+        from ..controllers.base_controller import BaseController
+
         base_controller = BaseController(router=self)
         base_controller.load()
 

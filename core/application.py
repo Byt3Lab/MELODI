@@ -165,7 +165,9 @@ class Application:
 
     async def verify_user_sudo_exist(self):
         try:
-            res = await self.db.execute("SELECT user_id from users WHERE is_sudo = true LIMIT 1;")
+            query = "SELECT user_id from {PREFIX_TABLE}users WHERE is_sudo = true LIMIT 1;"
+            query = query.replace("{PREFIX_TABLE}", self.config.PREFIX_TABLE)
+            res = await self.db.execute(query)
                 
             if len(res) > 0:
                 return True

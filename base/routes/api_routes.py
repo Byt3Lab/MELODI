@@ -1,15 +1,15 @@
 from core.router import APIRouter
-from base.services import HomePageService, WidgetService, InstallService
-
 class BaseApiRoutes(APIRouter):
     def load(self):
+        from base.services import HomePageService, WidgetService, InstallService
+        
         self.home_page_service = HomePageService(module=self.module)
         self.widget_service = WidgetService(module=self.module)
 
         self.before_request()(self.get_middleware("check_maintenance"))
         self.after_request()(self.get_middleware("deny_iframe"))
 
-        from base.routes.base_api_controller import BaseAPIController
+        from base.controllers.base_api_controller import BaseAPIController
 
         base_api_controller = BaseAPIController(router=self)
         base_api_controller.load()
@@ -38,11 +38,17 @@ class BaseApiRoutes(APIRouter):
         self.add_many_routes(routes, before_request=[self.get_middleware("api_auth_required")])
 
     def load_installer(self):
+        from base.controllers.base_api_controller import BaseAPIController
+
+
+        base_api_controller = BaseAPIController(router=self)
+        base_api_controller.load()
+
         self.before_request()(self.get_middleware("check_maintenance"))
         self.after_request()(self.get_middleware("deny_iframe"))
         installer_routes = [
-            {"path": "/install", "methods": ["POST"], "handler": self.install},
-            {"path": "/<path:path>", "methods": ["GET"], "handler": self.not_found},
+            {"path": "/install", "methods": ["POST"], "handler": base_api_controller.install},
+            {"path": "/<path:path>", "methods": ["GET"], "handler": base_api_controller.not_found},
         ]
 
         self.add_many_routes(installer_routes)

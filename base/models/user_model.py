@@ -2,11 +2,11 @@ from core.db import Model
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, DateTime
 from datetime import datetime
-
+from core import get_prefix_table
 from core.utils import run_sync
 
 class UserModel(Model):
-    __tablename__ = "users"
+    __tablename__ = get_prefix_table() + "users"
 
     user_id: Mapped[str] = mapped_column(String(100), primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True)

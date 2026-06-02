@@ -1,22 +1,25 @@
-def read_file(path_file: str, mode="r") -> str:
+def read_file(path_file: str, mode="r", encoding="utf-8") -> str|bytes:
     if not path_exist(path_file):
         raise FileNotFoundError(f"The file at {path_file} does not exist.")
     
-    if not (mode == "r" or mode == "ra") :
+    if not (mode in ["r", "rb"]):
         mode = "r"
-        
-    with open(path_file, 'r') as file:
-        return file.read()
-    
 
-def get_file(path_file: str) -> str:
-    if not path_exist(path_file):
-        raise FileNotFoundError(f"The file at {path_file} does not exist.")
+    content = None
     
-    return open(path_file, 'r')
+    if mode == "rb":
+        encoding = None  # no encoding for binary mode
+
+    with open(path_file, mode, encoding=encoding) as file:
+        content = file.read() 
+
+    return content
     
+def read_binary_file(path_file: str) -> bytes:
+    return read_file(path_file, "rb")
+
 def write_file(path_file: str, content: str, mode="w") -> None:
-    if not (mode == "w" or mode == "a" or mode == "wb" or mode == "ab") :
+    if not (mode in ["w", "a", "wb", "ab"]):
         mode = "w"
 
     with open(path_file, mode=mode) as file:

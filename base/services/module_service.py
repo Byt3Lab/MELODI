@@ -23,6 +23,9 @@ class ModuleService(Service):
         
         try:
             shutil.rmtree(target_dir)
+
+            self.app.migration.remove_tracking_migration_for_module(module_name)
+            
             if module_name in self.app.module_manager.list_modules_installs:
                 self.app.module_manager.list_modules_installs.remove(module_name)
             return True, f"Module '{module_name}' supprimé avec succès."

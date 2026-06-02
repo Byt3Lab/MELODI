@@ -73,3 +73,19 @@ class WebRouter(Router):
         if path_exist(path_file):
             template_string = read_file(path_file=path_file)
         return await self.render_template_string(template_string, **await self._build_context(context))
+    
+    async def redirect(self, location: str, code: int = 302):
+        from quart import redirect
+        return redirect(location, code=code)
+    
+    async def abort(self, code: int, description: str = None):
+        from quart import abort
+        return abort(code, description=description)
+    
+    async def url_for(self, endpoint: str, **values):
+        from quart import url_for
+        return url_for(endpoint, **values)
+    
+    async def send_file(self, file_path_or_io: str|bytes, **kwargs):
+        from quart import send_file
+        return await send_file( file_path_or_io, **kwargs)
