@@ -24,6 +24,42 @@
                 </ul>
             </div>
 
+            <div class="summary-card mb-4 p-4 rounded bg-light border">
+                <h5 class="mb-3">Paramètres de l'application</h5>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Distribution</label>
+                        <select class="form-control" v-model="distribution">
+                            <option value="cloud">Cloud</option>
+                            <option value="local">Local</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Langue</label>
+                        <select class="form-control" v-model="lang">
+                            <option value="fr">Français</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Devise</label>
+                        <input type="text" class="form-control" v-model="currency" placeholder="XAF">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Fuseau horaire</label>
+                        <input type="text" class="form-control" v-model="time_zone" placeholder="UTC">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Préfixe des tables</label>
+                        <input type="text" class="form-control" v-model="prefix_table" placeholder="ml_">
+                    </div>
+                </div>
+            </div>
+
             <div v-if="error" class="alert alert-danger mb-4">
                 {{ error }}
             </div>

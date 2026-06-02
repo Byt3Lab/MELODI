@@ -12,7 +12,8 @@ function saveState(state) {
     const db_config = state.db_config
     const admin_user = state.admin_user
     const installation_status = state.installation_status
-    sessionStorage.setItem('melodi_install_state', JSON.stringify({ db_config, admin_user, installation_status }))
+    const app_config = state.app_config
+    sessionStorage.setItem('melodi_install_state', JSON.stringify({ db_config, admin_user, installation_status, app_config }))
 }
 
 function loadState() {
@@ -40,7 +41,14 @@ const store = new MelodiStore({
                 first_name: stateSave?.admin_user?.first_name || '',
                 last_name: stateSave?.admin_user?.last_name || ''
             },
-            installation_status: stateSave?.installation_status || ''
+            installation_status: stateSave?.installation_status || '',
+            app_config: stateSave?.app_config || {
+                type_distribution: stateSave?.app_config?.type_distribution || 'cloud',
+                lang: stateSave?.app_config?.lang || 'fr',
+                currency: stateSave?.app_config?.currency || 'XAF',
+                time_zone: stateSave?.app_config?.time_zone || 'UTC',
+                prefix_table: stateSave?.app_config?.prefix_table || 'ml_'
+            }
         }
     },
     actions: {
@@ -50,6 +58,10 @@ const store = new MelodiStore({
         },
         updateAdminUser(user) {
             this.state.admin_user = user
+            saveState(this.state)
+        },
+        updateAppConfig(cfg) {
+            this.state.app_config = cfg
             saveState(this.state)
         },
         setInstallationStatus(status) {

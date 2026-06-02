@@ -162,20 +162,20 @@ class Base(ApplicationModule):
             return {"message": "pong", "received": params}
         
     def add_middlewares(self):
-        def auth_required_middleware(router:WebRouter):
+        async def auth_required_middleware(router:WebRouter):
             user = router.get_session("user_payload")
             if not user:
-                return router.redirect("/login") 
+                return await router.redirect("/login") 
             payload = json.loads(user)
             router.set_scope_attr("user_payload", payload)
 
-        def guest_only_middleware(router:WebRouter):
+        async def guest_only_middleware(router:WebRouter):
             user = router.get_session("user_payload")
 
             if user:
-                return router.redirect("/")
+                return await router.redirect("/")
                 
-        def api_auth_required_middleware(router:APIRouter):
+        async def api_auth_required_middleware(router:APIRouter):
             payload = None
 
             user = router.get_session("user_payload")
@@ -195,9 +195,9 @@ class Base(ApplicationModule):
                     router.set_scope_attr("user_payload", payload)
                     return None
                 
-            return router.render_json({"error": "Unauthorized"}, status_code=401)
+            return await router.render_json({"error": "Unauthorized"}, status_code=401)
             
-        def api_guest_only_middleware(router:APIRouter):
+        async def api_guest_only_middleware(router:APIRouter):
             user = router.get_session("user_payload")
 
             if user:
@@ -206,14 +206,14 @@ class Base(ApplicationModule):
             if router.get_header("Authorization"):
                 return router.render_json({"error": "Unauthorized"}, status_code=400)
             
-        def admin_only_middleware(router:WebRouter):
+        async def admin_only_middleware(router:WebRouter):
             user = router.get_scope_attr("user_payload")
 
             if not user or user.get("role") != "admin":
-                return router.redirect("/")
+                return await router.redirect("/")
 
-        def api_admin_only_middleware(router:APIRouter):
-            user = router.get_scope_attr("user_payload")
+        async def api_admin_only_middleware(router:APIRouter):
+            user = await router.get_scope_attr("user_payload")
 
             if not user or user.get("role") != "admin":
                 return router.render_json({"error": "Unauthorized"}, status_code=403)

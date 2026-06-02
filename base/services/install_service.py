@@ -43,6 +43,30 @@ class InstallService(Service):
             "db_port": self.db_port,
             "db_name": self.db_name
         })
+        # Charger les paramètres d'application s'ils existent
+        app_config:dict|None = data.get('app_config', None)
+
+        if app_config is None:
+            # Try top-level keys for backward compatibility
+            app_config = {
+                "type_distribution": data.get("type_distribution"),
+                "lang": data.get("lang"),
+                "currency": data.get("currency"),
+                "time_zone": data.get("time_zone"),
+                "prefix_table": data.get("prefix_table")
+            }
+
+        self.type_distribution = app_config.get('type_distribution') if app_config else None
+        self.lang = app_config.get('lang') if app_config else None
+        self.currency = app_config.get('currency') if app_config else None
+        self.time_zone = app_config.get('time_zone') if app_config else None
+        self.prefix_table = app_config.get('prefix_table') if app_config else None
+
+        # Save app configuration files early so models pick up prefix during import
+        try:
+            self._save_app_config()
+        except Exception as e:
+            return self.response(data={"message":"Erreur lors de la sauvegarde des paramètres de l'application: " + str(e)}, status_code=500)
         
         try:
             await self._init_database()
@@ -91,6 +115,7 @@ class InstallService(Service):
     def validate_form_data(self, data:dict)->bool:
         required_db_fields = ['provider', 'user', 'password', 'host', 'port', 'name']
         required_admin_fields = ['username', 'email', 'password', 'first_name', 'last_name']
+        required_app_fields = ['type_distribution', 'lang', 'currency', 'time_zone', 'prefix_table']
 
         db_config = data.get('db_config', {})
         admin_user = data.get('admin_user', {})
@@ -117,6 +142,20 @@ class InstallService(Service):
         if len(admin_user.get("username", "")) < 4:
             return False
         
+        # Validate application settings if provided
+        app_config = data.get('app_config', {})
+        if app_config:
+            for field in required_app_fields:
+                if field not in app_config or not app_config[field]:
+                    print("missing app field:", field)
+                    return False
+
+            if app_config.get('type_distribution') not in ['cloud', 'local']:
+                return False
+
+            if len(app_config.get('prefix_table', '')) < 1:
+                return False
+
         return True
 
     def _save_db_config(self):
@@ -138,6 +177,41 @@ class InstallService(Service):
 
         write_file(db_conf_path, json.dumps(mapping))
         self.app.config.set_db_config(mapping)
+
+    def _save_app_config(self):
+        # Save type_distribution, lang, time_zone, prefix_table and currency to config files
+        from core.utils import join_paths, write_file
+
+        cfg_path = self.app.config.PATH_DIR_CONFIG
+
+        # Type distribution
+        td = (self.type_distribution or self.app.config.TYPE_DISTRIBUTION or 'cloud').strip()
+        if td not in ['cloud', 'local']:
+            td = 'cloud'
+        write_file(join_paths(cfg_path, 'type_distribution.txt'), td)
+        self.app.config.TYPE_DISTRIBUTION = td
+
+        # Lang
+        lang = (self.lang or self.app.config.LANG or 'fr').strip()
+        write_file(join_paths(cfg_path, 'lang.txt'), lang)
+        self.app.config.LANG = lang
+
+        # Time zone
+        tz = (self.time_zone or self.app.config.TIME_ZONE or 'UTC').strip()
+        write_file(join_paths(cfg_path, 'time_zone.txt'), tz)
+        self.app.config.TIME_ZONE = tz
+
+        # Prefix table
+        prefix = (self.prefix_table or self.app.config.PREFIX_TABLE or 'ml_').strip().lower()
+        if not prefix.endswith('_'):
+            prefix = prefix + '_'
+        write_file(join_paths(cfg_path, 'prefix_table.txt'), prefix)
+        self.app.config.PREFIX_TABLE = prefix
+
+        # Currency
+        cur = (self.currency or self.app.config.CURRENCY or 'XAF').strip()
+        write_file(join_paths(cfg_path, 'currency.txt'), cur)
+        self.app.config.CURRENCY = cur
 
     async def _init_database(self):
         await self.app.db.close_engine()
